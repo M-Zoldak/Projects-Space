@@ -1,0 +1,20 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#app,
+#app > .login-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+
+    main {
+        display: flex;
+        align-items: center;
+        > div {
+            flex-grow: 1;
+        }
+    }
+}
