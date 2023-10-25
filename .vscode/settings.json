@@ -1,0 +1,15 @@
+{
+    "workbench.colorCustomizations": {
+        "gitDecoration.modifiedResourceForeground": "#21e6a4",
+        "activityBar.background": "#511444",
+        "titleBar.activeBackground": "#721C60",
+        "titleBar.activeForeground": "#FDF8FC"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/vendor": true,
+        "**/var": true
+    }
+}
