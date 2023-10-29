@@ -1,13 +1,16 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist/",
-        "noImplicitAny": true,
-        "module": "es6",
-        "target": "es5",
-        "jsx": "react-jsx",
-        "allowJs": true,
-        "moduleResolution": "node",
-        "allowSyntheticDefaultImports": true
-    },
-    "moduleResolution": ["node_modules", "node"]
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "react": ["./node_modules/@types/react"]
+    }
+  },
+  "moduleResolution": ["node_modules", "node"]
 }
