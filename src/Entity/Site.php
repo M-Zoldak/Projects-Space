@@ -6,18 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SiteRepository;
 
 #[ORM\Entity(repositoryClass: SiteRepository::class)]
-class Site {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+class Site extends Entity {
 
     #[ORM\Column(length: 255)]
     private ?string $domain = null;
-
-    public function getId(): ?int {
-        return $this->id;
-    }
 
     public function getDomain(): ?string {
         return $this->domain;
