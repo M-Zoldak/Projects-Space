@@ -6,68 +6,68 @@ import NavToggle from '../components/NavToggle';
 import { Link } from 'react-router-dom';
 
 const pageLinks = [
-    {
-        name: 'Home',
-        url: '/',
-    },
-    {
-        name: 'Sites',
-        url: '/sites',
-    },
-    {
-        name: 'About',
-        url: '/about',
-    },
-    {
-        name: 'Contact',
-        url: '/contact',
-    },
+  {
+    name: 'Home',
+    url: '/',
+  },
+  {
+    name: 'Sites',
+    url: '/sites',
+  },
+  {
+    name: 'About',
+    url: '/about',
+  },
+  {
+    name: 'Contact',
+    url: '/contact',
+  },
 ];
 
 type StandardLayout = PropsWithChildren<{
-    title: string;
+  title: string;
 }>;
 
 const StandardLayout = ({ children, title }: StandardLayout) => {
-    const [expand, setExpand] = useState(true);
+  const [expand, setExpand] = useState(true);
 
-    return (
-        <div className="show-fake-browser sidebar-page">
-            <Container>
-                <Sidebar
-                    style={{ display: 'flex', flexDirection: 'column' }}
-                    width={expand ? 260 : 56}
-                    collapsible
-                >
-                    <Sidenav.Header>
-                        <Link to="/" className="navbar-brand">
-                            <>MyProjectsLib</>
-                        </Link>
-                    </Sidenav.Header>
-                    <Sidenav
-                        expanded={expand}
-                        defaultOpenKeys={['3']}
-                        appearance="default"
+  return (
+    <div className="show-fake-browser sidebar-page">
+      <Container>
+        <Sidebar
+          style={{ display: 'flex', flexDirection: 'column' }}
+          width={expand ? 260 : 56}
+          collapsible
+        >
+          <Sidenav.Header>
+            <Link to="/" className="navbar-brand">
+              <>MyProjectsLib</>
+            </Link>
+          </Sidenav.Header>
+          <Sidenav
+            expanded={expand}
+            defaultOpenKeys={['3']}
+            appearance="default"
+          >
+            <Sidenav.Body>
+              <Nav>
+                {pageLinks.map((page, key) => {
+                  return (
+                    <Nav.Item
+                      as={Link}
+                      key={key}
+                      to={page.url}
+                      eventKey={key.toString()}
+                      active
+                      icon={<DashboardIcon />}
                     >
-                        <Sidenav.Body>
-                            <Nav>
-                                {pageLinks.map((page, key) => {
-                                    return (
-                                        <Nav.Item
-                                            as={Link}
-                                            key={key}
-                                            to={page.url}
-                                            eventKey={key.toString()}
-                                            active
-                                            icon={<DashboardIcon />}
-                                        >
-                                            {page.name}
-                                        </Nav.Item>
-                                    );
-                                })}
+                      {page.name}
+                    </Nav.Item>
+                  );
+                })}
 
-                                {/* <Nav.Item eventKey="2">User Group</Nav.Item> */}
-                                {/* <Nav.Menu
+                {/* <Nav.Item eventKey="2">User Group</Nav.Item> */}
+                {/* <Nav.Menu
                                     eventKey="3"
                                     trigger="hover"
                                     title="Advanced"
@@ -95,24 +95,23 @@ const StandardLayout = ({ children, title }: StandardLayout) => {
                                     <Nav.Item eventKey="4-4">Tags</Nav.Item>
                                     <Nav.Item eventKey="4-5">Versions</Nav.Item>
                                 </Nav.Menu> */}
-                            </Nav>
-                        </Sidenav.Body>
-                    </Sidenav>
-                    <NavToggle
-                        expand={expand}
-                        onChange={() => setExpand(!expand)}
-                    />
-                </Sidebar>
+              </Nav>
+            </Sidenav.Body>
+          </Sidenav>
+          <NavToggle expand={expand} onChange={() => setExpand(!expand)} />
+        </Sidebar>
 
-                <Container>
-                    <Header>
-                        <h2>{title}</h2>
-                    </Header>
-                    <Content>{children}</Content>
-                </Container>
-            </Container>
-        </div>
-    );
+        <Container>
+          <Header>
+            <h2>{title}</h2>
+          </Header>
+          <Container>
+            <Content>{children}</Content>
+          </Container>
+        </Container>
+      </Container>
+    </div>
+  );
 };
 
 export default StandardLayout;

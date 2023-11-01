@@ -5,11 +5,19 @@ namespace App\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints\PasswordStrength;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity("email")]
 class User extends Entity implements UserInterface, PasswordAuthenticatedUserInterface {
+    #[Assert\Email]
+    #[Assert\NotBlank()]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
@@ -22,17 +30,27 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\Column]
     private ?string $password = null;
 
+    #[Assert\Length(["min" => 2])]
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
 
+    #[Assert\NotBlank()]
+    #[Assert\Length(["min" => 2])]
     #[ORM\Column(length: 255)]
     private ?string $lastName = null;
 
+    #[Assert\NotBlank(null, "This field can not be empty.")]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $birthDate = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $statusText = null;
+    #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'Users')]
+    private Collection $apps;
+
+    public function __construct()
+    {
+        $this->apps = new ArrayCollection();
+    }
+
 
     public function getEmail(): ?string {
         return $this->email;
@@ -42,6 +60,10 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         $this->email = $email;
 
         return $this;
+    }
+
+    public function getUserName() {
+        return $this->getFirstName() . " " . $this->getLastName();
     }
 
     /**
@@ -121,12 +143,29 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this;
     }
 
-    public function getStatusText(): ?string {
-        return $this->statusText;
+    /**
+     * @return Collection<int, App>
+     */
+    public function getApps(): Collection
+    {
+        return $this->apps;
     }
 
-    public function setStatusText(string $statusText): static {
-        $this->statusText = $statusText;
+    public function addApp(App $app): static
+    {
+        if (!$this->apps->contains($app)) {
+            $this->apps->add($app);
+            $app->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeApp(App $app): static
+    {
+        if ($this->apps->removeElement($app)) {
+            $app->removeUser($this);
+        }
 
         return $this;
     }

@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -35,10 +36,6 @@ class UserRepository extends EntityRepository implements PasswordUpgraderInterfa
 
         $user->setPassword($newHashedPassword);
         $this->save($user);
-    }
-
-    public function validateIfEmailDoesNotExistsAlready($email) {
-        // $this->
     }
 
     //    /**
