@@ -2,12 +2,15 @@
 
 namespace App\Repository;
 
-use DateTime;
+use Error;
 use App\Entity\Entity;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
+use App\Helpers\ValidatorHelper;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Validator\Validation;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 class EntityRepository extends ServiceEntityRepository {
@@ -22,7 +25,7 @@ class EntityRepository extends ServiceEntityRepository {
         $this->entityManager = $this->getEntityManager();
     }
 
-    protected function getData() {
+    public function getData() {
         $results = $this->findAll();
         $json_results = array_map(function ($el) {
             return $el->getData();
@@ -30,14 +33,16 @@ class EntityRepository extends ServiceEntityRepository {
         return $json_results;
     }
 
-    protected function save(Entity $object) {
+    public function save(Entity $object) {
         if (is_null($object->getId())) $object->setCreatedAt(new DateTimeImmutable());
         $object->setModifiedAt(new DateTimeImmutable());
+        $object->setIsActive(true);
+
         $this->entityManager->persist($object);
         $this->entityManager->flush();
     }
 
-    protected function delete(Entity $object) {
+    public function delete(Entity $object) {
         $this->entityManager->remove($object);
         $this->entityManager->flush();
     }

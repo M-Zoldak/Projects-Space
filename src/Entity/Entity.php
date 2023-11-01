@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\EntityRepository;
 use Doctrine\ORM\Mapping\InheritanceType;
@@ -18,13 +20,13 @@ class Entity {
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: "datetime_immutable")]
     private ?\DateTimeImmutable $modifiedAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: "datetime_immutable")]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ["default" => true])]
     private ?bool $isActive = null;
 
     public function getId(): ?int {
