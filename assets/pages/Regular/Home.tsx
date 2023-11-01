@@ -12,7 +12,7 @@ const Home = () => {
   };
 
   return (
-    <StandardLayout title="Home">
+    <StandardLayout activePage="Home" title="Home">
       <div className="data_container">{data}</div>
       <Button onClick={() => loadData()}>Load Data</Button>
     </StandardLayout>
