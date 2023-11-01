@@ -12,7 +12,7 @@ const Dashboard = () => {
   };
 
   return (
-    <StandardLayout title="Dashboard">
+    <StandardLayout title="Dashboard" activePage="Dashboard">
       <div className="data_container">{data}</div>
       <Button onClick={() => loadData()}>Load Data</Button>
     </StandardLayout>

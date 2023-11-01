@@ -13,6 +13,7 @@ import Login from './pages/Login/Login';
 import Registration from './pages/Login/Registration';
 import Protected from './components/Protected';
 import RegistrationConfirmation from './pages/Login/RegistrationConfirmation';
+import AppIndex from './pages/App/Index';
 
 function Main() {
   return (
@@ -45,6 +46,14 @@ function Main() {
           element={
             <Protected>
               <Sites />
+            </Protected>
+          }
+        />
+        <Route
+          path="/apps"
+          element={
+            <Protected>
+              <AppIndex />
             </Protected>
           }
         />
