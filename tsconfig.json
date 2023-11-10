@@ -12,5 +12,7 @@
       "react": ["./node_modules/@types/react"]
     }
   },
+  // "exclude": ["/node_modules/**/*"],
+  "include": ["assets"],
   "moduleResolution": ["node_modules", "node"]
 }

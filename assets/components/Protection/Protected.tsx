@@ -1,7 +1,8 @@
 import { PropsWithChildren, useEffect } from 'react';
 
 import { Navigate } from 'react-router-dom';
-import useToken from './App/useToken';
+import useToken from '../App/useToken';
+import Login from '../../pages/Login/Login';
 
 export default function Protected({ children }: PropsWithChildren) {
   const { token, setToken } = useToken();
@@ -13,5 +14,5 @@ export default function Protected({ children }: PropsWithChildren) {
     }
   });
 
-  return token ? children : <Navigate to="/permissions-not-granted" />;
+  return token ? children : <Navigate to="/login" />;
 }

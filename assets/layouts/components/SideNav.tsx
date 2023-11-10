@@ -1,16 +1,16 @@
-import {
-  Container,
-  Header,
-  Sidebar,
-  Sidenav,
-  Content,
-  Nav,
-  Divider,
-} from 'rsuite';
+import { Nav, Divider } from 'rsuite';
 import { IconProps } from '@rsuite/icons/lib/Icon';
 import DashboardIcon from '@rsuite/icons/Dashboard';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faBookAtlas,
+  faGear,
+  faGears,
+  faGlobe,
+  faUserGear,
+} from '@fortawesome/free-solid-svg-icons';
 
 export interface PageLinkInterface {
   name: string;
@@ -45,20 +45,20 @@ class PageLink implements PageLinkInterface {
 }
 
 export const defaultPageLinks: PageLinksListInterface = [
-  new PageLink(
-    'Dashboard',
-    '/dashboard',
-    <i className="fa-solid fa-globe"></i>
-  ),
-  new PageLink('Sites', '/sites'),
+  new PageLink('Dashboard', '/dashboard', <DashboardIcon />),
+  new PageLink('Sites', '/sites', <FontAwesomeIcon icon={faGlobe} />),
   new PageLink('About', '/about'),
   new PageLink('Contact', '/contact'),
   new MenuDivider(),
-  new PageLink('My Apps', '/apps'),
-  new PageLink('App Settings', '/settings/user'),
+  new PageLink('My Apps', '/apps', <FontAwesomeIcon icon={faBookAtlas} />),
+  new PageLink(
+    'App Settings',
+    '/settings/user',
+    <FontAwesomeIcon icon={faGears} />
+  ),
   new MenuDivider(),
-  new PageLink('Settings', '/settings'),
-  new PageLink('Profile', '/profile'),
+  new PageLink('Profile', '/profile', <FontAwesomeIcon icon={faUserGear} />),
+  new PageLink('Settings', '/settings', <FontAwesomeIcon icon={faGear} />),
 ];
 
 export default function SideNav({
