@@ -1,4 +1,3 @@
-import Title from '../components/Title';
 import StandardLayout from '../layouts/StandardLayout';
 
 function NotFound() {

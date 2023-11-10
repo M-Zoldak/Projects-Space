@@ -1,11 +1,20 @@
-import { Container, Header, Sidebar, Sidenav, Content, Nav } from 'rsuite';
+import {
+  Container,
+  Header,
+  Sidebar,
+  Sidenav,
+  Content,
+  Nav,
+  Button,
+} from 'rsuite';
 import { PropsWithChildren, useEffect, useState } from 'react';
-import NavToggle from '../components/NavToggle';
+import NavToggle from './components/NavToggle';
 import { Link } from 'react-router-dom';
 import SideNav, {
   PageLinksListInterface,
   defaultPageLinks,
 } from './components/SideNav';
+import useToken from '../components/App/useToken';
 
 type StandardLayout = PropsWithChildren<{
   title: string;
@@ -16,8 +25,17 @@ const StandardLayout = ({ children, title, activePage }: StandardLayout) => {
   const [expand, setExpand] = useState(true);
   const [userPageLinks, setUserPageLinks] =
     useState<PageLinksListInterface>(null);
-
+  const { token, setToken } = useToken();
   useEffect(() => {}, null);
+
+  const handleLogout = async () => {
+    let loggedOut = await fetch('/api/logout', {
+      headers: { Authorization: 'Bearer ' + token },
+    })
+      .then((res) => res.json())
+      .then((data) => data.success);
+    setToken('');
+  };
 
   return (
     <div className="show-fake-browser sidebar-page">
@@ -55,6 +73,9 @@ const StandardLayout = ({ children, title, activePage }: StandardLayout) => {
         <Container>
           <Header>
             <h2>{title}</h2>
+            <div>
+              <Button onClick={handleLogout}>Logout</Button>
+            </div>
           </Header>
           <Container>
             <Content>{children}</Content>

@@ -7,10 +7,11 @@ import {
   Divider,
 } from 'rsuite';
 import LoginLayout from '../../layouts/LoginLayout';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import TextField from '../../components/Forms/TextField';
 import useToken from '../../components/App/useToken';
+import Dashboard from '../Dashboard';
 
 function Login() {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ function Login() {
     password: '',
   });
 
-  const login = () => {
-    fetch('/api/login', {
+  const login = async () => {
+    await fetch('/api/login', {
       method: 'POST',
       body: JSON.stringify(formValue),
       headers: {
@@ -31,8 +32,10 @@ function Login() {
     })
       .then((res) => res.json())
       .then((data) => setToken(data.token))
-      .then(() => navigate('/dashboard'))
+      .then(() => true)
       .catch((err) => setErrorMessage(err.getMessage()));
+
+    if (true) return navigate('/dashboard');
   };
 
   return (

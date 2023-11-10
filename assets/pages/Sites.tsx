@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Site } from '../interfaces/SiteInterface';
-import Title from '../components/Title';
 import { Button } from 'rsuite';
 import StandardLayout from '../layouts/StandardLayout';
+import useToken from '../components/App/useToken';
 
 function Sites() {
+  const { token } = useToken();
   const [sites, setSites] = useState<Array<Site>>([]);
   const [smth, setSmth] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -15,7 +16,12 @@ function Sites() {
   }, []);
 
   const fetchSites = async () => {
-    await fetch('/api/sites')
+    await fetch('/api/sites', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => setSites(data));
     setIsLoading(false);

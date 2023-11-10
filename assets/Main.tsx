@@ -11,9 +11,10 @@ import Sites from './pages/Sites';
 import { CustomProvider } from 'rsuite';
 import Login from './pages/Login/Login';
 import Registration from './pages/Login/Registration';
-import Protected from './components/Protected';
+import Protected from './components/Protection/Protected';
 import RegistrationConfirmation from './pages/Login/RegistrationConfirmation';
 import AppIndex from './pages/App/Index';
+import GuestsOnly from './components/Protection/GuestsOnly';
 
 function Main() {
   return (
@@ -27,11 +28,29 @@ function Main() {
             </Protected>
           }
         />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Registration />} />
+        <Route
+          path="/login"
+          element={
+            <GuestsOnly>
+              <Login />
+            </GuestsOnly>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <GuestsOnly>
+              <Registration />
+            </GuestsOnly>
+          }
+        />
         <Route
           path="/register/confirm"
-          element={<RegistrationConfirmation />}
+          element={
+            <GuestsOnly>
+              <RegistrationConfirmation />
+            </GuestsOnly>
+          }
         />
         <Route
           path="/dashboard"
