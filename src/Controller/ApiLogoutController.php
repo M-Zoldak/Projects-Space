@@ -6,6 +6,7 @@ use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -23,7 +24,7 @@ class ApiLogoutController extends AbstractController {
 
         $response = $security->logout(false);
 
-        return $response;
+        return new JsonResponse(["logged_out" => true]);
 
         // $tokenCreator->setUser()
         // return $this->json([

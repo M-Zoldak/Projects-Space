@@ -1,8 +1,7 @@
 import { PropsWithChildren, useEffect } from 'react';
 
 import useToken from '../App/useToken';
-import Home from '../../pages/Regular/Home';
-import { Navigate, redirect } from 'react-router-dom';
+import { redirect } from 'react-router-dom';
 
 export default function GuestsOnly({ children }: PropsWithChildren) {
   const { token, setToken } = useToken();

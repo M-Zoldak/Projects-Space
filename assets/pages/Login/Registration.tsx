@@ -45,9 +45,6 @@ function Registration() {
         if (res.status == 422) return Promise.reject(res);
         return res.json();
       })
-      .then((data) => {
-        localStorage.setItem('spa_app_username', data.user_data.username);
-      })
       .then(() => navigate('/register/confirm'))
       .catch((res: Response) => {
         res.json().then((data) => {

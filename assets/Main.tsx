@@ -15,19 +15,15 @@ import Protected from './components/Protection/Protected';
 import RegistrationConfirmation from './pages/Login/RegistrationConfirmation';
 import AppIndex from './pages/App/Index';
 import GuestsOnly from './components/Protection/GuestsOnly';
+import CreateApp from './pages/App/Create';
+import EditApp from './pages/App/Edit';
 
 function Main() {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Protected>
-              <Home />
-            </Protected>
-          }
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route
           path="/login"
           element={
@@ -73,6 +69,22 @@ function Main() {
           element={
             <Protected>
               <AppIndex />
+            </Protected>
+          }
+        />
+        <Route
+          path="/app/create"
+          element={
+            <Protected>
+              <CreateApp />
+            </Protected>
+          }
+        />
+        <Route
+          path="/app/edit/:id"
+          element={
+            <Protected>
+              <EditApp />
             </Protected>
           }
         />
