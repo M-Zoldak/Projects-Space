@@ -17,6 +17,7 @@ import AppIndex from './pages/App/Index';
 import GuestsOnly from './components/Protection/GuestsOnly';
 import CreateApp from './pages/App/Create';
 import EditApp from './pages/App/Edit';
+import OptionsApp from './pages/App/Options';
 
 function Main() {
   return (
@@ -85,6 +86,14 @@ function Main() {
           element={
             <Protected>
               <EditApp />
+            </Protected>
+          }
+        />
+        <Route
+          path="/app/options/:id"
+          element={
+            <Protected>
+              <OptionsApp />
             </Protected>
           }
         />

@@ -3,14 +3,15 @@ import StandardLayout, { MessageInterface } from '../../layouts/StandardLayout';
 import TextField from '../../components/Forms/TextField';
 import { useEffect, useState } from 'react';
 import useToken from '../../components/App/useToken';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import CommonList, {
   CommonListItemProps,
 } from '../../components/Data/CommonList';
 import { get } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
 
-export default function Index() {
+export default function Options() {
+  const params = useParams();
   const { token, setToken } = useToken();
   const [loaded, setLoaded] = useState(false);
   const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
@@ -19,9 +20,9 @@ export default function Index() {
   const [apps, setApps] = useState<Array<CommonListItemProps>>([]);
 
   useEffect(() => {
-    get(token, '/api/apps')
+    get(token, `/api/app/options/${params.id}`)
       .then((data) => {
-        setApps(data.apps);
+        // setApps(data.apps);
         setLoaded(true);
       })
       .catch((err: Error) => {
@@ -36,16 +37,12 @@ export default function Index() {
       messages={errorMessages}
     >
       <FlexboxGrid className="buttons_container">
-        <Button color="green" appearance="ghost" as={Link} to={'/app/create'}>
-          Create new App
+        <Button appearance="ghost" as={Link} to={'/apps'}>
+          Back to overview
         </Button>
       </FlexboxGrid>
 
-      <ContentLoader loaded={loaded}>
-        <div>
-          <CommonList items={apps} copyable={false} entity="app" />
-        </div>
-      </ContentLoader>
+      <ContentLoader loaded={loaded}>No content yet.</ContentLoader>
     </StandardLayout>
   );
 }
