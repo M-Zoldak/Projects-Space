@@ -6,35 +6,56 @@ import {
   Content,
   Nav,
   Button,
+  FlexboxGrid,
+  Message,
+  MessageProps,
 } from 'rsuite';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import NavToggle from './components/NavToggle';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SideNav, {
   PageLinksListInterface,
   defaultPageLinks,
 } from './components/SideNav';
+import { redirect } from 'react-router-dom';
 import useToken from '../components/App/useToken';
+import { TypeAttributes } from 'rsuite/esm/@types/common';
+
+export type MessageInterface = {
+  messageProps?: MessageProps;
+  text: string;
+};
 
 type StandardLayout = PropsWithChildren<{
   title: string;
   activePage: string;
+  messages?: Array<MessageInterface>;
 }>;
 
-const StandardLayout = ({ children, title, activePage }: StandardLayout) => {
+const StandardLayout = ({
+  children,
+  title,
+  activePage,
+  messages,
+}: StandardLayout) => {
+  const navigate = useNavigate();
   const [expand, setExpand] = useState(true);
   const [userPageLinks, setUserPageLinks] =
     useState<PageLinksListInterface>(null);
   const { token, setToken } = useToken();
-  useEffect(() => {}, null);
 
   const handleLogout = async () => {
     let loggedOut = await fetch('/api/logout', {
       headers: { Authorization: 'Bearer ' + token },
     })
       .then((res) => res.json())
-      .then((data) => data.success);
-    setToken('');
+      .then((data) => data.logged_out);
+
+    if (loggedOut) {
+      setToken('');
+    }
+
+    return navigate('/home');
   };
 
   return (
@@ -71,14 +92,26 @@ const StandardLayout = ({ children, title, activePage }: StandardLayout) => {
         </Sidebar>
 
         <Container>
-          <Header>
+          <Header className="site_header">
             <h2>{title}</h2>
-            <div>
+            <FlexboxGrid justify="space-between" align="middle">
               <Button onClick={handleLogout}>Logout</Button>
-            </div>
+            </FlexboxGrid>
           </Header>
           <Container>
-            <Content>{children}</Content>
+            <>
+              {messages &&
+                messages.map((message, index) => (
+                  <Message
+                    key={index}
+                    closable={true}
+                    type={message.messageProps?.type ?? 'error'}
+                  >
+                    {message.text}
+                  </Message>
+                ))}
+            </>
+            <Content className="content_container">{children}</Content>
           </Container>
         </Container>
       </Container>

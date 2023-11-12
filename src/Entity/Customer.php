@@ -6,12 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CustomerRepository;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
-class Customer {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
+class Customer extends Entity {
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -38,10 +33,6 @@ class Customer {
 
     #[ORM\ManyToOne(inversedBy: 'customers')]
     private ?App $App = null;
-
-    public function getId(): ?int {
-        return $this->id;
-    }
 
     public function getName(): ?string {
         return $this->name;
@@ -123,13 +114,11 @@ class Customer {
         return $this;
     }
 
-    public function getApp(): ?App
-    {
+    public function getApp(): ?App {
         return $this->App;
     }
 
-    public function setApp(?App $App): static
-    {
+    public function setApp(?App $App): static {
         $this->App = $App;
 
         return $this;

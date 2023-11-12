@@ -9,7 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints\PasswordStrength;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
@@ -46,8 +45,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'Users')]
     private Collection $apps;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->apps = new ArrayCollection();
     }
 
@@ -146,13 +144,11 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     /**
      * @return Collection<int, App>
      */
-    public function getApps(): Collection
-    {
+    public function getApps(): Collection {
         return $this->apps;
     }
 
-    public function addApp(App $app): static
-    {
+    public function addApp(App $app): static {
         if (!$this->apps->contains($app)) {
             $this->apps->add($app);
             $app->addUser($this);
@@ -161,8 +157,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this;
     }
 
-    public function removeApp(App $app): static
-    {
+    public function removeApp(App $app): static {
         if ($this->apps->removeElement($app)) {
             $app->removeUser($this);
         }

@@ -12,7 +12,12 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
 
 #[InheritanceType('JOINED')]
 #[DiscriminatorColumn(name: 'discr', type: 'string')]
-#[DiscriminatorMap(['user' => User::class, 'site' => Site::class])]
+#[DiscriminatorMap([
+    'user' => User::class,
+    'site' => Site::class,
+    'app' => App::class,
+    'customer' => Customer::class
+])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 class Entity {
     #[ORM\Id]
