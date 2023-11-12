@@ -7,9 +7,11 @@ import FormComponent, {
 } from '../../components/Forms/FormComponent';
 import { Link, redirect } from 'react-router-dom';
 import { get, post } from '../../Functions/Fetch';
+import ContentLoader from '../../components/Loader';
 
 export default function Create() {
   const { token, setToken } = useToken();
+  const [loaded, setLoaded] = useState(false);
   const [formFields, setFormFields] = useState([]);
   const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
     []
@@ -19,6 +21,7 @@ export default function Create() {
     get(token, '/api/app/create')
       .then((data) => {
         setFormFields(data);
+        setLoaded(true);
       })
       .catch((err: Error) => {
         setErrorMessages([...errorMessages, { text: err.message }]);
@@ -45,13 +48,14 @@ export default function Create() {
           Back to My Apps
         </Button>
       </FlexboxGrid>
-
-      <FormComponent
-        formData={formFields}
-        onSubmit={handleSubmit}
-        onSuccess={actionOnSuccess}
-        formValues={{}}
-      />
+      <ContentLoader loaded={loaded}>
+        <FormComponent
+          formData={formFields}
+          onSubmit={handleSubmit}
+          onSuccess={actionOnSuccess}
+          setFormData={setFormFields}
+        />
+      </ContentLoader>
     </StandardLayout>
   );
 }

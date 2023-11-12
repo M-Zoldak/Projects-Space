@@ -51,11 +51,11 @@ export const defaultPageLinks: PageLinksListInterface = [
   new PageLink('Contact', '/contact'),
   new MenuDivider(),
   new PageLink('My Apps', '/apps', <FontAwesomeIcon icon={faBookAtlas} />),
-  new PageLink(
-    'App Settings',
-    '/settings/user',
-    <FontAwesomeIcon icon={faGears} />
-  ),
+  // new PageLink(
+  //   'App Settings',
+  //   '/settings/user',
+  //   <FontAwesomeIcon icon={faGears} />
+  // ),
   new MenuDivider(),
   new PageLink('Profile', '/profile', <FontAwesomeIcon icon={faUserGear} />),
   new PageLink('Settings', '/settings', <FontAwesomeIcon icon={faGear} />),

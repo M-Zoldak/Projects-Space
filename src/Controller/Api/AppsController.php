@@ -75,8 +75,9 @@ class AppsController extends AbstractController {
             $formBuilder = $this->_createForm($app);
             return new JsonResponse($formBuilder->getFormData());
         } else if ($method == "POST") {
-            $data = json_decode($request->getContent());
+            $data = (object) json_decode($request->getContent());
             $app = $this->appRepository->findOneById($id);
+
             $app->setName($data->name);
 
             $errors = ValidatorHelper::validateObject($app, $validator);
@@ -89,6 +90,32 @@ class AppsController extends AbstractController {
 
             return new JsonResponse((object) $app);
         }
+    }
+
+    #[Route('/api/app/options/{id}', name: 'app_api_app_options', methods: ["GET", "POST"])]
+    public function options(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
+        $method = $request->getMethod();
+        // if ($method == "GET") {
+        //     $app = $this->appRepository->findOneById($id);
+        //     $formBuilder = $this->_createForm($app);
+        //     return new JsonResponse($formBuilder->getFormData());
+        // } else if ($method == "POST") {
+        //     $data = (object) json_decode($request->getContent());
+        //     $app = $this->appRepository->findOneById($id);
+
+        //     $app->setName($data->name);
+
+        //     $errors = ValidatorHelper::validateObject($app, $validator);
+
+        //     if (count((array) $errors)) {
+        //         return new JsonResponse($errors);
+        //     }
+
+        //     $this->appRepository->save($app);
+
+        //     return new JsonResponse((object) $app);
+        // }
+        return new JsonResponse([""]);
     }
 
     private function _createForm(?App $app = null): FormBuilder {

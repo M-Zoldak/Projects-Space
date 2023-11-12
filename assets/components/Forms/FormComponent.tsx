@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, ButtonToolbar, Form } from 'rsuite';
 import TextField from './TextField';
+import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
 
 export type SubmitCallbackFullfillmentProps = {
   success: boolean;
@@ -33,29 +34,59 @@ function VoidFunctionWithObjectParam({}): void {}
 
 type FormComponentProps = {
   onSubmit: typeof SubmitFunction;
-  formData: Array<FormFieldProps>;
   onSuccess: typeof VoidFunctionWithObjectParam;
-  formValues: {};
+  formData: Array<FormFieldProps>;
+  setFormData: Function;
 };
 
 export default function FormComponent({
   onSubmit,
-  formData,
   onSuccess,
-  formValues,
+  formData,
+  setFormData,
 }: FormComponentProps) {
-  const [formError, setFormError] = useState<{
-    [key: string]: string;
-  }>({ name: 'jebać' });
+  const [formValue, setFormValue] = useState<DynamicallyFilledObject>({});
+  const [loaded, setLoaded] = useState(false);
 
-  const [formValue, setFormValue] = useState<{
-    [key: string]: string;
-  }>(formValues);
+  useEffect(() => {
+    let formValues = formData.reduce(
+      (data: DynamicallyFilledObject, field: FormFieldProps) => {
+        data[field.name] = field.value;
+        return data;
+      },
+      {}
+    );
+
+    setFormValue(formValues);
+  }, [formData]);
+
+  const updateInput = (value: string, e: Event) => {
+    let editedField = e.target as HTMLInputElement;
+
+    formData = formData.map((field) => {
+      if (field.name == editedField.name) {
+        field.value = value;
+        formValue[field.name] = value;
+      }
+      return field;
+    });
+
+    setFormValue(formValue);
+    setFormData(formData);
+  };
 
   const renderField = (field: FormFieldProps, key: number) => {
     switch (field.type) {
       case 'text': {
-        return <TextField key={key} error={formError[field.name]} {...field} />;
+        return (
+          <TextField
+            key={key}
+            onChange={updateInput}
+            error={field.error}
+            value={field.value}
+            {...field}
+          />
+        );
       }
       default:
         return (
@@ -69,15 +100,14 @@ export default function FormComponent({
   const validateData = async () => {
     let res = await onSubmit(formValue);
     if (res.success) onSuccess(res.data);
-    else setFormError(res.data);
   };
 
   return (
-    <Form onChange={setFormValue} formValue={formValue}>
+    <Form>
       {formData.map((field, index) => renderField(field, index))}
 
       <ButtonToolbar>
-        <Button appearance="primary" type="submit" onClick={validateData}>
+        <Button appearance="ghost" type="submit" onClick={validateData}>
           Submit
         </Button>
       </ButtonToolbar>
