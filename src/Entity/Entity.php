@@ -16,7 +16,10 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
     'user' => User::class,
     'site' => Site::class,
     'app' => App::class,
-    'customer' => Customer::class
+    'customer' => Customer::class,
+    'site_options' => SiteOptions::class,
+    'app_role' => AppRole::class,
+    'section_permissions' => SectionPermissions::class
 ])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 class Entity {
@@ -33,6 +36,12 @@ class Entity {
 
     #[ORM\Column(options: ["default" => true])]
     private ?bool $isActive = null;
+
+    public function __construct() {
+        $this->createdAt = new DateTimeImmutable();
+        $this->modifiedAt = new DateTimeImmutable();
+        $this->isActive = true;
+    }
 
     public function getId(): ?int {
         return $this->id;

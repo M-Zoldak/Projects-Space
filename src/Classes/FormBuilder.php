@@ -7,7 +7,7 @@ use App\Enums\FormField;
 class FormBuilder {
     private array $fields = [];
 
-    public function add(string $fieldName, string $fieldLabel, FormField $fieldType, array $options): void {
+    public function add(string $fieldName, string $fieldLabel, FormField $fieldType, array $options = []): void {
         if (empty($fieldName)) return;
 
         $field = (object) ["name" => $fieldName, "type" => $fieldType, "label" => $fieldLabel];

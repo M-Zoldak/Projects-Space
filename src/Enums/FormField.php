@@ -8,6 +8,7 @@ enum FormField: string {
     case DATE = "date";
     case CHECKBOX = "checkbox";
     case RADIO = "radio";
+    case LIST = "list";
 
     public function hasDefaultValues(): bool {
         switch ($this) {

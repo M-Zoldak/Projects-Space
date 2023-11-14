@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use App\Utils\EntityCollectionUtil;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -45,10 +46,26 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'Users')]
     private Collection $apps;
 
+    #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
+    private Collection $appRoles;
+
     public function __construct() {
         $this->apps = new ArrayCollection();
+        $this->appRoles = new ArrayCollection();
     }
 
+    public function getData() {
+
+        return [
+            "id" => $this->getId(),
+            "name" => $this->getFirstName() . " " . $this->getLastName(),
+            "copyable" => false,
+            "hasOptions" => true,
+            "destroyable" => true,
+            "editable" => true,
+            "app_roles" => EntityCollectionUtil::createCollectionData($this->getAppRoles())
+        ];
+    }
 
     public function getEmail(): ?string {
         return $this->email;
@@ -160,6 +177,30 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     public function removeApp(App $app): static {
         if ($this->apps->removeElement($app)) {
             $app->removeUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AppRole>
+     */
+    public function getAppRoles(): Collection {
+        return $this->appRoles;
+    }
+
+    public function addAppRole(AppRole $appRole): static {
+        if (!$this->appRoles->contains($appRole)) {
+            $this->appRoles->add($appRole);
+            $appRole->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAppRole(AppRole $appRole): static {
+        if ($this->appRoles->removeElement($appRole)) {
+            $appRole->removeUser($this);
         }
 
         return $this;

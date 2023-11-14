@@ -42,6 +42,5 @@ export async function get(token: string, path: string) {
     if (res.ok) {
       return res.json();
     }
-    throw new Error('Validation Problem');
   });
 }

@@ -21,6 +21,10 @@ import { redirect } from 'react-router-dom';
 import useToken from '../components/App/useToken';
 import { TypeAttributes } from 'rsuite/esm/@types/common';
 
+export function ErrorMessagesFunctionSignature(
+  param: Array<MessageInterface>
+) {}
+
 export type MessageInterface = {
   messageProps?: MessageProps;
   text: string;
@@ -59,7 +63,7 @@ const StandardLayout = ({
   };
 
   return (
-    <div className="show-fake-browser sidebar-page">
+    <div className="sidebar-page">
       <Container>
         <Sidebar
           style={{ display: 'flex', flexDirection: 'column' }}
@@ -101,15 +105,17 @@ const StandardLayout = ({
           <Container>
             <>
               {messages &&
-                messages.map((message, index) => (
-                  <Message
-                    key={index}
-                    closable={true}
-                    type={message.messageProps?.type ?? 'error'}
-                  >
-                    {message.text}
-                  </Message>
-                ))}
+                messages.map((message, index) => {
+                  return (
+                    <Message
+                      key={index}
+                      closable={true}
+                      type={message.messageProps?.type ?? 'error'}
+                    >
+                      {message.text}
+                    </Message>
+                  );
+                })}
             </>
             <Content className="content_container">{children}</Content>
           </Container>

@@ -9,6 +9,7 @@ import FormComponent, {
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { get, post } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
+import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
 
 export default function Edit() {
   let params = useParams();
@@ -36,9 +37,7 @@ export default function Edit() {
       return post(token, `/api/app/edit/${params.id}`, formValue);
     };
 
-  const actionOnSuccess = (successData: {}) => {
-    console.log(successData);
-    // localStorage.setItem("message");
+  const actionOnSuccess = (successData: DynamicallyFilledObject) => {
     return navigate('/apps');
   };
 
