@@ -5,11 +5,13 @@ import useToken from '../../components/App/useToken';
 import FormComponent, {
   SubmitCallbackFullfillmentProps,
 } from '../../components/Forms/FormComponent';
-import { Link, redirect } from 'react-router-dom';
+import { Link, redirect, useNavigate } from 'react-router-dom';
 import { get, post } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
+import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
 
 export default function Create() {
+  const navigate = useNavigate();
   const { token, setToken } = useToken();
   const [loaded, setLoaded] = useState(false);
   const [formFields, setFormFields] = useState([]);
@@ -33,8 +35,13 @@ export default function Create() {
       return post(token, '/api/app/create', formValue);
     };
 
-  const actionOnSuccess = (successData: {}) => {
-    redirect('/apps');
+  const actionOnSuccess = (successData: DynamicallyFilledObject) => {
+    return navigate('/apps', {
+      state: {
+        message: `Your app ${successData.name} was created succesfully!`,
+        type: 'success',
+      },
+    });
   };
 
   return (

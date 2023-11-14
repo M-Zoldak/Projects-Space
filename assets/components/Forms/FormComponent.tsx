@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react';
 import { Button, ButtonToolbar, Form } from 'rsuite';
 import TextField from './TextField';
 import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
+import { EditableListItemProps } from './EditableList';
 
 export type SubmitCallbackFullfillmentProps = {
   success: boolean;
   data: {
-    [key: string]: string;
+    [key: string]: string | object | EditableListItemProps;
   };
 };
 
 export type FormFieldProps = {
-  type: 'text' | 'date' | 'checkbox' | 'radio';
+  type: 'text' | 'date' | 'checkbox' | 'radio' | 'list_readonly' | 'list';
   name: string;
   label: string;
   error: string;
@@ -46,7 +47,6 @@ export default function FormComponent({
   setFormData,
 }: FormComponentProps) {
   const [formValue, setFormValue] = useState<DynamicallyFilledObject>({});
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let formValues = formData.reduce(

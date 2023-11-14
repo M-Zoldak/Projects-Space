@@ -36,9 +36,12 @@ class EntityRepository extends ServiceEntityRepository {
     public function save(Entity $object) {
         if (is_null($object->getId())) $object->setCreatedAt(new DateTimeImmutable());
         $object->setModifiedAt(new DateTimeImmutable());
-        $object->setIsActive(true);
 
+        // try {
         $this->entityManager->persist($object);
+        // } catch (Error $err) {
+        // $this->entityManager->merge($object);
+        // }
         $this->entityManager->flush();
     }
 

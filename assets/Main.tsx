@@ -18,6 +18,7 @@ import GuestsOnly from './components/Protection/GuestsOnly';
 import CreateApp from './pages/App/Create';
 import EditApp from './pages/App/Edit';
 import OptionsApp from './pages/App/Options';
+import OptionsAppRole from './pages/AppRole/Options';
 
 function Main() {
   return (
@@ -94,6 +95,15 @@ function Main() {
           element={
             <Protected>
               <OptionsApp />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/app_role/options/:id"
+          element={
+            <Protected>
+              <OptionsAppRole />
             </Protected>
           }
         />

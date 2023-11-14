@@ -2,5 +2,11 @@ controllers:
     resource: ../src/Controller/
     type: attribute
 
+api_controllers:
+    resource: ../src/Controller/Api/
+    type: annotation
+    prefix: /api
+
+
 api_login:
     path: /api/login

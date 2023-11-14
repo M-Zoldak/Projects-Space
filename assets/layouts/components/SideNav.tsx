@@ -1,8 +1,8 @@
-import { Nav, Divider } from 'rsuite';
+import { Nav, Divider, SelectPicker } from 'rsuite';
 import { IconProps } from '@rsuite/icons/lib/Icon';
 import DashboardIcon from '@rsuite/icons/Dashboard';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBookAtlas,
@@ -11,6 +11,8 @@ import {
   faGlobe,
   faUserGear,
 } from '@fortawesome/free-solid-svg-icons';
+import useApp from '../../components/App/useApp';
+import useAppsData, { updateAppData } from '../../components/App/useAppsData';
 
 export interface PageLinkInterface {
   name: string;
@@ -42,6 +44,53 @@ class PageLink implements PageLinkInterface {
     this.icon = icon || null;
     if (subsites) this.subsites = subsites;
   }
+}
+
+function compare(a: string, b: string) {
+  let nameA = a.toUpperCase();
+  let nameB = b.toUpperCase();
+
+  if (nameA < nameB) {
+    return -1;
+  }
+  if (nameA > nameB) {
+    return 1;
+  }
+  return 0;
+}
+
+function AppChooser() {
+  const { appsData, setAppsData } = useAppsData();
+  const { appId, setAppId } = useApp();
+
+  useEffect(() => {
+    if (appsData) {
+      setAppId(appId.toString());
+    } else {
+      updateAppData();
+    }
+  }, []);
+
+  const handleChange = (val: string) => {
+    setAppId(val);
+  };
+
+  return appsData && appsData.length ? (
+    <SelectPicker
+      data={appsData}
+      searchable={false}
+      defaultValue={appId.toString()}
+      onChange={handleChange}
+      style={{
+        width: 'calc(100% - 40px)',
+        marginInline: '20px',
+        marginBottom: '10px',
+      }}
+      label={'App'}
+    />
+  ) : (
+    <></>
+  );
 }
 
 export const defaultPageLinks: PageLinksListInterface = [
@@ -109,17 +158,20 @@ export default function SideNav({
     key: number | string
   ) => {
     return (
-      <Nav.Item
-        as={Link}
-        key={key}
-        to={url}
-        eventKey={key.toString()}
-        active={activePage == name}
-        icon={icon}
-      >
-        {name}
-      </Nav.Item>
+      <>
+        {name == 'My Apps' && AppChooser()}
+        <Nav.Item
+          as={Link}
+          to={url}
+          eventKey={key.toString()}
+          active={activePage == name}
+          icon={icon}
+        >
+          {name}
+        </Nav.Item>
+      </>
     );
   };
+
   return <>{renderMenu()}</>;
 }

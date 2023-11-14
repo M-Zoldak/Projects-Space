@@ -11,6 +11,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  *
  * @method App|null find($id, $lockMode = null, $lockVersion = null)
  * @method App|null findOneBy(array $criteria, array $orderBy = null)
+ * @method App|null findOneById(array $criteria, array $orderBy = null)
  * @method App[]    findAll()
  * @method App[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
