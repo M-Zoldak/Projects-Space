@@ -50,7 +50,7 @@ class AppRole extends Entity {
         }
     }
 
-    public function getData() {
+    public function getData(): array {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),

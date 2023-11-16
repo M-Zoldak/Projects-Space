@@ -17,6 +17,10 @@ class SiteOptions extends Entity {
     #[ORM\Column(nullable: true)]
     private ?array $hostingsList = null;
 
+    public function getData(): array {
+        return [];
+    }
+
     public function getHosting(): ?string {
         return $this->hosting;
     }

@@ -58,9 +58,11 @@ class AppsController extends AbstractController {
             $app = new App();
             $app->setName($data->name);
             $app->addUser($user);
+            $app->setAppHeadAdminName("Head Admin");
 
             $ownerRole = new AppRole("Head Admin", $app, $this->sectionPermissionsRepository);
             $ownerRole->setIsDestroyable(false);
+
             $this->appRoleRepository->save($ownerRole);
 
             if ($user instanceof User) {

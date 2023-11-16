@@ -5,20 +5,20 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Home from './pages/Dashboard';
 import NotFound from './pages/NotFound';
-import CreateSite from './pages/Site/CreateSite';
-import Site from './pages/Site/Site';
 import Sites from './pages/Sites';
 import { CustomProvider } from 'rsuite';
 import Login from './pages/Login/Login';
 import Registration from './pages/Login/Registration';
 import Protected from './components/Protection/Protected';
 import RegistrationConfirmation from './pages/Login/RegistrationConfirmation';
-import AppIndex from './pages/App/Index';
 import GuestsOnly from './components/Protection/GuestsOnly';
 import CreateApp from './pages/App/Create';
 import EditApp from './pages/App/Edit';
 import OptionsApp from './pages/App/Options';
 import OptionsAppRole from './pages/AppRole/Options';
+import ProjectsList from './pages/Project/List';
+import AppsList from './pages/App/List';
+import NotificationsProvider from './contexts/NotificationsContext';
 
 function Main() {
   return (
@@ -70,7 +70,7 @@ function Main() {
           path="/apps"
           element={
             <Protected>
-              <AppIndex />
+              <AppsList />
             </Protected>
           }
         />
@@ -100,6 +100,24 @@ function Main() {
         />
 
         <Route
+          path="/projects"
+          element={
+            <Protected>
+              <ProjectsList />
+            </Protected>
+          }
+        />
+
+        {/* <Route
+          path="/project/:id"
+          element={
+            <Protected>
+              <ProjectIndex />
+            </Protected>
+          }
+        /> */}
+
+        <Route
           path="/app_role/options/:id"
           element={
             <Protected>
@@ -107,7 +125,7 @@ function Main() {
             </Protected>
           }
         />
-        <Route path="/site">
+        {/* <Route path="/site">
           <Route
             index
             element={
@@ -120,7 +138,7 @@ function Main() {
             path="/site/:id"
             element={
               <Protected>
-                <Site siteId="" />
+                <Site />
               </Protected>
             }
           />
@@ -132,7 +150,7 @@ function Main() {
               </Protected>
             }
           />
-        </Route>
+        </Route> */}
         <Route
           path="/about"
           element={
@@ -164,7 +182,9 @@ if (document.getElementById('app')) {
   root.render(
     <CustomProvider theme="dark">
       <StrictMode>
-        <Main />
+        <NotificationsProvider>
+          <Main />
+        </NotificationsProvider>
       </StrictMode>
     </CustomProvider>
   );

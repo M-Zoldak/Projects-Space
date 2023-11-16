@@ -1,5 +1,7 @@
 import { Button, FlexboxGrid, Loader } from 'rsuite';
-import StandardLayout, { MessageInterface } from '../../layouts/StandardLayout';
+import StandardLayout, {
+  NotificationInterface,
+} from '../../layouts/StandardLayout';
 import { useEffect, useState } from 'react';
 import useToken from '../../components/App/useToken';
 import FormComponent, {
@@ -10,31 +12,30 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { get, post } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
 import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
+import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
 export default function Edit() {
   let params = useParams();
   const navigate = useNavigate();
   const { token, setToken } = useToken();
   const [formFields, setFormFields] = useState([]);
-  const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
-    []
-  );
+  const { addNotification } = useNotificationsContext();
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    get(token, `/api/app/edit/${params.id}`)
+    get(token, `/app/edit/${params.id}`)
       .then((data) => {
         setFormFields(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        setErrorMessages([...errorMessages, { text: err.message }]);
+        addNotification({ text: 'test' });
       });
   }, []);
 
   const handleSubmit =
     async (formValue: {}): Promise<SubmitCallbackFullfillmentProps> => {
-      return post(token, `/api/app/edit/${params.id}`, formValue);
+      return post(token, `/app/edit/${params.id}`, formValue);
     };
 
   const actionOnSuccess = (successData: DynamicallyFilledObject) => {
@@ -42,11 +43,7 @@ export default function Edit() {
   };
 
   return (
-    <StandardLayout
-      title="App edit"
-      activePage="My Apps"
-      messages={errorMessages}
-    >
+    <StandardLayout title="App edit" activePage="My Apps">
       <FlexboxGrid className="buttons_container">
         <Button appearance="ghost" as={Link} to="/apps">
           Back to My Apps

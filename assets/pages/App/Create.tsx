@@ -1,5 +1,7 @@
 import { Button, FlexboxGrid } from 'rsuite';
-import StandardLayout, { MessageInterface } from '../../layouts/StandardLayout';
+import StandardLayout, {
+  NotificationInterface,
+} from '../../layouts/StandardLayout';
 import { useEffect, useState } from 'react';
 import useToken from '../../components/App/useToken';
 import FormComponent, {
@@ -9,52 +11,48 @@ import { Link, redirect, useNavigate } from 'react-router-dom';
 import { get, post } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
 import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
+import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
 export default function Create() {
   const navigate = useNavigate();
   const { token, setToken } = useToken();
   const [loaded, setLoaded] = useState(false);
   const [formFields, setFormFields] = useState([]);
-  const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
-    []
-  );
+  const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
-    get(token, '/api/app/create')
+    get(token, '/app/create')
       .then((data) => {
         setFormFields(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        setErrorMessages([...errorMessages, { text: err.message }]);
+        addNotification({ text: 'test' });
       });
   }, []);
 
   const handleSubmit =
     async (formValue: {}): Promise<SubmitCallbackFullfillmentProps> => {
-      return post(token, '/api/app/create', formValue);
+      return post(token, '/app/create', formValue);
     };
 
   const actionOnSuccess = (successData: DynamicallyFilledObject) => {
     return navigate('/apps', {
       state: {
-        message: `Your app ${successData.name} was created succesfully!`,
+        notification: `Your app ${successData.name} was created succesfully!`,
         type: 'success',
       },
     });
   };
 
   return (
-    <StandardLayout
-      title="New App"
-      activePage="My Apps"
-      messages={errorMessages}
-    >
+    <StandardLayout title="New App" activePage="My Apps">
       <FlexboxGrid className="buttons_container">
         <Button appearance="ghost" as={Link} to="/apps">
           Back to My Apps
         </Button>
       </FlexboxGrid>
+
       <ContentLoader loaded={loaded}>
         <FormComponent
           formData={formFields}

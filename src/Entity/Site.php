@@ -27,7 +27,7 @@ class Site extends Entity {
         return $this;
     }
 
-    public function getData() {
+    public function getData(): array {
         return [
             "id" => $this->getId(),
             "domain" => $this->getDomain(),

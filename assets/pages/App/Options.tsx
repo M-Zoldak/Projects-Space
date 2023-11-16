@@ -1,21 +1,14 @@
-import { Button, FlexboxGrid, Form, Input, InputGroup, Message } from 'rsuite';
-import StandardLayout, { MessageInterface } from '../../layouts/StandardLayout';
-import TextField from '../../components/Forms/TextField';
+import { Button, FlexboxGrid, Input, InputGroup } from 'rsuite';
+import StandardLayout from '../../layouts/StandardLayout';
 import { useEffect, useState } from 'react';
 import useToken from '../../components/App/useToken';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import CommonList, {
-  CommonListItemProps,
-} from '../../components/Data/CommonList';
 import { get, post } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
-import { SubmitCallbackFullfillmentProps } from '../../components/Forms/FormComponent';
 import EditableList, {
   EditableListItemProps,
 } from '../../components/Forms/EditableList';
-import EditableTable from '../../components/Data/EditableTable';
-import { extraPropsToShow } from '../../components/Forms/EditableList';
-import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
+import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
 export default function Options() {
   const location = useLocation();
@@ -26,14 +19,12 @@ export default function Options() {
   const [appRolesList, setAppRolesList] = useState<
     Array<EditableListItemProps>
   >([]);
-  const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
-    []
-  );
+  const { addNotification } = useNotificationsContext();
   const [users, setUsers] = useState<Array<EditableListItemProps>>([]);
   const [newRole, setNewRole] = useState('');
 
   useEffect(() => {
-    get(token, `/api/app/options/${params.id}`)
+    get(token, `/app/options/${params.id}`)
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
@@ -41,12 +32,12 @@ export default function Options() {
         setLoaded(true);
       })
       .catch((err: Error) => {
-        setErrorMessages([...errorMessages, { text: err.message }]);
+        addNotification({ text: 'test' });
       });
   }, []);
 
   const createNewRole = async () => {
-    const successData = await post(token, `/api/app_role/add`, {
+    const successData = await post(token, `/app_role/add`, {
       name: newRole,
       appId: params.id,
     });
@@ -57,11 +48,7 @@ export default function Options() {
 
   console.log(appRolesList);
   return (
-    <StandardLayout
-      title={`${appName} overview`}
-      activePage="My Apps"
-      messages={errorMessages}
-    >
+    <StandardLayout title={`${appName} overview`} activePage="My Apps">
       <FlexboxGrid className="buttons_container">
         <Button appearance="ghost" as={Link} to={'/apps'}>
           Back to overview
@@ -74,8 +61,6 @@ export default function Options() {
           entity="user"
           items={users}
           token={token}
-          setErrorMessages={setErrorMessages}
-          errorMessages={errorMessages}
           propsToShow={[{ name: 'app_role' }]}
           backlink={location.pathname}
         />
@@ -87,8 +72,6 @@ export default function Options() {
           copyable={false}
           hasOptions={true}
           token={token}
-          setErrorMessages={setErrorMessages}
-          errorMessages={errorMessages}
           backlink={location.pathname}
         />
         <FlexboxGrid>

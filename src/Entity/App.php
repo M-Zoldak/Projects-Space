@@ -33,15 +33,19 @@ class App extends Entity {
     #[ORM\Column(length: 255)]
     private ?string $appHeadAdminName = null;
 
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class)]
+    private Collection $projects;
+
     public function __construct() {
         parent::__construct();
         $this->Users = new ArrayCollection();
         $this->customers = new ArrayCollection();
         $this->sites = new ArrayCollection();
         $this->roles = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
-    public function getData() {
+    public function getData(): array {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),
@@ -184,14 +188,39 @@ class App extends Entity {
         return $this;
     }
 
-    public function getAppHeadAdminName(): ?string
-    {
+    public function getAppHeadAdminName(): ?string {
         return $this->appHeadAdminName;
     }
 
-    public function setAppHeadAdminName(string $appHeadAdminName): static
-    {
+    public function setAppHeadAdminName(string $appHeadAdminName): static {
         $this->appHeadAdminName = $appHeadAdminName;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function getProjects(): Collection {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): static {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+            $project->setApp($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Project $project): static {
+        if ($this->projects->removeElement($project)) {
+            // set the owning side to null (unless already changed)
+            if ($project->getApp() === $this) {
+                $project->setApp(null);
+            }
+        }
 
         return $this;
     }

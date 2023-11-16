@@ -16,7 +16,7 @@ import Dashboard from '../Dashboard';
 function Login() {
   const navigate = useNavigate();
   const { token, setToken } = useToken();
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorNotification, setErrorNotification] = useState('');
   const [formValue, setFormValue] = useState({
     username: '',
     password: '',
@@ -33,7 +33,7 @@ function Login() {
       .then((res) => res.json())
       .then((data) => setToken(data.token))
       .then(() => true)
-      .catch((err) => setErrorMessage(err.getMessage()));
+      .catch((err) => setErrorNotification(err.getNotification()));
 
     if (true) return navigate('/dashboard');
   };

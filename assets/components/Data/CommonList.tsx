@@ -1,17 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Button,
-  FlexboxGrid,
-  List,
-  ListItemProps,
-  Modal,
-  Popover,
-} from 'rsuite';
-import {
-  ErrorMessagesFunctionSignature,
-  MessageInterface,
-} from '../../layouts/StandardLayout';
+import { Button, FlexboxGrid, List, ListItemProps, Modal } from 'rsuite';
+import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
 export type CommonListItemProps = {
   // [key: 'string']: string;
@@ -33,8 +23,6 @@ type CommonListProps = {
   entity: string;
   title?: string;
   token: string;
-  setErrorMessages: typeof ErrorMessagesFunctionSignature;
-  errorMessages: Array<MessageInterface>;
 };
 
 export default function CommonList({
@@ -47,11 +35,10 @@ export default function CommonList({
   title = 'name',
   token,
   setItems,
-  setErrorMessages,
-  errorMessages,
 }: CommonListProps) {
   const [chosenObjectId, setChosenObjectId] = useState(0);
   const [destroyOpen, setDestroyOpen] = useState(false);
+  const { addNotification } = useNotificationsContext();
 
   const destroyObject = async () => {
     await fetch(`/api/${entity}/delete`, {
@@ -70,17 +57,12 @@ export default function CommonList({
         items = items.filter((item) => item.id != chosenObjectId);
         setItems(items);
         setDestroyOpen(false);
-        setErrorMessages([
-          ...errorMessages,
-          {
-            text: 'Item and all dependencies was deleted succesfully.',
-            messageProps: { type: 'success' },
-          },
-        ]);
+        addNotification({
+          text: 'Item and all dependencies was deleted succesfully.',
+          notificationProps: { type: 'success' },
+        });
       })
-      .catch((err: Error) =>
-        setErrorMessages([...errorMessages, { text: err.message }])
-      );
+      .catch((err: Error) => addNotification({ text: 'test' }));
   };
 
   const copyAction = () => {};
@@ -150,14 +132,15 @@ export default function CommonList({
 
   return (
     <List hover bordered>
-      {items.map((item) => (
-        <List.Item key={item.id.toString()}>
-          <FlexboxGrid justify="space-between" align="middle">
-            <h5>{item.name}</h5>
-            {renderActionButtons(item)}
-          </FlexboxGrid>
-        </List.Item>
-      ))}
+      {items &&
+        items.map((item) => (
+          <List.Item key={item.id.toString()}>
+            <FlexboxGrid justify="space-between" align="middle">
+              <h5>{item.name}</h5>
+              {renderActionButtons(item)}
+            </FlexboxGrid>
+          </List.Item>
+        ))}
 
       <Modal size="sm" open={destroyOpen} onClose={() => setDestroyOpen(false)}>
         <Modal.Header>

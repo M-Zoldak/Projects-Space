@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Button, FlexboxGrid, List, ListItemProps, Table } from 'rsuite';
 import {
-  ErrorMessagesFunctionSignature,
-  MessageInterface,
+  NotificationsFunctionSignature,
+  NotificationInterface,
 } from '../../layouts/StandardLayout';
 
 const { Column, HeaderCell, Cell } = Table;
@@ -44,8 +44,8 @@ type EditableListProps = {
   }>;
   token: string;
   setItems?: Function;
-  setErrorMessages: typeof ErrorMessagesFunctionSignature;
-  errorMessages: Array<MessageInterface>;
+  setNotification: typeof NotificationsFunctionSignature;
+  notifications: Array<NotificationInterface>;
 };
 
 export default function EditableTable({
@@ -59,7 +59,7 @@ export default function EditableTable({
   propsToRender,
   token,
   setItems,
-  setErrorMessages,
+  setNotification,
 }: EditableListProps) {
   const destroyAction = () => {};
 
