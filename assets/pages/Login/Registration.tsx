@@ -34,7 +34,7 @@ function Registration() {
   });
 
   const handleSubmit = () => {
-    fetch('/api/user/create', {
+    fetch('/user/create', {
       method: 'POST',
       body: JSON.stringify(formValue),
       headers: {

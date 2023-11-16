@@ -34,6 +34,10 @@ class Customer extends Entity {
     #[ORM\ManyToOne(inversedBy: 'customers')]
     private ?App $App = null;
 
+    public function getData(): array {
+        return [];
+    }
+
     public function getName(): ?string {
         return $this->name;
     }

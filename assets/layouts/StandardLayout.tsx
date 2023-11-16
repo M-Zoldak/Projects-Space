@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Container,
   Header,
@@ -7,48 +8,48 @@ import {
   Nav,
   Button,
   FlexboxGrid,
+  Notification,
+  NotificationProps,
   Message,
-  MessageProps,
 } from 'rsuite';
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import NavToggle from './components/NavToggle';
 import { Link, useNavigate } from 'react-router-dom';
-import SideNav, {
-  PageLinksListInterface,
-  defaultPageLinks,
-} from './components/SideNav';
-import { redirect } from 'react-router-dom';
+import SideNav from './components/SideNav';
 import useToken from '../components/App/useToken';
-import { TypeAttributes } from 'rsuite/esm/@types/common';
+import NotificationsProvider, {
+  useNotificationsContext,
+} from '../contexts/NotificationsContext';
 
-export function ErrorMessagesFunctionSignature(
-  param: Array<MessageInterface>
+export function NotificationsFunctionSignature(
+  param: Array<NotificationInterface>
 ) {}
 
-export type MessageInterface = {
-  messageProps?: MessageProps;
+export type NotificationInterface = {
+  notificationProps?: NotificationProps;
   text: string;
 };
 
 type StandardLayout = PropsWithChildren<{
   title: string;
   activePage: string;
-  messages?: Array<MessageInterface>;
+  // notifications?: Array<NotificationInterface>;
 }>;
 
 const StandardLayout = ({
   children,
   title,
-  activePage,
-  messages,
+  activePage, // notifications,
 }: StandardLayout) => {
   const navigate = useNavigate();
   const [expand, setExpand] = useState(true);
-  const [userPageLinks, setUserPageLinks] =
-    useState<PageLinksListInterface>(null);
+  // const [userPageLinks, setUserPageLinks] =
+  //   useState<PageLinksListInterface>(null);
   const { token, setToken } = useToken();
+  // const { notifications } = useContext();
+  const { notifications } = useNotificationsContext();
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     await fetch('/api/logout', {
       headers: { Authorization: 'Bearer ' + token },
     })
@@ -56,7 +57,9 @@ const StandardLayout = ({
       .catch((err) => setToken(''));
 
     return navigate('/home');
-  };
+  }
+
+  console.log(notifications);
 
   return (
     <div className="sidebar-page">
@@ -79,16 +82,14 @@ const StandardLayout = ({
             <Sidenav.Body>
               {
                 <Nav>
-                  <SideNav
-                    activePage={activePage}
-                    menuItems={defaultPageLinks}
-                  />
-                  <SideNav activePage={activePage} menuItems={userPageLinks} />
+                  <SideNav activePage={activePage} />
+                  {/* <SideNav activePage={activePage} /> */}
                 </Nav>
               }
             </Sidenav.Body>
           </Sidenav>
           <NavToggle expand={expand} onChange={() => setExpand(!expand)} />
+          .tsx
         </Sidebar>
 
         <Container>
@@ -107,20 +108,19 @@ const StandardLayout = ({
             )}
           </Header>
           <Container>
-            <>
-              {messages &&
-                messages.map((message, index) => {
-                  return (
-                    <Message
-                      key={index}
-                      closable={true}
-                      type={message.messageProps?.type ?? 'error'}
-                    >
-                      {message.text}
-                    </Message>
-                  );
-                })}
-            </>
+            {notifications &&
+              notifications.map((notification, index) => {
+                return (
+                  <Message
+                    key={index}
+                    closable={true}
+                    type={notification.notificationProps?.type ?? 'error'}
+                  >
+                    {notification.text}
+                  </Message>
+                );
+              })}
+
             <Content className="content_container">{children}</Content>
           </Container>
         </Container>

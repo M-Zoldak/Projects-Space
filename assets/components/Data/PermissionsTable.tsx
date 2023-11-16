@@ -8,8 +8,8 @@ import {
   Table,
 } from 'rsuite';
 import {
-  ErrorMessagesFunctionSignature,
-  MessageInterface,
+  NotificationsFunctionSignature,
+  NotificationInterface,
 } from '../../layouts/StandardLayout';
 import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
 

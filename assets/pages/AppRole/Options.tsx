@@ -1,5 +1,7 @@
-import { Button, ButtonToolbar, FlexboxGrid, Form, Message } from 'rsuite';
-import StandardLayout, { MessageInterface } from '../../layouts/StandardLayout';
+import { Button, ButtonToolbar, FlexboxGrid, Form, Notification } from 'rsuite';
+import StandardLayout, {
+  NotificationInterface,
+} from '../../layouts/StandardLayout';
 import { useEffect, useState } from 'react';
 import useToken from '../../components/App/useToken';
 import { Link, useLocation, useNavigation, useParams } from 'react-router-dom';
@@ -8,6 +10,7 @@ import { get, post } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
 
 import PermissionsTable from '../../components/Data/PermissionsTable';
+import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
 type AppRoleProps = {
   id: string;
@@ -33,18 +36,16 @@ export default function OptionsAppRole() {
   const [loaded, setLoaded] = useState(false);
   const [appRole, setAppRole] = useState<AppRoleProps>();
 
-  const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
-    []
-  );
+  const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
-    get(token, `/api/app_role/options/${params.id}`)
+    get(token, `/app_role/options/${params.id}`)
       .then((data) => {
         setLoaded(true);
         setAppRole(data);
       })
       .catch((err: Error) => {
-        setErrorMessages([...errorMessages, { text: err.message }]);
+        addNotification({ text: 'test' });
       });
   }, []);
 
@@ -52,13 +53,8 @@ export default function OptionsAppRole() {
     role.id;
   };
 
-  console.log(appRole);
   return (
-    <StandardLayout
-      title="Role options"
-      activePage="My Apps"
-      messages={errorMessages}
-    >
+    <StandardLayout title="Role options" activePage="My Apps">
       <ButtonToolbar className="buttons_container">
         <Button appearance="ghost" as={Link} to={state.backlink}>
           Back
@@ -67,17 +63,19 @@ export default function OptionsAppRole() {
 
       <ContentLoader loaded={loaded}>
         <h3>{appRole?.name} permissions</h3>
-        <PermissionsTable
-          id={appRole?.id}
-          items={appRole?.sectionPermissions}
-          token={token}
-          label="none yet"
-          name="some Name"
-          setItems={updateAppRole}
-          // setErrorMessages={setErrorMessages}
-          // errorMessages={errorMessages}
-          propsToRender={[]}
-        />
+        {!!appRole ? (
+          <PermissionsTable
+            id={appRole?.id}
+            items={appRole?.sectionPermissions}
+            token={token}
+            label="none yet"
+            name="some Name"
+            setItems={updateAppRole}
+            propsToRender={[]}
+          />
+        ) : (
+          <p>You don't have any apps yet. Create one now!</p>
+        )}
       </ContentLoader>
     </StandardLayout>
   );

@@ -11,7 +11,7 @@ export async function post(
     data: undefined,
   };
 
-  await fetch(path, {
+  await fetch(`/api${path}`, {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
@@ -34,7 +34,7 @@ export async function post(
 }
 
 export async function get(token: string, path: string) {
-  return await fetch(path, {
+  return await fetch(`/api${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

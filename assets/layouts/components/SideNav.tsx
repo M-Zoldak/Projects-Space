@@ -93,33 +93,34 @@ function AppChooser() {
   );
 }
 
-export const defaultPageLinks: PageLinksListInterface = [
-  new PageLink('Dashboard', '/dashboard', <DashboardIcon />),
-  new PageLink('Sites', '/sites', <FontAwesomeIcon icon={faGlobe} />),
-  new PageLink('About', '/about'),
-  new PageLink('Contact', '/contact'),
-  new MenuDivider(),
-  new PageLink('My Apps', '/apps', <FontAwesomeIcon icon={faBookAtlas} />),
-  // new PageLink(
-  //   'App Settings',
-  //   '/settings/user',
-  //   <FontAwesomeIcon icon={faGears} />
-  // ),
-  new MenuDivider(),
-  new PageLink('Profile', '/profile', <FontAwesomeIcon icon={faUserGear} />),
-  new PageLink('Settings', '/settings', <FontAwesomeIcon icon={faGear} />),
-];
+export default function SideNav({ activePage }: { activePage: string }) {
+  const defaultPageLinks: PageLinksListInterface = [
+    new PageLink('Dashboard', '/dashboard', <DashboardIcon />),
+    new PageLink(
+      'Projects',
+      '/projects',
+      <FontAwesomeIcon icon={faBookAtlas} />
+    ),
+    new MenuDivider(),
+    new PageLink('Sites', '/sites', <FontAwesomeIcon icon={faGlobe} />),
+    new PageLink('Customers', '/customers', <FontAwesomeIcon icon={faGlobe} />),
+    // new PageLink('About', '/about'),
+    // new PageLink('Contact', '/contact'),
+    new MenuDivider(),
+    new PageLink('My Apps', '/apps', <FontAwesomeIcon icon={faBookAtlas} />),
+    // new PageLink(
+    //   'App Settings',
+    //   '/settings/user',
+    //   <FontAwesomeIcon icon={faGears} />
+    // ),
+    new MenuDivider(),
+    new PageLink('Profile', '/profile', <FontAwesomeIcon icon={faUserGear} />),
+    new PageLink('Settings', '/settings', <FontAwesomeIcon icon={faGear} />),
+  ];
 
-export default function SideNav({
-  activePage,
-  menuItems,
-}: {
-  activePage: string;
-  menuItems: PageLinksListInterface;
-}) {
   const renderMenu = () => {
-    if (!menuItems) return <></>;
-    return menuItems.map((menuItem, index) => {
+    if (!defaultPageLinks) return <></>;
+    return defaultPageLinks.map((menuItem, index) => {
       if (menuItem instanceof MenuDivider) {
         return menuItem.render(index);
       } else if (menuItem.subsites) {

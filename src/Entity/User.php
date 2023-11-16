@@ -49,13 +49,16 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
     private Collection $appRoles;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ProjectRole::class, orphanRemoval: true)]
+    private Collection $projectRoles;
+
     public function __construct() {
         $this->apps = new ArrayCollection();
         $this->appRoles = new ArrayCollection();
+        $this->projectRoles = new ArrayCollection();
     }
 
-    public function getData() {
-
+    public function getData(): array {
         return [
             "id" => $this->getId(),
             "name" => $this->getFirstName() . " " . $this->getLastName(),
@@ -201,6 +204,33 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     public function removeAppRole(AppRole $appRole): static {
         if ($this->appRoles->removeElement($appRole)) {
             $appRole->removeUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProjectRole>
+     */
+    public function getProjectRoles(): Collection {
+        return $this->projectRoles;
+    }
+
+    public function addProjectRole(ProjectRole $projectRole): static {
+        if (!$this->projectRoles->contains($projectRole)) {
+            $this->projectRoles->add($projectRole);
+            $projectRole->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectRole(ProjectRole $projectRole): static {
+        if ($this->projectRoles->removeElement($projectRole)) {
+            // set the owning side to null (unless already changed)
+            if ($projectRole->getUser() === $this) {
+                $projectRole->setUser(null);
+            }
         }
 
         return $this;

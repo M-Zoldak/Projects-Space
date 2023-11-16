@@ -1,5 +1,7 @@
-import { Button, FlexboxGrid, Form, Message } from 'rsuite';
-import StandardLayout, { MessageInterface } from '../../layouts/StandardLayout';
+import { Button, FlexboxGrid, Form, Notification } from 'rsuite';
+import StandardLayout, {
+  NotificationInterface,
+} from '../../layouts/StandardLayout';
 import TextField from '../../components/Forms/TextField';
 import { useEffect, useState } from 'react';
 import useToken from '../../components/App/useToken';
@@ -9,43 +11,35 @@ import CommonList, {
 } from '../../components/Data/CommonList';
 import { get } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
+import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
-export default function Index() {
+export default function AppsList() {
   const location = useLocation();
   const { token, setToken } = useToken();
   const [loaded, setLoaded] = useState(false);
-  const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
-    []
-  );
+  const { addNotification } = useNotificationsContext();
   const [apps, setApps] = useState<Array<CommonListItemProps>>([]);
 
   useEffect(() => {
-    if (location.state?.message) {
-      setErrorMessages([
-        ...errorMessages,
-        {
-          text: location.state.message,
-          messageProps: { type: location.state?.type ?? 'error' },
-        },
-      ]);
+    if (location.state?.notification) {
+      addNotification({
+        text: location.state.notification,
+        notificationProps: { type: location.state?.type ?? 'error' },
+      });
     }
 
-    get(token, '/api/apps')
+    get(token, '/apps')
       .then((data) => {
         setApps(data.apps);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        setErrorMessages([...errorMessages, { text: err.message }]);
+        addNotification({ text: 'test' });
       });
   }, []);
 
   return (
-    <StandardLayout
-      title="Apps overview"
-      activePage="My Apps"
-      messages={errorMessages}
-    >
+    <StandardLayout title="Apps overview" activePage="My Apps">
       <FlexboxGrid className="buttons_container">
         <Button color="green" appearance="ghost" as={Link} to={'/app/create'}>
           Create new App
@@ -60,8 +54,6 @@ export default function Index() {
             entity="app"
             token={token}
             setItems={setApps}
-            setErrorMessages={setErrorMessages}
-            errorMessages={errorMessages}
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>

@@ -19,10 +19,12 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
     'customer' => Customer::class,
     'site_options' => SiteOptions::class,
     'app_role' => AppRole::class,
-    'section_permissions' => SectionPermissions::class
+    'section_permissions' => SectionPermissions::class,
+    'project' => Project::class,
+    'project_role' => ProjectRole::class
 ])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
-class Entity {
+abstract class Entity {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -76,4 +78,6 @@ class Entity {
 
         return $this;
     }
+
+    abstract function getData(): array;
 }

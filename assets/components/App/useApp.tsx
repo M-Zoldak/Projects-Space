@@ -7,13 +7,13 @@ export default function useApp() {
 
   const [appId, setAppId] = useState(getApp());
 
-  const setApp = (appId: string) => {
+  const setId = (appId: string) => {
     localStorage.setItem('app', appId.toString());
     setAppId(appId.toString());
   };
 
   return {
-    setAppId: setApp,
+    setAppId: setId,
     appId,
   };
 }

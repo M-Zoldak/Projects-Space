@@ -1,8 +1,8 @@
 import { Link, useNavigation } from 'react-router-dom';
 import { Button, FlexboxGrid, List, ListItemProps } from 'rsuite';
 import {
-  ErrorMessagesFunctionSignature,
-  MessageInterface,
+  NotificationsFunctionSignature,
+  NotificationInterface,
 } from '../../layouts/StandardLayout';
 
 export type EditableListItemProps = {
@@ -30,8 +30,6 @@ type EditableListProps = {
   entity: string;
   title?: string;
   propsToShow?: Array<extraPropsToShow>;
-  setErrorMessages: typeof ErrorMessagesFunctionSignature;
-  errorMessages: Array<MessageInterface>;
   token: string;
   backlink: string;
   creator?: boolean;
