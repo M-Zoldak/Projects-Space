@@ -49,15 +49,11 @@ const StandardLayout = ({
   const { token, setToken } = useToken();
 
   const handleLogout = async () => {
-    let loggedOut = await fetch('/api/logout', {
+    await fetch('/api/logout', {
       headers: { Authorization: 'Bearer ' + token },
     })
-      .then((res) => res.json())
-      .then((data) => data.logged_out);
-
-    if (loggedOut) {
-      setToken('');
-    }
+      .then((res) => setToken(''))
+      .catch((err) => setToken(''));
 
     return navigate('/home');
   };
@@ -98,9 +94,17 @@ const StandardLayout = ({
         <Container>
           <Header className="site_header">
             <h2>{title}</h2>
-            <FlexboxGrid justify="space-between" align="middle">
-              <Button onClick={handleLogout}>Logout</Button>
-            </FlexboxGrid>
+            {token ? (
+              <FlexboxGrid justify="space-between" align="middle">
+                <Button onClick={handleLogout}>Logout</Button>
+              </FlexboxGrid>
+            ) : (
+              <FlexboxGrid justify="space-between" align="middle">
+                <Button as={Link} to={'/login'}>
+                  Login
+                </Button>
+              </FlexboxGrid>
+            )}
           </Header>
           <Container>
             <>

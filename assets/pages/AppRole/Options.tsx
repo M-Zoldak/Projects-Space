@@ -1,28 +1,38 @@
 import { Button, ButtonToolbar, FlexboxGrid, Form, Message } from 'rsuite';
 import StandardLayout, { MessageInterface } from '../../layouts/StandardLayout';
-import TextField from '../../components/Forms/TextField';
 import { useEffect, useState } from 'react';
 import useToken from '../../components/App/useToken';
 import { Link, useLocation, useNavigation, useParams } from 'react-router-dom';
-import CommonList, {
-  CommonListItemProps,
-} from '../../components/Data/CommonList';
+
 import { get, post } from '../../Functions/Fetch';
 import ContentLoader from '../../components/Loader';
-import { SubmitCallbackFullfillmentProps } from '../../components/Forms/FormComponent';
-import EditableList, {
-  EditableListItemProps,
-} from '../../components/Forms/EditableList';
-import EditableTable from '../../components/Data/EditableTable';
-import { extraPropsToShow } from '../../components/Forms/EditableList';
+
+import PermissionsTable from '../../components/Data/PermissionsTable';
+
+type AppRoleProps = {
+  id: string;
+  name: string;
+  destroyable: boolean;
+  copyable: boolean;
+  sectionPermissions: Array<SectionPermissionsProps>;
+};
+
+type SectionPermissionsProps = {
+  id: string;
+  roleId: string;
+  sectionName: string;
+  delete: boolean;
+  read: boolean;
+  edit: boolean;
+};
 
 export default function OptionsAppRole() {
   const params = useParams();
   const { state } = useLocation();
   const { token, setToken } = useToken();
   const [loaded, setLoaded] = useState(false);
-  const [appRole, setAppRole] = useState<Array<EditableListItemProps>>([]);
-  const [appRoleName, setAppRoleName] = useState('');
+  const [appRole, setAppRole] = useState<AppRoleProps>();
+
   const [errorMessages, setErrorMessages] = useState<Array<MessageInterface>>(
     []
   );
@@ -30,15 +40,19 @@ export default function OptionsAppRole() {
   useEffect(() => {
     get(token, `/api/app_role/options/${params.id}`)
       .then((data) => {
-        setAppRoleName(data.name);
-        setAppRole(data.app_role);
         setLoaded(true);
+        setAppRole(data);
       })
       .catch((err: Error) => {
         setErrorMessages([...errorMessages, { text: err.message }]);
       });
   }, []);
 
+  const updateAppRole = (e: Event, role: AppRoleProps) => {
+    role.id;
+  };
+
+  console.log(appRole);
   return (
     <StandardLayout
       title="Role options"
@@ -52,18 +66,17 @@ export default function OptionsAppRole() {
       </ButtonToolbar>
 
       <ContentLoader loaded={loaded}>
-        <h3>{appRoleName} permissions</h3>
-        <EditableTable
-          entity="app_role"
-          items={appRole}
+        <h3>{appRole?.name} permissions</h3>
+        <PermissionsTable
+          id={appRole?.id}
+          items={appRole?.sectionPermissions}
           token={token}
-          setErrorMessages={setErrorMessages}
-          errorMessages={errorMessages}
-          propsToRender={[
-            { name: 'not_exist', readableName: 'Projects permissions' },
-          ]}
-          // backlink={location.pathname}
-          // creator={true}
+          label="none yet"
+          name="some Name"
+          setItems={updateAppRole}
+          // setErrorMessages={setErrorMessages}
+          // errorMessages={errorMessages}
+          propsToRender={[]}
         />
       </ContentLoader>
     </StandardLayout>

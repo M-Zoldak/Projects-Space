@@ -46,9 +46,9 @@ class AppRolesController extends AbstractController {
 
         return new JsonResponse([
             "success" => true,
-            "name" => $appRole?->getName(),
-            "app_role" => $appRole?->getData(),
-            "permissions" => EntityCollectionUtil::createCollectionData($appRole->getSectionPermissions())
+            "id" => $appRole->getId(),
+            "name" => $appRole->getName(),
+            "app_role" => $appRole->getData(),
         ]);
     }
 }

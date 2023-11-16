@@ -54,6 +54,7 @@ function Login() {
               <ButtonToolbar>
                 <Button
                   appearance="primary"
+                  type="submit"
                   onClick={() => login()}
                   onSubmit={() => login()}
                 >
