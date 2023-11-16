@@ -24,6 +24,9 @@ class SectionPermissions extends Entity {
     #[ORM\Column(length: 255)]
     private ?string $sectionName = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $sectionReadableName = null;
+
     public function __construct(AppRole $appRole, string $sectionName, bool $isDestroyable = false, bool $isReviewable = false, bool $isEditable = false) {
         parent::__construct();
         $this->setAppRole($appRole);
@@ -35,6 +38,8 @@ class SectionPermissions extends Entity {
 
     public function getData() {
         return [
+            "id" => $this->getId(),
+            "roleId" => $this->getAppRole(),
             "name" => $this->getSectionName(),
             "read" => $this->isReview(),
             "delete" => $this->isDestroy(),
@@ -88,6 +93,16 @@ class SectionPermissions extends Entity {
 
     public function setReview(?bool $review): static {
         $this->review = $review;
+
+        return $this;
+    }
+
+    public function getSectionReadableName(): ?string {
+        return $this->sectionReadableName;
+    }
+
+    public function setSectionReadableName(string $sectionReadableName): static {
+        $this->sectionReadableName = $sectionReadableName;
 
         return $this;
     }

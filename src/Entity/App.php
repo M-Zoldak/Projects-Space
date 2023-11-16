@@ -30,6 +30,9 @@ class App extends Entity {
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: AppRole::class)]
     private Collection $roles;
 
+    #[ORM\Column(length: 255)]
+    private ?string $appHeadAdminName = null;
+
     public function __construct() {
         parent::__construct();
         $this->Users = new ArrayCollection();
@@ -177,6 +180,18 @@ class App extends Entity {
                 $role->setApp(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAppHeadAdminName(): ?string
+    {
+        return $this->appHeadAdminName;
+    }
+
+    public function setAppHeadAdminName(string $appHeadAdminName): static
+    {
+        $this->appHeadAdminName = $appHeadAdminName;
 
         return $this;
     }

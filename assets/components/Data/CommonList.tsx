@@ -46,7 +46,7 @@ export default function CommonList({
   entity,
   title = 'name',
   token,
-  setItems = null,
+  setItems,
   setErrorMessages,
   errorMessages,
 }: CommonListProps) {

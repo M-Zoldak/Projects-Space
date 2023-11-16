@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Enums\StandardSections;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\RoleRepository;
+use App\Utils\EntityCollectionUtil;
 use Doctrine\Common\Collections\Collection;
 use App\Repository\SectionPermissionsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -54,7 +55,8 @@ class AppRole extends Entity {
             "id" => $this->getId(),
             "name" => $this->getName(),
             "destroyable" => $this->isDestroyable(),
-            "copyable" => false
+            "copyable" => false,
+            "sectionPermissions" => EntityCollectionUtil::createCollectionData($this->getSectionPermissions())
         ];
     }
 

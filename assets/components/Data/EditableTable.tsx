@@ -26,10 +26,20 @@ type EditableListProps = {
   entity: string;
   title?: string;
   propsToRender: Array<{
+    id?: string;
     name: string;
     readableName: string;
+
+    // id: number | string;
+    sectionName: string;
+    // readableName: string;
+    delete: boolean;
+    read: boolean;
+    edit: boolean;
+
     options?: {
-      tag: boolean;
+      tag?: boolean;
+      checkbox?: boolean;
     };
   }>;
   token: string;
@@ -108,7 +118,7 @@ export default function EditableTable({
     return (
       <FlexboxGrid className="buttons_container">
         {options}
-        {edit}
+        {edit}name
         {copy}
         {destroy}
       </FlexboxGrid>
@@ -118,10 +128,12 @@ export default function EditableTable({
   return (
     <Table hover bordered data={items}>
       {propsToRender.map((defs, index) => (
-        <Column fixed key={index}>
-          <HeaderCell>{defs.readableName}</HeaderCell>
-          <Cell dataKey={defs.name} />
-        </Column>
+        <>
+          <Column fixed key={index}>
+            <HeaderCell>{defs.readableName}</HeaderCell>
+            <Cell dataKey={defs.name} />
+          </Column>
+        </>
       ))}
     </Table>
   );
