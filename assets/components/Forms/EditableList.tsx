@@ -1,17 +1,13 @@
-import { Link, useNavigation } from 'react-router-dom';
-import { Button, FlexboxGrid, List, ListItemProps } from 'rsuite';
-import {
-  NotificationsFunctionSignature,
-  NotificationInterface,
-} from '../../layouts/StandardLayout';
+import { Link, useNavigation } from "react-router-dom";
+import { Button, FlexboxGrid, List, ListItemProps } from "rsuite";
 
 export type EditableListItemProps = {
   props?: ListItemProps;
   name: string;
   id: number;
-  editable: boolean;
-  hasOptions: boolean;
-  destroyable: boolean;
+  editable?: boolean;
+  hasOptions?: boolean;
+  destroyable?: boolean;
 };
 
 export type extraPropsToShow = {
@@ -42,7 +38,7 @@ export default function EditableList({
   copyable = true,
   hasOptions = false,
   entity,
-  title = 'name',
+  title = "name",
   propsToShow,
   backlink,
   creator = false,
@@ -64,7 +60,7 @@ export default function EditableList({
           Edit
         </Button>
       ) : (
-        ''
+        ""
       );
     let destroy =
       destroyable && item.destroyable ? (
@@ -77,14 +73,14 @@ export default function EditableList({
           Delete
         </Button>
       ) : (
-        ''
+        ""
       );
     let copy = copyable ? (
       <Button appearance="ghost" size="sm" color="cyan" onClick={copyAction}>
         Copy
       </Button>
     ) : (
-      ''
+      ""
     );
     let options =
       hasOptions || item.hasOptions ? (
@@ -99,7 +95,7 @@ export default function EditableList({
           Options
         </Button>
       ) : (
-        ''
+        ""
       );
 
     return (

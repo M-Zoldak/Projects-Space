@@ -1,18 +1,18 @@
-import { Nav, Divider, SelectPicker } from 'rsuite';
-import { IconProps } from '@rsuite/icons/lib/Icon';
-import DashboardIcon from '@rsuite/icons/Dashboard';
-import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Nav, Divider, SelectPicker } from "rsuite";
+import { IconProps } from "@rsuite/icons/lib/Icon";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBookAtlas,
+  faGaugeHigh,
   faGear,
-  faGears,
   faGlobe,
+  faPeopleGroup,
+  faProjectDiagram,
   faUserGear,
-} from '@fortawesome/free-solid-svg-icons';
-import useApp from '../../components/App/useApp';
-import useAppsData, { updateAppData } from '../../components/App/useAppsData';
+} from "@fortawesome/free-solid-svg-icons";
+import { useAppDataContext } from "../../contexts/AppDataContext";
+import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 export interface PageLinkInterface {
   name: string;
@@ -21,7 +21,9 @@ export interface PageLinkInterface {
   icon: React.ReactElement<IconProps>;
 }
 
-export type PageLinksListInterface = Array<PageLink | MenuDivider> | null;
+export type PageLinksListInterface = Array<
+  PageLink | MenuDivider | "AppChooser"
+> | null;
 
 class MenuDivider {
   render = (key: number | string) => <Divider key={key} />;
@@ -59,69 +61,92 @@ function compare(a: string, b: string) {
   return 0;
 }
 
-function AppChooser() {
-  const { appsData, setAppsData } = useAppsData();
-  const { appId, setAppId } = useApp();
+function AppChooser(index: number) {
+  const { appData, setAppId } = useAppDataContext();
 
-  useEffect(() => {
-    if (appsData) {
-      setAppId(appId.toString());
-    } else {
-      updateAppData();
-    }
-  }, []);
-
-  const handleChange = (val: string) => {
-    setAppId(val);
+  const handleChange = (appId: string) => {
+    setAppId(appId);
   };
 
-  return appsData && appsData.length ? (
+  const provideSelectData = (apps: Array<AppType>) => {
+    return apps.map((app) => {
+      return { label: app.name, value: app.id.toString() };
+    });
+  };
+
+  return appData.apps && appData.apps.length ? (
     <SelectPicker
-      data={appsData}
+      key={index}
+      data={provideSelectData(appData.apps)}
       searchable={false}
-      defaultValue={appId.toString()}
+      defaultValue={appData?.currentAppId}
       onChange={handleChange}
       style={{
-        width: 'calc(100% - 40px)',
-        marginInline: '20px',
-        marginBottom: '10px',
+        width: "calc(100% - 40px)",
+        marginInline: "20px",
+        marginBottom: "10px",
       }}
-      label={'App'}
+      label={"App"}
     />
   ) : (
-    <></>
+    <p
+      style={{
+        width: "calc(100% - 40px)",
+        marginInline: "20px",
+        marginBottom: "10px",
+      }}
+      key={index}
+    >
+      Create your first App!
+    </p>
   );
 }
 
 export default function SideNav({ activePage }: { activePage: string }) {
+  const { appData } = useAppDataContext();
+
   const defaultPageLinks: PageLinksListInterface = [
-    new PageLink('Dashboard', '/dashboard', <DashboardIcon />),
     new PageLink(
-      'Projects',
-      '/projects',
-      <FontAwesomeIcon icon={faBookAtlas} />
+      "Dashboard",
+      "/dashboard",
+      <FontAwesomeIcon icon={faGaugeHigh} />
     ),
+    appData.currentAppId &&
+      new PageLink(
+        "Projects",
+        "/projects",
+        <FontAwesomeIcon icon={faProjectDiagram} />
+      ),
     new MenuDivider(),
-    new PageLink('Sites', '/sites', <FontAwesomeIcon icon={faGlobe} />),
-    new PageLink('Customers', '/customers', <FontAwesomeIcon icon={faGlobe} />),
+    new PageLink("Sites", "/sites", <FontAwesomeIcon icon={faGlobe} />),
+    new PageLink(
+      "Customers",
+      "/customers",
+      <FontAwesomeIcon icon={faPeopleGroup} />
+    ),
     // new PageLink('About', '/about'),
     // new PageLink('Contact', '/contact'),
     new MenuDivider(),
-    new PageLink('My Apps', '/apps', <FontAwesomeIcon icon={faBookAtlas} />),
+    "AppChooser",
+    new PageLink("My Apps", "/apps", <FontAwesomeIcon icon={faBookAtlas} />),
     // new PageLink(
     //   'App Settings',
     //   '/settings/user',
     //   <FontAwesomeIcon icon={faGears} />
     // ),
     new MenuDivider(),
-    new PageLink('Profile', '/profile', <FontAwesomeIcon icon={faUserGear} />),
-    new PageLink('Settings', '/settings', <FontAwesomeIcon icon={faGear} />),
+    new PageLink("Profile", "/profile", <FontAwesomeIcon icon={faUserGear} />),
+    new PageLink("Settings", "/settings", <FontAwesomeIcon icon={faGear} />),
   ];
 
   const renderMenu = () => {
     if (!defaultPageLinks) return <></>;
+    console.log(defaultPageLinks);
     return defaultPageLinks.map((menuItem, index) => {
-      if (menuItem instanceof MenuDivider) {
+      if (menuItem == undefined) return;
+      if (menuItem == "AppChooser") {
+        return AppChooser(index);
+      } else if (menuItem instanceof MenuDivider) {
         return menuItem.render(index);
       } else if (menuItem.subsites) {
         return renderSubsites(menuItem, index);
@@ -136,21 +161,19 @@ export default function SideNav({ activePage }: { activePage: string }) {
     key: number | string
   ) => {
     return (
-      <>
-        <Nav.Menu
-          title={name}
-          key={key}
-          active={subsites.some((page) => page.name == name)}
-          eventKey={key.toString()}
-          icon={icon}
-        >
-          {subsites.map((menuItem, index) =>
-            menuItem.subsites instanceof Array
-              ? renderSubsites(menuItem, key + '-' + index)
-              : renderSingleLink(menuItem, key + '-' + index)
-          )}
-        </Nav.Menu>
-      </>
+      <Nav.Menu
+        title={name}
+        key={key}
+        active={subsites.some((page) => page.name == name)}
+        eventKey={key.toString()}
+        icon={icon}
+      >
+        {subsites.map((menuItem, index) =>
+          menuItem.subsites instanceof Array
+            ? renderSubsites(menuItem, key + "-" + index)
+            : renderSingleLink(menuItem, key + "-" + index)
+        )}
+      </Nav.Menu>
     );
   };
 
@@ -159,18 +182,16 @@ export default function SideNav({ activePage }: { activePage: string }) {
     key: number | string
   ) => {
     return (
-      <>
-        {name == 'My Apps' && AppChooser()}
-        <Nav.Item
-          as={Link}
-          to={url}
-          eventKey={key.toString()}
-          active={activePage == name}
-          icon={icon}
-        >
-          {name}
-        </Nav.Item>
-      </>
+      <Nav.Item
+        as={Link}
+        to={url}
+        key={key}
+        eventKey={key.toString()}
+        active={activePage == name}
+        icon={icon}
+      >
+        {name}
+      </Nav.Item>
     );
   };
 

@@ -1,7 +1,0 @@
-{
-  "rules": {
-    "react/jsx-uses-react": 0,
-    "react/react-in-jsx-scope": 0,
-    "lines-between-class-members": 1
-  }
-}

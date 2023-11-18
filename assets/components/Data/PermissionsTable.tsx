@@ -1,17 +1,4 @@
-import { Link } from 'react-router-dom';
-import {
-  Button,
-  Checkbox,
-  FlexboxGrid,
-  List,
-  ListItemProps,
-  Table,
-} from 'rsuite';
-import {
-  NotificationsFunctionSignature,
-  NotificationInterface,
-} from '../../layouts/StandardLayout';
-import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
+import { Checkbox, Table } from "rsuite";
 
 const { Column, HeaderCell, Cell } = Table;
 
@@ -30,7 +17,7 @@ type PermissionRenderProps = {
   [key: string]: string | boolean;
   key: string;
   label: string;
-  fieldType: 'string' | 'checkbox';
+  fieldType: "string" | "checkbox";
 };
 
 export default function PermissionsTable({
@@ -41,13 +28,13 @@ export default function PermissionsTable({
 }: PermissionsTableProps) {
   const createProperField = (props: PermissionRenderProps) => {
     switch (props.fieldType) {
-      case 'checkbox':
+      case "checkbox":
         return (
-          <Cell style={{ alignContent: 'center' }}>
+          <Cell style={{ alignContent: "center" }}>
             <Checkbox onChange={(e) => setItems(e, props)} />
           </Cell>
         );
-      case 'string':
+      case "string":
         return <Cell dataKey={props.key} />;
     }
   };
@@ -55,7 +42,7 @@ export default function PermissionsTable({
   return (
     <Table hover bordered data={items}>
       {propsToRender.map((props, index) => {
-        let align = index > 0 && 'center';
+        let align = index > 0 && "center";
 
         return (
           <Column fixed key={props.key} align={align}>

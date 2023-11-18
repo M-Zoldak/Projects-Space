@@ -1,46 +1,45 @@
-import { Button, FlexboxGrid } from 'rsuite';
-import StandardLayout, {
-  NotificationInterface,
-} from '../../layouts/StandardLayout';
-import { useEffect, useState } from 'react';
-import useToken from '../../components/App/useToken';
+import { Button, FlexboxGrid } from "rsuite";
+import { useEffect, useState } from "react";
+import useToken from "../../components/App/useToken";
 import FormComponent, {
   SubmitCallbackFullfillmentProps,
-} from '../../components/Forms/FormComponent';
-import { Link, redirect, useNavigate } from 'react-router-dom';
-import { get, post } from '../../Functions/Fetch';
-import ContentLoader from '../../components/Loader';
-import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
-import { useNotificationsContext } from '../../contexts/NotificationsContext';
+} from "../../components/Forms/FormComponent";
+import { Link, redirect, useNavigate } from "react-router-dom";
+import { get, post } from "../../Functions/Fetch";
+import ContentLoader from "../../components/Loader";
+import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
+import { useNotificationsContext } from "../../contexts/NotificationsContext";
+import { AppType } from "../../interfaces/EntityTypes/AppType";
+import StandardLayout from "../../layouts/StandardLayout";
 
 export default function Create() {
   const navigate = useNavigate();
-  const { token, setToken } = useToken();
+  const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
   const [formFields, setFormFields] = useState([]);
   const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
-    get(token, '/app/create')
+    get<any>(token, "/apps/create")
       .then((data) => {
-        setFormFields(data);
+        setFormFields(data.data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        addNotification({ text: 'test' });
+        addNotification({ text: "test" });
       });
   }, []);
 
   const handleSubmit =
-    async (formValue: {}): Promise<SubmitCallbackFullfillmentProps> => {
-      return post(token, '/app/create', formValue);
+    async (formData: {}): Promise<SubmitCallbackFullfillmentProps> => {
+      return post(token, "/apps/create", formData);
     };
 
   const actionOnSuccess = (successData: DynamicallyFilledObject) => {
-    return navigate('/apps', {
+    return navigate("/apps", {
       state: {
         notification: `Your app ${successData.name} was created succesfully!`,
-        type: 'success',
+        type: "success",
       },
     });
   };

@@ -1,45 +1,43 @@
-import { Button, FlexboxGrid, Loader } from 'rsuite';
-import StandardLayout, {
-  NotificationInterface,
-} from '../../layouts/StandardLayout';
-import { useEffect, useState } from 'react';
-import useToken from '../../components/App/useToken';
+import { Button, FlexboxGrid, Loader } from "rsuite";
+import StandardLayout from "../../layouts/StandardLayout";
+import { useEffect, useState } from "react";
+import useToken from "../../components/App/useToken";
 import FormComponent, {
   FormFieldProps,
   SubmitCallbackFullfillmentProps,
-} from '../../components/Forms/FormComponent';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { get, post } from '../../Functions/Fetch';
-import ContentLoader from '../../components/Loader';
-import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
-import { useNotificationsContext } from '../../contexts/NotificationsContext';
+} from "../../components/Forms/FormComponent";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { get, post } from "../../Functions/Fetch";
+import ContentLoader from "../../components/Loader";
+import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
+import { useNotificationsContext } from "../../contexts/NotificationsContext";
 
 export default function Edit() {
   let params = useParams();
   const navigate = useNavigate();
-  const { token, setToken } = useToken();
+  const { token } = useToken();
   const [formFields, setFormFields] = useState([]);
   const { addNotification } = useNotificationsContext();
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    get(token, `/app/edit/${params.id}`)
+    get<any>(token, `/apps/edit/${params.id}`)
       .then((data) => {
-        setFormFields(data);
+        setFormFields(data.data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        addNotification({ text: 'test' });
+        addNotification({ text: "test" });
       });
   }, []);
 
   const handleSubmit =
-    async (formValue: {}): Promise<SubmitCallbackFullfillmentProps> => {
-      return post(token, `/app/edit/${params.id}`, formValue);
+    async (formData: {}): Promise<SubmitCallbackFullfillmentProps> => {
+      return post(token, `/apps/edit/${params.id}`, formData);
     };
 
-  const actionOnSuccess = (successData: DynamicallyFilledObject) => {
-    return navigate('/apps');
+  const actionOnSuccess = (successData: any) => {
+    return navigate("/apps");
   };
 
   return (

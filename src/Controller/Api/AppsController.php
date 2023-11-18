@@ -39,13 +39,10 @@ class AppsController extends AbstractController {
 
         $appsData = EntityCollectionUtil::createCollectionData($apps);
 
-        return new JsonResponse([
-            "success" => true,
-            "apps" => $appsData
-        ]);
+        return new JsonResponse($appsData);
     }
 
-    #[Route('/app/create', name: 'app_api_app_create', methods: ["GET", "POST"])]
+    #[Route('/apps/create', name: 'app_api_app_create', methods: ["GET", "POST"])]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse {
         $method = $request->getMethod();
 
@@ -83,7 +80,7 @@ class AppsController extends AbstractController {
         }
     }
 
-    #[Route('/app/edit/{id}', name: 'app_api_app_edit', methods: ["GET", "POST"])]
+    #[Route('/apps/edit/{id}', name: 'app_api_app_edit', methods: ["GET", "POST"])]
     public function edit(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
         $method = $request->getMethod();
         if ($method == "GET") {
@@ -108,7 +105,7 @@ class AppsController extends AbstractController {
         }
     }
 
-    #[Route('/app/options/{id}', name: 'app_api_app_options', methods: ["GET", "POST"])]
+    #[Route('/apps/options/{id}', name: 'app_api_app_options', methods: ["GET", "POST"])]
     public function options(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
         $method = $request->getMethod();
         if ($method == "GET") {
@@ -116,13 +113,13 @@ class AppsController extends AbstractController {
             $appUsers = EntityCollectionUtil::createCollectionData($app->getUsers());
             $appRoles = EntityCollectionUtil::createCollectionData($app->getRoles());
 
-            return new JsonResponse(["roles" => $appRoles, "users" => $appUsers]);
+            return new JsonResponse(["roles" => $appRoles, "users" => $appUsers, "app_name" => $app->getName()]);
         }
 
         return new JsonResponse([""]);
     }
 
-    #[Route('/app/delete', name: 'app_api_app_delete', methods: ["DELETE"])]
+    #[Route('/apps/delete', name: 'app_api_app_delete', methods: ["DELETE"])]
     public function delete(Request $request, ValidatorInterface $validator): JsonResponse {
         $data = json_decode($request->getContent());
 
