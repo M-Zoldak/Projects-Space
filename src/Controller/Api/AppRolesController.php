@@ -32,10 +32,7 @@ class AppRolesController extends AbstractController {
         $appRole = new AppRole($data->name, $app, $this->sectionPermissionsRepository);
         $this->appRoleRepository->save($appRole);
 
-        return new JsonResponse([
-            "success" => true,
-            "app_role" => $appRole?->getData()
-        ]);
+        return new JsonResponse($appRole?->getData());
     }
 
     #[Route('/app_role/options/{id}', name: 'app_api_role_options')]
@@ -45,7 +42,6 @@ class AppRolesController extends AbstractController {
         if (empty($appRole)) return new JsonResponse(null, 404);
 
         return new JsonResponse([
-            "success" => true,
             "id" => $appRole->getId(),
             "name" => $appRole->getName(),
             "app_role" => $appRole->getData(),

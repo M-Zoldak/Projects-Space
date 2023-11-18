@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Button, ButtonToolbar, Form } from 'rsuite';
-import TextField from './TextField';
-import { DynamicallyFilledObject } from '../../interfaces/DefaultTypes';
-import { EditableListItemProps } from './EditableList';
+import { useEffect, useState } from "react";
+import { Button, ButtonToolbar, Form } from "rsuite";
+import TextField from "./TextField";
+import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
+import { EditableListItemProps } from "./EditableList";
 
 export type SubmitCallbackFullfillmentProps = {
   success: boolean;
@@ -12,7 +12,7 @@ export type SubmitCallbackFullfillmentProps = {
 };
 
 export type FormFieldProps = {
-  type: 'text' | 'date' | 'checkbox' | 'radio' | 'list_readonly' | 'list';
+  type: "text" | "date" | "checkbox" | "radio" | "list_readonly" | "list";
   name: string;
   label: string;
   error: string;
@@ -23,19 +23,9 @@ async function SubmitFunction({}): Promise<SubmitCallbackFullfillmentProps> {
   return { success: true, data: {} };
 }
 
-const getFormErrors = (formData: Array<FormFieldProps>) => {
-  if (formData.length) {
-    return formData.reduce((obj, curr) =>
-      Object.assign(obj, { [curr.name]: curr.error ?? '' }, {})
-    );
-  } else return {};
-};
-
-function VoidFunctionWithObjectParam({}): void {}
-
 type FormComponentProps = {
   onSubmit: typeof SubmitFunction;
-  onSuccess: typeof VoidFunctionWithObjectParam;
+  onSuccess: ({}) => void;
   formData: Array<FormFieldProps>;
   setFormData: Function;
 };
@@ -77,7 +67,7 @@ export default function FormComponent({
 
   const renderField = (field: FormFieldProps, key: number) => {
     switch (field.type) {
-      case 'text': {
+      case "text": {
         return (
           <TextField
             key={key}
@@ -107,7 +97,12 @@ export default function FormComponent({
       {formData.map((field, index) => renderField(field, index))}
 
       <ButtonToolbar>
-        <Button appearance="ghost" type="submit" onClick={validateData}>
+        <Button
+          appearance="ghost"
+          type="submit"
+          onClick={validateData}
+          onSubmit={validateData}
+        >
           Submit
         </Button>
       </ButtonToolbar>

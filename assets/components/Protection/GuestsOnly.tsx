@@ -1,16 +1,16 @@
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect } from "react";
 
-import useToken from '../App/useToken';
-import { redirect } from 'react-router-dom';
+import useToken from "../App/useToken";
+import { redirect } from "react-router-dom";
 
 export default function GuestsOnly({ children }: PropsWithChildren) {
-  const { token, setToken } = useToken();
+  const { token } = useToken();
 
   useEffect(() => {
     if (!token) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      redirect('/dashboard');
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      redirect("/dashboard");
     }
   });
 

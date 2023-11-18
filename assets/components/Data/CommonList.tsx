@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button, FlexboxGrid, List, ListItemProps, Modal } from 'rsuite';
-import { useNotificationsContext } from '../../contexts/NotificationsContext';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button, FlexboxGrid, List, ListItemProps, Modal } from "rsuite";
+import { useNotificationsContext } from "../../contexts/NotificationsContext";
 
 export type CommonListItemProps = {
   // [key: 'string']: string;
@@ -21,8 +21,8 @@ type CommonListProps = {
   copyable?: boolean;
   hasOptions?: boolean;
   entity: string;
-  title?: string;
   token: string;
+  onDelete: (items: any) => void;
 };
 
 export default function CommonList({
@@ -32,9 +32,9 @@ export default function CommonList({
   copyable = true,
   hasOptions = false,
   entity,
-  title = 'name',
   token,
   setItems,
+  onDelete,
 }: CommonListProps) {
   const [chosenObjectId, setChosenObjectId] = useState(0);
   const [destroyOpen, setDestroyOpen] = useState(false);
@@ -42,83 +42,73 @@ export default function CommonList({
 
   const destroyObject = async () => {
     await fetch(`/api/${entity}/delete`, {
-      method: 'DELETE',
+      method: "DELETE",
       body: JSON.stringify({ id: chosenObjectId }),
       headers: {
-        Authorization: 'Bearer ' + token,
+        Authorization: "Bearer " + token,
       },
     })
       .then((res) => {
         if (res.status == 200) return res.json();
         if (res.status == 403)
-          throw new Error('Unsufficient rights to delete this.');
+          throw new Error("Unsufficient rights to delete this.");
       })
       .then(() => {
         items = items.filter((item) => item.id != chosenObjectId);
         setItems(items);
         setDestroyOpen(false);
         addNotification({
-          text: 'Item and all dependencies was deleted succesfully.',
-          notificationProps: { type: 'success' },
+          text: "Item and all dependencies was deleted succesfully.",
+          notificationProps: { type: "success" },
         });
+        onDelete(items);
       })
-      .catch((err: Error) => addNotification({ text: 'test' }));
+      .catch((err: Error) => addNotification({ text: err.message }));
   };
 
   const copyAction = () => {};
 
   const renderActionButtons = (item: CommonListItemProps) => {
-    let edit =
-      editable && item.editable ? (
-        <Button
-          appearance="ghost"
-          size="sm"
-          as={Link}
-          to={`/${entity}/edit/${item.id}`}
-          color="blue"
-        >
-          Edit
-        </Button>
-      ) : (
-        ''
-      );
-    let destroy =
-      destroyable && item.destroyable ? (
-        <Button
-          appearance="ghost"
-          size="sm"
-          color="red"
-          onClick={() => {
-            setChosenObjectId(item.id);
-            setDestroyOpen(true);
-          }}
-        >
-          Delete
-        </Button>
-      ) : (
-        ''
-      );
-    let copy = copyable ? (
+    let edit = editable && item.editable && (
+      <Button
+        appearance="ghost"
+        size="sm"
+        as={Link}
+        to={`/${entity}/edit/${item.id}`}
+        color="blue"
+      >
+        Edit
+      </Button>
+    );
+    let destroy = destroyable && item.destroyable && (
+      <Button
+        appearance="ghost"
+        size="sm"
+        color="red"
+        onClick={() => {
+          setChosenObjectId(item.id);
+          setDestroyOpen(true);
+        }}
+      >
+        Delete
+      </Button>
+    );
+    let copy = copyable && (
       <Button appearance="ghost" size="sm" color="cyan" onClick={copyAction}>
         Copy
       </Button>
-    ) : (
-      ''
     );
-    let options =
-      hasOptions || item.hasOptions ? (
-        <Button
-          appearance="ghost"
-          size="sm"
-          color="yellow"
-          as={Link}
-          to={`/${entity}/options/${item.id}`}
-        >
-          Options
-        </Button>
-      ) : (
-        ''
-      );
+    let options = (hasOptions || item.hasOptions) && (
+      <Button
+        appearance="ghost"
+        size="sm"
+        color="yellow"
+        as={Link}
+        to={`/${entity}/options/${item.id}`}
+      >
+        Options
+      </Button>
+    );
 
     return (
       <FlexboxGrid className="buttons_container">

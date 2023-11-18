@@ -1,24 +1,25 @@
-import React, { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Home from './pages/Dashboard';
-import NotFound from './pages/NotFound';
-import Sites from './pages/Sites';
-import { CustomProvider } from 'rsuite';
-import Login from './pages/Login/Login';
-import Registration from './pages/Login/Registration';
-import Protected from './components/Protection/Protected';
-import RegistrationConfirmation from './pages/Login/RegistrationConfirmation';
-import GuestsOnly from './components/Protection/GuestsOnly';
-import CreateApp from './pages/App/Create';
-import EditApp from './pages/App/Edit';
-import OptionsApp from './pages/App/Options';
-import OptionsAppRole from './pages/AppRole/Options';
-import ProjectsList from './pages/Project/List';
-import AppsList from './pages/App/List';
-import NotificationsProvider from './contexts/NotificationsContext';
+import React, { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Home from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
+import Sites from "./pages/Sites";
+import { CustomProvider } from "rsuite";
+import Login from "./pages/Login/Login";
+import Registration from "./pages/Login/Registration";
+import Protected from "./components/Protection/Protected";
+import RegistrationConfirmation from "./pages/Login/RegistrationConfirmation";
+import GuestsOnly from "./components/Protection/GuestsOnly";
+import CreateApp from "./pages/App/Create";
+import EditApp from "./pages/App/Edit";
+import OptionsApp from "./pages/App/Options";
+import OptionsAppRole from "./pages/AppRole/Options";
+import ProjectsList from "./pages/Project/List";
+import AppsList from "./pages/App/List";
+import NotificationsProvider from "./contexts/NotificationsContext";
+import AppDataProvider from "./contexts/AppDataContext";
 
 function Main() {
   return (
@@ -175,17 +176,19 @@ function Main() {
 
 export default Main;
 
-if (document.getElementById('app')) {
-  const rootElement = document.getElementById('app') as HTMLElement;
+if (document.getElementById("app")) {
+  const rootElement = document.getElementById("app") as HTMLElement;
   const root = createRoot(rootElement);
 
   root.render(
-    <CustomProvider theme="dark">
-      <StrictMode>
-        <NotificationsProvider>
-          <Main />
-        </NotificationsProvider>
-      </StrictMode>
-    </CustomProvider>
+    <StrictMode>
+      <AppDataProvider>
+        <CustomProvider theme="dark">
+          <NotificationsProvider>
+            <Main />
+          </NotificationsProvider>
+        </CustomProvider>
+      </AppDataProvider>
+    </StrictMode>
   );
 }

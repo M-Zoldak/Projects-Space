@@ -1,6 +1,9 @@
-import useToken from '../components/App/useToken';
-import { SubmitCallbackFullfillmentProps } from '../components/Forms/FormComponent';
+import useToken from "../components/App/useToken";
+import { SubmitCallbackFullfillmentProps } from "../components/Forms/FormComponent";
 
+export type GetResponse<T> = T;
+
+export type GetAllResponse<T> = Array<T>;
 export async function post(
   token: string,
   path: string,
@@ -12,7 +15,7 @@ export async function post(
   };
 
   await fetch(`/api${path}`, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(body),
     headers: {
       Authorization: `Bearer ${token}`,
@@ -33,7 +36,25 @@ export async function post(
   return response;
 }
 
-export async function get(token: string, path: string) {
+export async function get<T>(
+  token: string,
+  path: string
+): Promise<GetResponse<T>> {
+  return await fetch(`/api${path}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => {
+    if (res.ok) {
+      return res.json();
+    }
+  });
+}
+
+export async function getAll<T>(
+  token: string,
+  path: string
+): Promise<GetAllResponse<T>> {
   return await fetch(`/api${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,

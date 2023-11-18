@@ -1,59 +1,59 @@
-import { Button, FlexboxGrid, Form, Notification } from 'rsuite';
-import StandardLayout, {
-  NotificationInterface,
-} from '../../layouts/StandardLayout';
-import TextField from '../../components/Forms/TextField';
-import { useEffect, useState } from 'react';
-import useToken from '../../components/App/useToken';
-import { Link, useLocation } from 'react-router-dom';
+import { Button, FlexboxGrid } from "rsuite";
+import StandardLayout from "../../layouts/StandardLayout";
+import { useEffect, useState } from "react";
+import useToken from "../../components/App/useToken";
+import { Link, useLocation } from "react-router-dom";
 import CommonList, {
   CommonListItemProps,
-} from '../../components/Data/CommonList';
-import { get } from '../../Functions/Fetch';
-import ContentLoader from '../../components/Loader';
-import { useNotificationsContext } from '../../contexts/NotificationsContext';
+} from "../../components/Data/CommonList";
+import { get, getAll } from "../../Functions/Fetch";
+import ContentLoader from "../../components/Loader";
+import { useNotificationsContext } from "../../contexts/NotificationsContext";
+import { useAppDataContext } from "../../contexts/AppDataContext";
+import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 export default function AppsList() {
+  const { appData, setApps } = useAppDataContext();
   const location = useLocation();
-  const { token, setToken } = useToken();
+  const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
-  const [apps, setApps] = useState<Array<CommonListItemProps>>([]);
 
   useEffect(() => {
     if (location.state?.notification) {
       addNotification({
         text: location.state.notification,
-        notificationProps: { type: location.state?.type ?? 'error' },
+        notificationProps: { type: location.state?.type ?? "error" },
       });
     }
 
-    get(token, '/apps')
+    getAll<AppType>(token, "/apps")
       .then((data) => {
-        setApps(data.apps);
+        setApps(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        addNotification({ text: 'test' });
+        addNotification({ text: err.message });
       });
   }, []);
 
   return (
     <StandardLayout title="Apps overview" activePage="My Apps">
       <FlexboxGrid className="buttons_container">
-        <Button color="green" appearance="ghost" as={Link} to={'/app/create'}>
+        <Button color="green" appearance="ghost" as={Link} to={"/app/create"}>
           Create new App
         </Button>
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
-        {!!apps.length ? (
+        {appData?.apps?.length ? (
           <CommonList
-            items={apps}
+            items={appData.apps as CommonListItemProps[]}
             copyable={false}
             entity="app"
             token={token}
             setItems={setApps}
+            onDelete={(items) => setApps(items)}
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>

@@ -1,9 +1,6 @@
-import { Link } from 'react-router-dom';
-import { Button, FlexboxGrid, List, ListItemProps, Table } from 'rsuite';
-import {
-  NotificationsFunctionSignature,
-  NotificationInterface,
-} from '../../layouts/StandardLayout';
+import { Link } from "react-router-dom";
+import { Button, FlexboxGrid, List, ListItemProps, Table } from "rsuite";
+import { PermissionsType } from "../../interfaces/DefaultTypes";
 
 const { Column, HeaderCell, Cell } = Table;
 
@@ -12,17 +9,13 @@ export type CommonListItemProps = {
   props?: ListItemProps;
   name: string;
   id: number;
-  editable: boolean;
-  hasOptions: boolean;
-  destroyable: boolean;
+  editable?: boolean;
+  hasOptions?: boolean;
+  destroyable?: boolean;
 };
 
 type EditableListProps = {
   items: Array<CommonListItemProps>;
-  editable?: boolean;
-  destroyable?: boolean;
-  copyable?: boolean;
-  hasOptions?: boolean;
   entity: string;
   title?: string;
   propsToRender: Array<{
@@ -44,9 +37,7 @@ type EditableListProps = {
   }>;
   token: string;
   setItems?: Function;
-  setNotification: typeof NotificationsFunctionSignature;
-  notifications: Array<NotificationInterface>;
-};
+} & PermissionsType;
 
 export default function EditableTable({
   items,
@@ -55,11 +46,10 @@ export default function EditableTable({
   copyable = true,
   hasOptions = false,
   entity,
-  title = 'name',
+  title = "name",
   propsToRender,
   token,
   setItems,
-  setNotification,
 }: EditableListProps) {
   const destroyAction = () => {};
 
@@ -78,7 +68,7 @@ export default function EditableTable({
           Edit
         </Button>
       ) : (
-        ''
+        ""
       );
     let destroy =
       destroyable && item.destroyable ? (
@@ -91,14 +81,14 @@ export default function EditableTable({
           Delete
         </Button>
       ) : (
-        ''
+        ""
       );
     let copy = copyable ? (
       <Button appearance="ghost" size="sm" color="cyan" onClick={copyAction}>
         Copy
       </Button>
     ) : (
-      ''
+      ""
     );
     let options =
       hasOptions || item.hasOptions ? (
@@ -112,7 +102,7 @@ export default function EditableTable({
           Options
         </Button>
       ) : (
-        ''
+        ""
       );
 
     return (

@@ -1,30 +1,31 @@
-import { Button, FlexboxGrid, Input, InputGroup } from 'rsuite';
-import StandardLayout from '../../layouts/StandardLayout';
-import { useEffect, useState } from 'react';
-import useToken from '../../components/App/useToken';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import { get, post } from '../../Functions/Fetch';
-import ContentLoader from '../../components/Loader';
+import { Button, FlexboxGrid, Input, InputGroup } from "rsuite";
+import StandardLayout from "../../layouts/StandardLayout";
+import { useEffect, useState } from "react";
+import useToken from "../../components/App/useToken";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { get, post } from "../../Functions/Fetch";
+import ContentLoader from "../../components/Loader";
 import EditableList, {
   EditableListItemProps,
-} from '../../components/Forms/EditableList';
-import { useNotificationsContext } from '../../contexts/NotificationsContext';
+} from "../../components/Forms/EditableList";
+import { useNotificationsContext } from "../../contexts/NotificationsContext";
+import { AppOptionsType, AppType } from "../../interfaces/EntityTypes/AppType";
 
 export default function Options() {
   const location = useLocation();
   const params = useParams();
-  const { token, setToken } = useToken();
+  const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
-  const [appName, setAppName] = useState('');
+  const [appName, setAppName] = useState("");
   const [appRolesList, setAppRolesList] = useState<
     Array<EditableListItemProps>
   >([]);
   const { addNotification } = useNotificationsContext();
   const [users, setUsers] = useState<Array<EditableListItemProps>>([]);
-  const [newRole, setNewRole] = useState('');
+  const [newRole, setNewRole] = useState("");
 
   useEffect(() => {
-    get(token, `/app/options/${params.id}`)
+    get<AppOptionsType>(token, `/apps/options/${params.id}`)
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
@@ -32,7 +33,7 @@ export default function Options() {
         setLoaded(true);
       })
       .catch((err: Error) => {
-        addNotification({ text: 'test' });
+        addNotification({ text: "test" });
       });
   }, []);
 
@@ -50,7 +51,7 @@ export default function Options() {
   return (
     <StandardLayout title={`${appName} overview`} activePage="My Apps">
       <FlexboxGrid className="buttons_container">
-        <Button appearance="ghost" as={Link} to={'/apps'}>
+        <Button appearance="ghost" as={Link} to={"/apps"}>
           Back to overview
         </Button>
       </FlexboxGrid>
@@ -61,7 +62,7 @@ export default function Options() {
           entity="user"
           items={users}
           token={token}
-          propsToShow={[{ name: 'app_role' }]}
+          propsToShow={[{ name: "app_role" }]}
           backlink={location.pathname}
         />
 
