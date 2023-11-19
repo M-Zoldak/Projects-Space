@@ -2,12 +2,11 @@ import { Button, FlexboxGrid } from "rsuite";
 import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
 import FormComponent from "../../components/Forms/FormComponent";
-import { Link, redirect, useNavigate } from "react-router-dom";
-import { get, post } from "../../Functions/Fetch";
+import { Link, useNavigate } from "react-router-dom";
+import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
-import { AppType } from "../../interfaces/EntityTypes/AppType";
 import StandardLayout from "../../layouts/StandardLayout";
 import { FormDataType } from "../../interfaces/FormDataType";
 
@@ -19,7 +18,8 @@ export default function Create() {
   const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
-    get<Array<FormDataType>>(token, "/apps/create")
+    http_methods
+      .fetch<Array<FormDataType>>(token, "/apps/create")
       .then((data) => {
         setFormFields(data);
         setLoaded(true);

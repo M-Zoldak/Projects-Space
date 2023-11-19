@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, ButtonToolbar, Form } from "rsuite";
 import TextField from "./TextField";
 import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
-import { post } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/Fetch";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { FormDataType } from "../../interfaces/FormDataType";
 
@@ -72,7 +72,9 @@ export default function FormComponent<T>({
   };
 
   const validateData = () => {
-    post<T>(appData.token, postPath, formValue).then((data) => onSuccess(data));
+    http_methods
+      .post<T>(appData.token, postPath, formValue)
+      .then((data) => onSuccess(data));
   };
 
   return (

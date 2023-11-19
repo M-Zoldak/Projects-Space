@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
 import { Link, useLocation } from "react-router-dom";
 import CommonList from "../../components/Data/CommonList";
-import { get, getAll } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import SimpleCreateModal from "../../components/Modals/SimpleCreateModal";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
@@ -19,10 +19,12 @@ export default function ProjectsList() {
   const [projects, setProjects] = useState<Array<any>>([]);
 
   useEffect(() => {
-    getAll<ProjectType>(
-      appData.token,
-      `/projects?appId=${appData.currentAppId}`
-    )
+    setLoaded(false);
+    http_methods
+      .fetchAll<ProjectType>(
+        appData.token,
+        `/projects?appId=${appData.currentAppId}`
+      )
       .then((data) => {
         setProjects(data);
         setLoaded(true);
@@ -52,11 +54,16 @@ export default function ProjectsList() {
 
       <ContentLoader loaded={loaded}>
         {projects && projects.length ? (
-          <CommonList
+          <CommonList<ProjectType>
             items={projects}
             entity="project"
-            setItems={setProjects}
-            onDelete={(items) => {}}
+            onDelete={(items, item) => {
+              setProjects(items);
+              addNotification({
+                text: `Project ${item.name} was deleted succesfully`,
+                notificationProps: { type: "success" },
+              });
+            }}
           />
         ) : (
           <p>You don't have any projects yet. Create one now!</p>

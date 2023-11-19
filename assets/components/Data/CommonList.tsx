@@ -11,32 +11,26 @@ export type CommonListItemProps = {
   id: number;
 } & PermissionsType;
 
-type CommonListProps = {
+type CommonListProps<T> = {
   items: Array<CommonListItemProps>;
-  setItems: Function;
-  hasView?: boolean;
-  destroyable?: boolean;
-  hasOptions?: boolean;
   entity: string;
-  onDelete: (items: any) => void;
+  onDelete: (items: any, item: T) => void;
+  userPermissions?: PermissionsType;
 };
 
-export default function CommonList({
+export default function CommonList<T>({
   items,
-  hasView = true,
-  destroyable = true,
-  hasOptions = false,
+  userPermissions = { hasView: true, destroyable: true, hasOptions: true },
   entity,
-  setItems,
   onDelete,
-}: CommonListProps) {
+}: CommonListProps<T>) {
   const { appData } = useAppDataContext();
   const [chosenObjectId, setChosenObjectId] = useState(0);
   const [destroyOpen, setDestroyOpen] = useState(false);
   const { addNotification } = useNotificationsContext();
 
   const destroyObject = async () => {
-    await fetch(`/api/${entity}/delete`, {
+    await fetch(`/api/${entity}`, {
       method: "DELETE",
       body: JSON.stringify({ id: chosenObjectId }),
       headers: {
@@ -44,25 +38,22 @@ export default function CommonList({
       },
     })
       .then((res) => {
-        if (res.status == 200) return res.json();
-        if (res.status == 403)
-          throw new Error("Unsufficient rights to delete this.");
+        if (res.status >= 200 && res.status <= 299) return res.json();
+        setDestroyOpen(false);
+        if (res.status == 403) throw new Error(res.statusText);
+        if (res.status == 404) throw new Error(res.statusText);
       })
       .then(() => {
+        let item = items.find((item) => item.id == chosenObjectId);
         items = items.filter((item) => item.id != chosenObjectId);
-        setItems(items);
         setDestroyOpen(false);
-        addNotification({
-          text: "Item and all dependencies was deleted succesfully.",
-          notificationProps: { type: "success" },
-        });
-        onDelete(items);
+        onDelete(items, item as T);
       })
       .catch((err: Error) => addNotification({ text: err.message }));
   };
 
   const renderActionButtons = (item: CommonListItemProps) => {
-    let edit = hasView && item.hasView && (
+    let edit = userPermissions.hasView && item.hasView && (
       <Button
         appearance="ghost"
         size="sm"
@@ -74,7 +65,7 @@ export default function CommonList({
       </Button>
     );
 
-    let destroy = destroyable && item.destroyable && (
+    let destroy = userPermissions.destroyable && item.destroyable && (
       <Button
         appearance="ghost"
         size="sm"
@@ -88,7 +79,7 @@ export default function CommonList({
       </Button>
     );
 
-    let options = (hasOptions || item.hasOptions) && (
+    let options = userPermissions.hasOptions && item.hasOptions && (
       <Button
         appearance="ghost"
         size="sm"

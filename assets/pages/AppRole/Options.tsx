@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
 import { Link, useLocation, useNavigation, useParams } from "react-router-dom";
 
-import { get, getAll, post } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 
 import PermissionsTable from "../../components/Data/PermissionsTable";
@@ -21,7 +21,8 @@ export default function OptionsAppRole() {
   const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
-    get<AppRoleType>(token, `/app_role/options/${params.id}`)
+    http_methods
+      .fetch<AppRoleType>(token, `/app_role/options/${params.id}`)
       .then((data) => {
         setLoaded(true);
         setAppRole(data);

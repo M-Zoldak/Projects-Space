@@ -119,8 +119,8 @@ class AppsController extends AbstractController {
         return new JsonResponse([""]);
     }
 
-    #[Route('/apps/delete', name: 'app_api_app_delete', methods: ["DELETE"])]
-    public function delete(Request $request, ValidatorInterface $validator): JsonResponse {
+    #[Route('/app', name: 'app_api_app_delete', methods: ["DELETE"])]
+    public function delete(Request $request): JsonResponse {
         $data = json_decode($request->getContent());
 
         $app = $this->appRepository->findOneById($data->id);

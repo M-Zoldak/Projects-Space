@@ -1,6 +1,6 @@
 import { DynamicallyFilledObject } from "../interfaces/DefaultTypes";
 
-export async function post<T>(
+async function post<T>(
   token: string,
   path: string,
   body: DynamicallyFilledObject
@@ -16,29 +16,22 @@ export async function post<T>(
   });
 }
 
-export async function get<T>(token: string, path: string): Promise<T> {
+async function fetchObject<T>(token: string, path: string): Promise<T> {
   return await fetch(`/api${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
+    return res.json();
   });
 }
 
-export async function getAll<T>(
-  token: string,
-  path: string
-): Promise<Array<T>> {
-  return await fetch(`/api${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-  });
+async function fetchAll<T>(token: string, path: string): Promise<Array<T>> {
+  return await fetchObject<Array<T>>(token, `${path}`);
 }
+
+export const http_methods = {
+  post,
+  fetch: fetchObject,
+  fetchAll,
+};

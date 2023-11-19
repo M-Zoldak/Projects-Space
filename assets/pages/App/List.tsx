@@ -6,7 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import CommonList, {
   CommonListItemProps,
 } from "../../components/Data/CommonList";
-import { get, getAll } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
@@ -26,7 +26,8 @@ export default function AppsList() {
       });
     }
 
-    getAll<AppType>(appData.token, "/apps")
+    http_methods
+      .fetchAll<AppType>(appData.token, "/apps")
       .then((data) => {
         setApps(data);
         setLoaded(true);
@@ -46,11 +47,16 @@ export default function AppsList() {
 
       <ContentLoader loaded={loaded}>
         {appData?.apps?.length ? (
-          <CommonList
+          <CommonList<AppType>
             items={appData.apps as CommonListItemProps[]}
             entity="app"
-            setItems={setApps}
-            onDelete={(items) => setApps(items)}
+            onDelete={(items, item) => {
+              addNotification({
+                text: `App ${item.name} was deleted succesfully`,
+                notificationProps: { type: "success" },
+              });
+              setApps(items);
+            }}
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>

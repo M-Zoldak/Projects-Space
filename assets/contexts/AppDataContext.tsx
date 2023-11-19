@@ -1,8 +1,6 @@
 import { PropsWithChildren, createContext, useContext } from "react";
-
 import { useState } from "react";
 import { AppType } from "../interfaces/EntityTypes/AppType";
-import { get, getAll } from "../Functions/Fetch";
 import { UserType } from "../interfaces/EntityTypes/UserType";
 
 interface AppDataType {

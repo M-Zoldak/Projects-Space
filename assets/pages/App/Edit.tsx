@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
 import FormComponent from "../../components/Forms/FormComponent";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { get, post } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
@@ -19,7 +19,8 @@ export default function Edit() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    get<Array<FormDataType>>(token, `/apps/edit/${params.id}`)
+    http_methods
+      .fetch<Array<FormDataType>>(token, `/apps/edit/${params.id}`)
       .then((data) => {
         setFormFields(data);
         setLoaded(true);

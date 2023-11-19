@@ -3,7 +3,7 @@ import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { get, post } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import EditableList, {
   EditableListItemProps,
@@ -26,7 +26,8 @@ export default function Options() {
   const [newRole, setNewRole] = useState("");
 
   useEffect(() => {
-    get<AppOptionsType>(token, `/apps/options/${params.id}`)
+    http_methods
+      .fetch<AppOptionsType>(token, `/apps/options/${params.id}`)
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
@@ -39,10 +40,14 @@ export default function Options() {
   }, []);
 
   const createNewRole = async () => {
-    const successData = await post<AppRoleType>(token, `/app_role/add`, {
-      name: newRole,
-      appId: params.id,
-    });
+    const successData = await http_methods.post<AppRoleType>(
+      token,
+      `/app_role/add`,
+      {
+        name: newRole,
+        appId: params.id,
+      }
+    );
 
     let role = successData as EditableListItemProps;
     setAppRolesList([...appRolesList, role]);

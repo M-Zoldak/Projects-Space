@@ -31,10 +31,11 @@ class Project extends Entity {
             "id" => $this->getId(),
             "appId" => $this->getApp()->getId(),
             "name" => $this->getName(),
-            "copyable" => false,
-            "hasView" => false,
-            "destroyable" => true,
-            "hasView" => true
+            "userPermissions" => [
+                "hasOptions" => true,
+                "hasView" => true,
+                "destroyable" => true,
+            ]
         ];
     }
 
