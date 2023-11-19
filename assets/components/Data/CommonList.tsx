@@ -4,6 +4,7 @@ import { Button, FlexboxGrid, List, ListItemProps, Modal } from "rsuite";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { PermissionsType } from "../../interfaces/DefaultTypes";
+import { http_methods } from "../../Functions/Fetch";
 
 export type CommonListItemProps = {
   props?: ListItemProps;
@@ -30,24 +31,12 @@ export default function CommonList<T>({
   const { addNotification } = useNotificationsContext();
 
   const destroyObject = async () => {
-    await fetch(`/api/${entity}`, {
-      method: "DELETE",
-      body: JSON.stringify({ id: chosenObjectId }),
-      headers: {
-        Authorization: "Bearer " + appData.token,
-      },
-    })
-      .then((res) => {
-        if (res.status >= 200 && res.status <= 299) return res.json();
-        setDestroyOpen(false);
-        if (res.status == 403) throw new Error(res.statusText);
-        if (res.status == 404) throw new Error(res.statusText);
-      })
-      .then(() => {
-        let item = items.find((item) => item.id == chosenObjectId);
+    http_methods
+      .delete<T>(appData.token, `/${entity}`, chosenObjectId)
+      .then((data) => {
         items = items.filter((item) => item.id != chosenObjectId);
         setDestroyOpen(false);
-        onDelete(items, item as T);
+        onDelete(items, data);
       })
       .catch((err: Error) => addNotification({ text: err.message }));
   };
