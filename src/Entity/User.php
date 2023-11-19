@@ -63,9 +63,9 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
             "id" => $this->getId(),
             "name" => $this->getFirstName() . " " . $this->getLastName(),
             "copyable" => false,
-            "hasOptions" => true,
+            "hasView" => true,
             "destroyable" => true,
-            "editable" => true,
+            "hasView" => true,
             "app_roles" => EntityCollectionUtil::createCollectionData($this->getAppRoles())
         ];
     }

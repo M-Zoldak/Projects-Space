@@ -5,6 +5,8 @@ namespace App\Controller\Api;
 use App\Entity\Project;
 use App\Enums\FormField;
 use App\Classes\FormBuilder;
+use App\Repository\AppRepository;
+use App\Utils\EntityCollectionUtil;
 use App\Repository\ProjectRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,25 +15,32 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProjectsController extends AbstractController {
-    public function __construct(private ProjectRepository $projectRepository) {
+    public function __construct(
+        private ProjectRepository $projectRepository,
+        private AppRepository $appRepository
+    ) {
     }
 
     #[Route('/projects/create', name: 'app_api_projects_create', methods: ["GET", "POST"])]
     public function create(Request $request): JsonResponse {
-        // $domain = $request->get("domain");
-        // $project = new Site();
-        // $project->setDomain($domain);
-
-        // $this->projectRepository->save($project);
-        // return new RedirectResponse("/projects?page_created=true");
 
         $method = $request->getMethod();
 
-        if ($method == "GET") {
-            $formBuilder = $this->addAndEditForm();
-            return new JsonResponse($formBuilder->getFormData());
-        } else if ($method == "POST") {
-            return new JsonResponse();
+        switch ($method) {
+            case "GET": {
+                    $formBuilder = $this->addAndEditForm();
+                    return new JsonResponse($formBuilder->getFormData());
+                }
+            case "POST": {
+                    $data = json_decode($request->getContent());
+                    $app = $this->appRepository->findOneById($data->appId);
+                    $project = new Project($app, $data->name);
+                    $this->projectRepository->save($project);
+                    $app->addProject($project);
+                    $this->appRepository->save($app);
+
+                    return new JsonResponse($project->getData());
+                }
         }
     }
 
@@ -80,6 +89,14 @@ class ProjectsController extends AbstractController {
     //     }
     // }
 
+    #[Route('/projects', name: 'app_api_projects_overview', methods: ["GET"])]
+    public function list(Request $request): JsonResponse {
+        $appId = $request->query->get("appId");
+        $projects = $this->projectRepository->findBy(["app" => $appId]);
+        $projectsData = EntityCollectionUtil::createCollectionData($projects);
+        return new JsonResponse($projectsData ?? []);
+    }
+
     #[Route('/projects/{id}', name: 'app_api_projects', methods: ["GET"])]
     public function getData($id): JsonResponse {
         $project = $this->projectRepository->findOneById($id);
@@ -91,11 +108,5 @@ class ProjectsController extends AbstractController {
         $project = $this->projectRepository->findOneById($id);
         $this->projectRepository->delete($project);
         return new Response($project->getDomain() . " deleted successfully.");
-    }
-
-    #[Route('/projects', name: 'app_api_projects_overview', methods: ["GET"])]
-    public function list(): JsonResponse {
-        $projects = $this->projectRepository->getData();
-        return new JsonResponse($projects ?? []);
     }
 }

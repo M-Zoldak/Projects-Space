@@ -55,9 +55,12 @@ export default function SimpleCreateModal<T>({
           </Modal.Header>
           <Modal.Body>
             <ContentLoader loaded={loaded}>
-              <FormComponent
+              <FormComponent<T>
                 formData={formFields}
-                onSuccess={onSuccess}
+                onSuccess={(data) => {
+                  setModalOpen(false);
+                  onSuccess(data);
+                }}
                 setFormData={setFormFields}
                 postPath={createPath}
               />

@@ -1,14 +1,12 @@
 import { Link, useNavigation } from "react-router-dom";
 import { Button, FlexboxGrid, List, ListItemProps } from "rsuite";
+import { PermissionsType } from "../../interfaces/DefaultTypes";
 
 export type EditableListItemProps = {
   props?: ListItemProps;
   name: string;
   id: number;
-  editable?: boolean;
-  hasOptions?: boolean;
-  destroyable?: boolean;
-};
+} & PermissionsType;
 
 export type extraPropsToShow = {
   name: string;
@@ -19,7 +17,7 @@ export type extraPropsToShow = {
 
 type EditableListProps = {
   items: Array<EditableListItemProps>;
-  editable?: boolean;
+  hasView?: boolean;
   destroyable?: boolean;
   copyable?: boolean;
   hasOptions?: boolean;
@@ -33,7 +31,7 @@ type EditableListProps = {
 
 export default function EditableList({
   items,
-  editable = true,
+  hasView = true,
   destroyable = true,
   copyable = true,
   hasOptions = false,
@@ -49,7 +47,7 @@ export default function EditableList({
 
   const renderActionButtons = (item: EditableListItemProps) => {
     let edit =
-      editable && item.editable ? (
+      hasView && item.hasView ? (
         <Button
           appearance="ghost"
           size="sm"

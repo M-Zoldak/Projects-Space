@@ -1,10 +1,9 @@
-import useToken from "../components/App/useToken";
-import { useAppDataContext } from "../contexts/AppDataContext";
+import { DynamicallyFilledObject } from "../interfaces/DefaultTypes";
 
 export async function post<T>(
   token: string,
   path: string,
-  body: {}
+  body: DynamicallyFilledObject
 ): Promise<T> {
   return await fetch(`/api${path}`, {
     method: "POST",

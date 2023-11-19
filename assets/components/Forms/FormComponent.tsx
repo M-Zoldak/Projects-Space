@@ -28,7 +28,7 @@ export default function FormComponent<T>({
         data[field.name] = field.value;
         return data;
       },
-      {}
+      { appId: appData.currentAppId }
     );
 
     setFormValue(formValues);

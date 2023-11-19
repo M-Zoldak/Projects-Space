@@ -72,7 +72,7 @@ export default function Options() {
           entity="app_role"
           items={appRolesList}
           copyable={false}
-          hasOptions={true}
+          hasView={true}
           token={token}
           backlink={location.pathname}
         />
