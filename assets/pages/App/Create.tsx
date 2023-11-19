@@ -1,9 +1,7 @@
 import { Button, FlexboxGrid } from "rsuite";
 import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
-import FormComponent, {
-  SubmitCallbackFullfillmentProps,
-} from "../../components/Forms/FormComponent";
+import FormComponent from "../../components/Forms/FormComponent";
 import { Link, redirect, useNavigate } from "react-router-dom";
 import { get, post } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
@@ -11,6 +9,7 @@ import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import StandardLayout from "../../layouts/StandardLayout";
+import { FormDataType } from "../../interfaces/FormDataType";
 
 export default function Create() {
   const navigate = useNavigate();
@@ -20,20 +19,15 @@ export default function Create() {
   const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
-    get<any>(token, "/apps/create")
+    get<Array<FormDataType>>(token, "/apps/create")
       .then((data) => {
-        setFormFields(data.data);
+        setFormFields(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        addNotification({ text: "test" });
+        addNotification({ text: err.message });
       });
   }, []);
-
-  const handleSubmit =
-    async (formData: {}): Promise<SubmitCallbackFullfillmentProps> => {
-      return post(token, "/apps/create", formData);
-    };
 
   const actionOnSuccess = (successData: DynamicallyFilledObject) => {
     return navigate("/apps", {
@@ -55,9 +49,9 @@ export default function Create() {
       <ContentLoader loaded={loaded}>
         <FormComponent
           formData={formFields}
-          onSubmit={handleSubmit}
           onSuccess={actionOnSuccess}
           setFormData={setFormFields}
+          postPath="/apps/create"
         />
       </ContentLoader>
     </StandardLayout>

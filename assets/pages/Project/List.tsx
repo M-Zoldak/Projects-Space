@@ -5,33 +5,36 @@ import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
 import { Link, useLocation } from "react-router-dom";
 import CommonList from "../../components/Data/CommonList";
-import { get } from "../../Functions/Fetch";
+import { get, getAll } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import SimpleCreateModal from "../../components/Modals/SimpleCreateModal";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
+import { ProjectType } from "../../interfaces/EntityTypes/ProjectType";
+import { useAppDataContext } from "../../contexts/AppDataContext";
 
 export default function ProjectsList() {
   const location = useLocation();
+  const { appData } = useAppDataContext();
   const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
   const [projects, setProjects] = useState<Array<any>>([]);
 
   useEffect(() => {
-    if (location.state?.notification) {
-      addNotification({
-        text: location.state.notification,
-        notificationProps: { type: location.state?.type ?? "error" },
-      });
-    }
+    // if (location.state?.notification) {
+    //   addNotification({
+    //     text: location.state.notification,
+    //     notificationProps: { type: location.state?.type ?? "error" },
+    //   });
+    // }
 
-    get<any>(token, "/projects")
+    getAll<ProjectType>(appData.token, "/projects")
       .then((data) => {
-        setProjects(data.data);
+        setProjects(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        console.log(err);
+        // console.log(err);
         addNotification({ text: err.message });
       });
   }, []);
@@ -39,10 +42,17 @@ export default function ProjectsList() {
   return (
     <StandardLayout title="Projects overview" activePage="Projects">
       <FlexboxGrid className="buttons_container">
-        <SimpleCreateModal
+        <SimpleCreateModal<ProjectType>
           title="New project"
           createPath="/projects/create"
-          onSuccess={{ notification: `Project xxx was created succesfully.` }}
+          onSuccess={(project) => {
+            addNotification({
+              text: `Project ${project.name} was created succesfully!`,
+              notificationProps: {
+                type: "success",
+              },
+            });
+          }}
         />
       </FlexboxGrid>
 

@@ -24,7 +24,10 @@ class Project extends Entity {
     }
 
     public function getData(): array {
-        return [];
+        return [
+            "appId" => $this->getName(),
+            "name" => $this->getName()
+        ];
     }
 
     public function getName(): ?string {

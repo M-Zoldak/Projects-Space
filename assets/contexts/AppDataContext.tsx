@@ -18,7 +18,6 @@ type AppDataContextType = {
   setUser: (user: UserType) => void;
   setApps: (apps: Array<AppType>) => void;
   setToken: (token: string) => void;
-  initializeOnLogin: (token: string) => void;
   clear: () => void;
 };
 
@@ -59,12 +58,6 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
     setAppData(appData);
   };
 
-  const initializeOnLogin = async (token: string) => {
-    appData.token = token;
-    await getAll<AppType>(token, "/apps").then((data) => (appData.apps = data));
-    setAppData(appData);
-  };
-
   const clear = () => {
     setAppData({} as AppDataType);
   };
@@ -77,7 +70,6 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
         setUser,
         setApps,
         setToken,
-        initializeOnLogin,
         clear,
       }}
     >

@@ -2,45 +2,29 @@ import { useEffect, useState } from "react";
 import { Button, ButtonToolbar, Form } from "rsuite";
 import TextField from "./TextField";
 import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
-import { EditableListItemProps } from "./EditableList";
+import { post } from "../../Functions/Fetch";
+import { useAppDataContext } from "../../contexts/AppDataContext";
+import { FormDataType } from "../../interfaces/FormDataType";
 
-export type SubmitCallbackFullfillmentProps = {
-  success: boolean;
-  data: {
-    [key: string]: string | object | EditableListItemProps;
-  };
-};
-
-export type FormFieldProps = {
-  type: "text" | "date" | "checkbox" | "radio" | "list_readonly" | "list";
-  name: string;
-  label: string;
-  error: string;
-  value?: string;
-};
-
-async function SubmitFunction({}): Promise<SubmitCallbackFullfillmentProps> {
-  return { success: true, data: {} };
-}
-
-type FormComponentProps = {
-  onSubmit: typeof SubmitFunction;
-  onSuccess: ({}) => void;
-  formData: Array<FormFieldProps>;
+type FormComponentProps<T> = {
+  onSuccess: (data: T) => void;
+  formData: Array<FormDataType>;
   setFormData: Function;
+  postPath: string;
 };
 
-export default function FormComponent({
-  onSubmit,
+export default function FormComponent<T>({
   onSuccess,
   formData,
   setFormData,
-}: FormComponentProps) {
+  postPath,
+}: FormComponentProps<T>) {
+  const { appData } = useAppDataContext();
   const [formValue, setFormValue] = useState<DynamicallyFilledObject>({});
 
   useEffect(() => {
     let formValues = formData.reduce(
-      (data: DynamicallyFilledObject, field: FormFieldProps) => {
+      (data: DynamicallyFilledObject, field: FormDataType) => {
         data[field.name] = field.value;
         return data;
       },
@@ -65,7 +49,7 @@ export default function FormComponent({
     setFormData(formData);
   };
 
-  const renderField = (field: FormFieldProps, key: number) => {
+  const renderField = (field: FormDataType, key: number) => {
     switch (field.type) {
       case "text": {
         return (
@@ -87,9 +71,8 @@ export default function FormComponent({
     }
   };
 
-  const validateData = async () => {
-    let res = await onSubmit(formValue);
-    if (res.success) onSuccess(res.data);
+  const validateData = () => {
+    post<T>(appData.token, postPath, formValue).then((data) => onSuccess(data));
   };
 
   return (
