@@ -2,40 +2,35 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, FlexboxGrid, List, ListItemProps, Modal } from "rsuite";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
+import { useAppDataContext } from "../../contexts/AppDataContext";
+import { PermissionsType } from "../../interfaces/DefaultTypes";
 
 export type CommonListItemProps = {
-  // [key: 'string']: string;
   props?: ListItemProps;
   name: string;
   id: number;
-  editable: boolean;
-  hasOptions: boolean;
-  destroyable: boolean;
-};
+} & PermissionsType;
 
 type CommonListProps = {
   items: Array<CommonListItemProps>;
   setItems: Function;
-  editable?: boolean;
+  hasView?: boolean;
   destroyable?: boolean;
-  copyable?: boolean;
   hasOptions?: boolean;
   entity: string;
-  token: string;
   onDelete: (items: any) => void;
 };
 
 export default function CommonList({
   items,
-  editable = true,
+  hasView = true,
   destroyable = true,
-  copyable = true,
   hasOptions = false,
   entity,
-  token,
   setItems,
   onDelete,
 }: CommonListProps) {
+  const { appData } = useAppDataContext();
   const [chosenObjectId, setChosenObjectId] = useState(0);
   const [destroyOpen, setDestroyOpen] = useState(false);
   const { addNotification } = useNotificationsContext();
@@ -45,7 +40,7 @@ export default function CommonList({
       method: "DELETE",
       body: JSON.stringify({ id: chosenObjectId }),
       headers: {
-        Authorization: "Bearer " + token,
+        Authorization: "Bearer " + appData.token,
       },
     })
       .then((res) => {
@@ -66,10 +61,8 @@ export default function CommonList({
       .catch((err: Error) => addNotification({ text: err.message }));
   };
 
-  const copyAction = () => {};
-
   const renderActionButtons = (item: CommonListItemProps) => {
-    let edit = editable && item.editable && (
+    let edit = hasView && item.hasView && (
       <Button
         appearance="ghost"
         size="sm"
@@ -80,6 +73,7 @@ export default function CommonList({
         Edit
       </Button>
     );
+
     let destroy = destroyable && item.destroyable && (
       <Button
         appearance="ghost"
@@ -93,11 +87,7 @@ export default function CommonList({
         Delete
       </Button>
     );
-    let copy = copyable && (
-      <Button appearance="ghost" size="sm" color="cyan" onClick={copyAction}>
-        Copy
-      </Button>
-    );
+
     let options = (hasOptions || item.hasOptions) && (
       <Button
         appearance="ghost"
@@ -114,7 +104,6 @@ export default function CommonList({
       <FlexboxGrid className="buttons_container">
         {options}
         {edit}
-        {copy}
         {destroy}
       </FlexboxGrid>
     );

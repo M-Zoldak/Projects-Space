@@ -13,31 +13,24 @@ import { ProjectType } from "../../interfaces/EntityTypes/ProjectType";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 
 export default function ProjectsList() {
-  const location = useLocation();
   const { appData } = useAppDataContext();
-  const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
   const [projects, setProjects] = useState<Array<any>>([]);
 
   useEffect(() => {
-    // if (location.state?.notification) {
-    //   addNotification({
-    //     text: location.state.notification,
-    //     notificationProps: { type: location.state?.type ?? "error" },
-    //   });
-    // }
-
-    getAll<ProjectType>(appData.token, "/projects")
+    getAll<ProjectType>(
+      appData.token,
+      `/projects?appId=${appData.currentAppId}`
+    )
       .then((data) => {
         setProjects(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        // console.log(err);
         addNotification({ text: err.message });
       });
-  }, []);
+  }, [appData.currentAppId]);
 
   return (
     <StandardLayout title="Projects overview" activePage="Projects">
@@ -46,6 +39,7 @@ export default function ProjectsList() {
           title="New project"
           createPath="/projects/create"
           onSuccess={(project) => {
+            setProjects([...projects, project]);
             addNotification({
               text: `Project ${project.name} was created succesfully!`,
               notificationProps: {
@@ -57,12 +51,10 @@ export default function ProjectsList() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
-        {projects && !!projects.length ? (
+        {projects && projects.length ? (
           <CommonList
             items={projects}
-            copyable={false}
             entity="project"
-            token={token}
             setItems={setProjects}
             onDelete={(items) => {}}
           />

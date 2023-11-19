@@ -14,8 +14,8 @@ interface AppDataType {
 
 type AppDataContextType = {
   appData: AppDataType;
-  setAppId: (appId: string) => void;
-  setUser: (user: UserType) => void;
+  setAppId: (currentAppId: string) => void;
+  setUser: (currentUser: UserType) => void;
   setApps: (apps: Array<AppType>) => void;
   setToken: (token: string) => void;
   clear: () => void;
@@ -34,28 +34,24 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
     currentUser: JSON.parse(localStorage.getItem("currentUser")),
   } as AppDataType);
 
-  const setAppId = (appId: string) => {
-    appData.currentAppId = appId;
-    localStorage.setItem("currentAppId", appId);
-    setAppData(appData);
+  const setAppId = (currentAppId: string) => {
+    localStorage.setItem("currentAppId", currentAppId);
+    setAppData({ ...appData, currentAppId });
   };
 
-  const setUser = (user: UserType) => {
-    appData.currentUser = user;
-    localStorage.setItem("currentUser", JSON.stringify(user));
-    setAppData(appData);
+  const setUser = (currentUser: UserType) => {
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    setAppData({ ...appData, currentUser });
   };
 
   const setApps = (apps: Array<AppType>) => {
-    appData.apps = apps;
     localStorage.setItem("appsData", JSON.stringify(apps));
-    setAppData(appData);
+    setAppData({ ...appData, apps });
   };
 
   const setToken = (token: string) => {
-    appData.token = token;
     localStorage.setItem("token", token);
-    setAppData(appData);
+    setAppData({ ...appData, token });
   };
 
   const clear = () => {

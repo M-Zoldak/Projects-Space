@@ -49,7 +49,6 @@ export default function OptionsAppRole() {
           <PermissionsTable
             id={appRole?.id.toString()}
             items={appRole?.sectionPermissions}
-            token={token}
             label="none yet"
             name="some Name"
             setItems={updateAppRole}

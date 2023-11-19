@@ -9,23 +9,16 @@ export type CommonListItemProps = {
   props?: ListItemProps;
   name: string;
   id: number;
-  editable?: boolean;
-  hasOptions?: boolean;
-  destroyable?: boolean;
-};
+} & PermissionsType;
 
 type EditableListProps = {
   items: Array<CommonListItemProps>;
   entity: string;
-  title?: string;
   propsToRender: Array<{
     id?: string;
     name: string;
     readableName: string;
-
-    // id: number | string;
     sectionName: string;
-    // readableName: string;
     delete: boolean;
     read: boolean;
     edit: boolean;
@@ -35,29 +28,23 @@ type EditableListProps = {
       checkbox?: boolean;
     };
   }>;
-  token: string;
-  setItems?: Function;
 } & PermissionsType;
 
 export default function EditableTable({
   items,
-  editable = true,
+  hasView = true,
   destroyable = true,
-  copyable = true,
   hasOptions = false,
   entity,
-  title = "name",
   propsToRender,
-  token,
-  setItems,
 }: EditableListProps) {
   const destroyAction = () => {};
 
-  const copyAction = () => {};
+  // const copyAction = () => {};
 
   const renderActionButtons = (item: CommonListItemProps) => {
     let edit =
-      editable && item.editable ? (
+      hasView && item.hasView ? (
         <Button
           appearance="ghost"
           size="sm"
@@ -65,11 +52,12 @@ export default function EditableTable({
           to={`/${entity}/edit/${item.id}`}
           color="blue"
         >
-          Edit
+          Overview
         </Button>
       ) : (
         ""
       );
+
     let destroy =
       destroyable && item.destroyable ? (
         <Button
@@ -83,13 +71,7 @@ export default function EditableTable({
       ) : (
         ""
       );
-    let copy = copyable ? (
-      <Button appearance="ghost" size="sm" color="cyan" onClick={copyAction}>
-        Copy
-      </Button>
-    ) : (
-      ""
-    );
+
     let options =
       hasOptions || item.hasOptions ? (
         <Button
@@ -109,7 +91,7 @@ export default function EditableTable({
       <FlexboxGrid className="buttons_container">
         {options}
         {edit}name
-        {copy}
+        {/* {copy} */}
         {destroy}
       </FlexboxGrid>
     );

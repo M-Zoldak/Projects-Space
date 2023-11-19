@@ -7,8 +7,8 @@ export type DynamicallyFilledObject = {
 };
 
 export type PermissionsType = {
-  editable?: boolean;
+  hasView?: boolean;
   destroyable?: boolean;
-  copyable?: boolean;
+  // copyable?: boolean;
   hasOptions?: boolean;
 };

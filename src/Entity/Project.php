@@ -19,14 +19,22 @@ class Project extends Entity {
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: ProjectRole::class, orphanRemoval: true)]
     private Collection $projectRoles;
 
-    public function __construct() {
+    public function __construct(App $app, string $name) {
+        parent::__construct();
         $this->projectRoles = new ArrayCollection();
+        $this->setApp($app);
+        $this->setName($name);
     }
 
     public function getData(): array {
         return [
-            "appId" => $this->getName(),
-            "name" => $this->getName()
+            "id" => $this->getId(),
+            "appId" => $this->getApp()->getId(),
+            "name" => $this->getName(),
+            "copyable" => false,
+            "hasView" => false,
+            "destroyable" => true,
+            "hasView" => true
         ];
     }
 

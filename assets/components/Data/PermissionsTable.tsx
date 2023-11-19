@@ -8,7 +8,6 @@ export type PermissionsTableProps = {
   name: string;
   label: string;
   propsToRender: Array<PermissionRenderProps>;
-  token: string;
   items: Array<{}>;
   setItems: Function;
 };
@@ -23,7 +22,6 @@ type PermissionRenderProps = {
 export default function PermissionsTable({
   items,
   propsToRender,
-  token,
   setItems,
 }: PermissionsTableProps) {
   const createProperField = (props: PermissionRenderProps) => {

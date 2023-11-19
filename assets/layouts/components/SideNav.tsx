@@ -13,6 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
+import { useEffect } from "react";
 
 export interface PageLinkInterface {
   name: string;
@@ -105,6 +106,8 @@ function AppChooser(index: number) {
 export default function SideNav({ activePage }: { activePage: string }) {
   const { appData } = useAppDataContext();
 
+  useEffect(() => {}, [appData.currentAppId]);
+
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(
       "Dashboard",
@@ -141,7 +144,6 @@ export default function SideNav({ activePage }: { activePage: string }) {
 
   const renderMenu = () => {
     if (!defaultPageLinks) return <></>;
-    console.log(defaultPageLinks);
     return defaultPageLinks.map((menuItem, index) => {
       if (menuItem == undefined) return;
       if (menuItem == "AppChooser") {

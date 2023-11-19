@@ -15,7 +15,6 @@ import { AppType } from "../../interfaces/EntityTypes/AppType";
 export default function AppsList() {
   const { appData, setApps } = useAppDataContext();
   const location = useLocation();
-  const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
 
@@ -27,7 +26,7 @@ export default function AppsList() {
       });
     }
 
-    getAll<AppType>(token, "/apps")
+    getAll<AppType>(appData.token, "/apps")
       .then((data) => {
         setApps(data);
         setLoaded(true);
@@ -49,9 +48,7 @@ export default function AppsList() {
         {appData?.apps?.length ? (
           <CommonList
             items={appData.apps as CommonListItemProps[]}
-            copyable={false}
             entity="app"
-            token={token}
             setItems={setApps}
             onDelete={(items) => setApps(items)}
           />

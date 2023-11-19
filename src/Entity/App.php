@@ -50,9 +50,9 @@ class App extends Entity {
             "id" => $this->getId(),
             "name" => $this->getName(),
             "copyable" => false,
-            "hasOptions" => true,
+            "hasView" => true,
             "destroyable" => true,
-            "editable" => true
+            "hasView" => true
         ];
     }
 
