@@ -1,65 +1,42 @@
 import { Button, Modal } from "rsuite";
 import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
-import FormComponent, {
-  SubmitCallbackFullfillmentProps,
-} from "../../components/Forms/FormComponent";
+import FormComponent from "../../components/Forms/FormComponent";
 import { useNavigate } from "react-router-dom";
-import { get, post } from "../../Functions/Fetch";
+import { get, getAll, post } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
+import { useAppDataContext } from "../../contexts/AppDataContext";
 
-type OnSuccessProps = {
-  notification: string;
-  path?: string;
-};
-
-type SimpleCreateModalProps = {
-  createPath: string;
-  onSuccess: OnSuccessProps;
+type SimpleCreateModalProps<T> = {
   title: string;
+  createPath: string;
+  onSuccess: ({}: T) => void;
 };
 
-export default function SimpleCreateModal({
+export default function SimpleCreateModal<T>({
   createPath,
   onSuccess,
   title,
-}: SimpleCreateModalProps) {
+}: SimpleCreateModalProps<T>) {
+  const { appData } = useAppDataContext();
   const navigate = useNavigate();
-  const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [formFields, setFormFields] = useState([]);
   const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
-    get<any>(token, createPath)
+    getAll<T>(appData.token, createPath)
       .then((data) => {
-        setFormFields(data.data);
+        setFormFields(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
-        console.log(err);
         addNotification({ text: err.message });
       });
   }, []);
-
-  const handleSubmit =
-    async (formValue: {}): Promise<SubmitCallbackFullfillmentProps> => {
-      return post(token, createPath, formValue);
-    };
-
-  const actionOnSuccess = (successData: DynamicallyFilledObject) => {
-    if (successData.path) {
-      return navigate(successData.path, {
-        state: {
-          notification: successData.notification,
-          type: "success",
-        },
-      });
-    }
-  };
 
   return (
     <>
@@ -80,9 +57,9 @@ export default function SimpleCreateModal({
             <ContentLoader loaded={loaded}>
               <FormComponent
                 formData={formFields}
-                onSubmit={handleSubmit}
-                onSuccess={actionOnSuccess}
+                onSuccess={onSuccess}
                 setFormData={setFormFields}
+                postPath={createPath}
               />
             </ContentLoader>
           </Modal.Body>

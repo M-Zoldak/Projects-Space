@@ -10,6 +10,7 @@ import EditableList, {
 } from "../../components/Forms/EditableList";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { AppOptionsType, AppType } from "../../interfaces/EntityTypes/AppType";
+import { AppRoleType } from "../../interfaces/EntityTypes/AppRoleType";
 
 export default function Options() {
   const location = useLocation();
@@ -38,12 +39,12 @@ export default function Options() {
   }, []);
 
   const createNewRole = async () => {
-    const successData = await post(token, `/app_role/add`, {
+    const successData = await post<AppRoleType>(token, `/app_role/add`, {
       name: newRole,
       appId: params.id,
     });
 
-    let role = successData.data.app_role as EditableListItemProps;
+    let role = successData as EditableListItemProps;
     setAppRolesList([...appRolesList, role]);
   };
 

@@ -2,15 +2,13 @@ import { Button, FlexboxGrid, Loader } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
 import useToken from "../../components/App/useToken";
-import FormComponent, {
-  FormFieldProps,
-  SubmitCallbackFullfillmentProps,
-} from "../../components/Forms/FormComponent";
+import FormComponent from "../../components/Forms/FormComponent";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { get, post } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
-import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
+import { AppType } from "../../interfaces/EntityTypes/AppType";
+import { FormDataType } from "../../interfaces/FormDataType";
 
 export default function Edit() {
   let params = useParams();
@@ -21,9 +19,9 @@ export default function Edit() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    get<any>(token, `/apps/edit/${params.id}`)
+    get<Array<FormDataType>>(token, `/apps/edit/${params.id}`)
       .then((data) => {
-        setFormFields(data.data);
+        setFormFields(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
@@ -31,12 +29,7 @@ export default function Edit() {
       });
   }, []);
 
-  const handleSubmit =
-    async (formData: {}): Promise<SubmitCallbackFullfillmentProps> => {
-      return post(token, `/apps/edit/${params.id}`, formData);
-    };
-
-  const actionOnSuccess = (successData: any) => {
+  const actionOnSuccess = (successData: AppType) => {
     return navigate("/apps");
   };
 
@@ -49,11 +42,11 @@ export default function Edit() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
-        <FormComponent
+        <FormComponent<AppType>
           formData={formFields}
-          onSubmit={handleSubmit}
           onSuccess={actionOnSuccess}
           setFormData={setFormFields}
+          postPath={`/apps/edit/${params.id}`}
         />
       </ContentLoader>
     </StandardLayout>
