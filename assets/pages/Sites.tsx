@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Site } from '../interfaces/SiteInterface';
-import { Button } from 'rsuite';
-import StandardLayout from '../layouts/StandardLayout';
-import useToken from '../components/App/useToken';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "rsuite";
+import StandardLayout from "../layouts/StandardLayout";
+import { useAppDataContext } from "../contexts/AppDataContext";
+import { http_methods } from "../Functions/Fetch";
 
 function Sites() {
-  const { token } = useToken();
-  const [sites, setSites] = useState<Array<Site>>([]);
-  const [smth, setSmth] = useState<string>('');
+  const { appData } = useAppDataContext();
+  // const [sites, setSites] = useState<Array<Site>>([]);
+  const [smth, setSmth] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -16,15 +16,11 @@ function Sites() {
   }, []);
 
   const fetchSites = async () => {
-    await fetch('/api/sites', {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setSites(data));
-    setIsLoading(false);
+    setIsLoading(true);
+    http_methods.fetchAll(appData.token, "/sites").then((data) => {
+      console.log("to be filled");
+      setIsLoading(false);
+    });
   };
 
   const deleteSite = async (id: string) => {
@@ -34,31 +30,31 @@ function Sites() {
     fetchSites();
   };
 
-  const renderSites = () => {
-    return sites.map((el, index) => (
-      <div key={index}>
-        <a href={`/site/${el.id}`}>{el.domain}</a>
-        <Button
-          onClick={() => {
-            deleteSite(el.id.toString());
-          }}
-        >
-          Delete <i className="fa-solid fa-trash"></i>
-        </Button>
-      </div>
-    ));
-  };
+  // const renderSites = () => {
+  //   return sites.map((el, index) => (
+  //     <div key={index}>
+  //       <a href={`/site/${el.id}`}>{el.domain}</a>
+  //       <Button
+  //         onClick={() => {
+  //           deleteSite(el.id.toString());
+  //         }}
+  //       >
+  //         Delete <i className="fa-solid fa-trash"></i>
+  //       </Button>
+  //     </div>
+  //   ));
+  // };
 
-  const renderSitesView = () => {
-    return sites.length > 0 ? renderSites() : 'No sites added yet.';
-  };
+  // const renderSitesView = () => {
+  //   return sites.length > 0 ? renderSites() : "No sites added yet.";
+  // };
 
   return (
     <StandardLayout title="Sites Page" activePage="Sites">
-      <div>{smth}</div>
-      <Link to={'/site/create'}>Add Site</Link>
-      {isLoading ? 'Loading...' : renderSitesView()}
-      <Button appearance="primary">Click Me!</Button>
+      {/* <div>{smth}</div>
+      <Link to={"/site/create"}>Add Site</Link>
+      {isLoading ? "Loading..." : renderSitesView()}
+      <Button appearance="primary">Click Me!</Button> */}
     </StandardLayout>
   );
 }

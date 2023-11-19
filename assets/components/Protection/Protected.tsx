@@ -1,13 +1,13 @@
 import { PropsWithChildren, useEffect } from "react";
 
 import { redirect } from "react-router-dom";
-import useToken from "../App/useToken";
+import { useAppDataContext } from "../../contexts/AppDataContext";
 
 export default function Protected({ children }: PropsWithChildren) {
-  const { token } = useToken();
+  const { appData } = useAppDataContext();
 
   useEffect(() => {
-    if (!token) {
+    if (!appData.token) {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
       redirect("/login");

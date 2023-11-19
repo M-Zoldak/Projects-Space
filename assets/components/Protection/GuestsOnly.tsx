@@ -1,13 +1,13 @@
 import { PropsWithChildren, useEffect } from "react";
 
-import useToken from "../App/useToken";
 import { redirect } from "react-router-dom";
+import { useAppDataContext } from "../../contexts/AppDataContext";
 
 export default function GuestsOnly({ children }: PropsWithChildren) {
-  const { token } = useToken();
+  const { appData } = useAppDataContext();
 
   useEffect(() => {
-    if (!token) {
+    if (!appData?.token) {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
       redirect("/dashboard");

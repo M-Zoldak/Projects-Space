@@ -1,9 +1,6 @@
-import { Button, FlexboxGrid, Form, Notification } from "rsuite";
+import { FlexboxGrid } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
-import TextField from "../../components/Forms/TextField";
 import { useEffect, useState } from "react";
-import useToken from "../../components/App/useToken";
-import { Link, useLocation } from "react-router-dom";
 import CommonList from "../../components/Data/CommonList";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
@@ -53,7 +50,7 @@ export default function ProjectsList() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
-        {projects && projects.length ? (
+        {projects?.length ? (
           <CommonList<ProjectType>
             items={projects}
             entity="project"

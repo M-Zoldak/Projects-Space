@@ -53,7 +53,7 @@ export default function CommonList<T>({
   };
 
   const renderActionButtons = (item: CommonListItemProps) => {
-    let edit = userPermissions.hasView && item.hasView && (
+    let overview = userPermissions.hasView && item.hasView && (
       <Button
         appearance="ghost"
         size="sm"
@@ -61,7 +61,7 @@ export default function CommonList<T>({
         to={`/${entity}/edit/${item.id}`}
         color="blue"
       >
-        Edit
+        Show
       </Button>
     );
 
@@ -93,8 +93,8 @@ export default function CommonList<T>({
 
     return (
       <FlexboxGrid className="buttons_container">
+        {overview}
         {options}
-        {edit}
         {destroy}
       </FlexboxGrid>
     );

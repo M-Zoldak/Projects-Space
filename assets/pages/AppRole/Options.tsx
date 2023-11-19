@@ -1,7 +1,6 @@
 import { Button, ButtonToolbar, FlexboxGrid, Form, Notification } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
-import useToken from "../../components/App/useToken";
 import { Link, useLocation, useNavigation, useParams } from "react-router-dom";
 
 import { http_methods } from "../../Functions/Fetch";
@@ -10,11 +9,12 @@ import ContentLoader from "../../components/Loader";
 import PermissionsTable from "../../components/Data/PermissionsTable";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { AppRoleType } from "../../interfaces/EntityTypes/AppRoleType";
+import { useAppDataContext } from "../../contexts/AppDataContext";
 
 export default function OptionsAppRole() {
   const params = useParams();
   const { state } = useLocation();
-  const { token } = useToken();
+  const { appData } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
   const [appRole, setAppRole] = useState<AppRoleType>();
 
@@ -22,7 +22,7 @@ export default function OptionsAppRole() {
 
   useEffect(() => {
     http_methods
-      .fetch<AppRoleType>(token, `/app_role/options/${params.id}`)
+      .fetch<AppRoleType>(appData.token, `/app_role/options/${params.id}`)
       .then((data) => {
         setLoaded(true);
         setAppRole(data);
@@ -46,10 +46,10 @@ export default function OptionsAppRole() {
 
       <ContentLoader loaded={loaded}>
         <h3>{appRole?.name} permissions</h3>
-        {!!appRole ? (
+        {/* {!!appRole ? (
           <PermissionsTable
             id={appRole?.id.toString()}
-            items={appRole?.sectionPermissions}
+            items={appRole?.userPermissions}
             label="none yet"
             name="some Name"
             setItems={updateAppRole}
@@ -57,7 +57,7 @@ export default function OptionsAppRole() {
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>
-        )}
+        )} */}
       </ContentLoader>
     </StandardLayout>
   );

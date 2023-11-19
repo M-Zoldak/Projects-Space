@@ -6,7 +6,8 @@ export type EditableListItemProps = {
   props?: ListItemProps;
   name: string;
   id: number;
-} & PermissionsType;
+  userPermissions: PermissionsType;
+};
 
 export type extraPropsToShow = {
   name: string;
@@ -17,37 +18,28 @@ export type extraPropsToShow = {
 
 type EditableListProps = {
   items: Array<EditableListItemProps>;
-  hasView?: boolean;
-  destroyable?: boolean;
-  copyable?: boolean;
-  hasOptions?: boolean;
   entity: string;
   title?: string;
   propsToShow?: Array<extraPropsToShow>;
-  token: string;
   backlink: string;
-  creator?: boolean;
+  buttons?: PermissionsType;
 };
 
-export default function EditableList({
+export default function EditableList<T>({
   items,
-  hasView = true,
-  destroyable = true,
-  copyable = true,
-  hasOptions = false,
   entity,
-  title = "name",
-  propsToShow,
   backlink,
-  creator = false,
+  buttons = {
+    destroyable: true,
+    hasOptions: true,
+    hasView: true,
+  },
 }: EditableListProps) {
   const destroyAction = () => {};
 
-  const copyAction = () => {};
-
   const renderActionButtons = (item: EditableListItemProps) => {
-    let edit =
-      hasView && item.hasView ? (
+    let overview =
+      buttons.hasView && item.userPermissions.hasView ? (
         <Button
           appearance="ghost"
           size="sm"
@@ -55,13 +47,14 @@ export default function EditableList({
           to={`/${entity}/edit/${item.id}`}
           color="blue"
         >
-          Edit
+          Show
         </Button>
       ) : (
         ""
       );
+
     let destroy =
-      destroyable && item.destroyable ? (
+      buttons.destroyable && item.userPermissions.destroyable ? (
         <Button
           appearance="ghost"
           size="sm"
@@ -73,15 +66,9 @@ export default function EditableList({
       ) : (
         ""
       );
-    let copy = copyable ? (
-      <Button appearance="ghost" size="sm" color="cyan" onClick={copyAction}>
-        Copy
-      </Button>
-    ) : (
-      ""
-    );
+
     let options =
-      hasOptions || item.hasOptions ? (
+      buttons.hasOptions && item.userPermissions.hasOptions ? (
         <Button
           appearance="ghost"
           size="sm"
@@ -98,21 +85,20 @@ export default function EditableList({
 
     return (
       <FlexboxGrid className="buttons_container">
+        {overview}
         {options}
-        {edit}
-        {copy}
         {destroy}
       </FlexboxGrid>
     );
   };
 
-  const renderSpecifiedProps = (
-    item: EditableListItemProps,
-    props: Array<extraPropsToShow>
-  ) =>
-    props.map((prop) => {
-      // return <>{item.prop.name}</>;
-    });
+  // const renderSpecifiedProps = (
+  //   item: EditableListItemProps,
+  //   props: Array<extraPropsToShow>
+  // ) =>
+  //   props.map((prop) => {
+  //     // return <>{item.prop.name}</>;
+  //   });
 
   return (
     <List hover bordered>

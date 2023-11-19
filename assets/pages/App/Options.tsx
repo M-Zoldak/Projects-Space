@@ -1,7 +1,6 @@
 import { Button, FlexboxGrid, Input, InputGroup } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
-import useToken from "../../components/App/useToken";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
@@ -11,11 +10,13 @@ import EditableList, {
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { AppOptionsType, AppType } from "../../interfaces/EntityTypes/AppType";
 import { AppRoleType } from "../../interfaces/EntityTypes/AppRoleType";
+import { useAppDataContext } from "../../contexts/AppDataContext";
+import { UserType } from "../../interfaces/EntityTypes/UserType";
 
 export default function Options() {
+  const { appData } = useAppDataContext();
   const location = useLocation();
   const params = useParams();
-  const { token } = useToken();
   const [loaded, setLoaded] = useState(false);
   const [appName, setAppName] = useState("");
   const [appRolesList, setAppRolesList] = useState<
@@ -27,7 +28,7 @@ export default function Options() {
 
   useEffect(() => {
     http_methods
-      .fetch<AppOptionsType>(token, `/apps/options/${params.id}`)
+      .fetch<AppOptionsType>(appData.token, `/apps/options/${params.id}`)
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
@@ -41,7 +42,7 @@ export default function Options() {
 
   const createNewRole = async () => {
     const successData = await http_methods.post<AppRoleType>(
-      token,
+      appData.token,
       `/app_role/add`,
       {
         name: newRole,
@@ -64,21 +65,17 @@ export default function Options() {
 
       <ContentLoader loaded={loaded}>
         <h3>Users</h3>
-        <EditableList
+        <EditableList<UserType>
           entity="user"
           items={users}
-          token={token}
           propsToShow={[{ name: "app_role" }]}
           backlink={location.pathname}
         />
 
         <h3>App Roles</h3>
-        <EditableList
+        <EditableList<AppRoleType>
           entity="app_role"
           items={appRolesList}
-          copyable={false}
-          hasView={true}
-          token={token}
           backlink={location.pathname}
         />
         <FlexboxGrid>

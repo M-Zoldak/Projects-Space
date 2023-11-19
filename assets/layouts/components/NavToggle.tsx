@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
-import { Nav, Navbar } from 'rsuite';
-import useToken from '../../components/App/useToken';
+import { useNavigate } from "react-router-dom";
+import { Nav, Navbar } from "rsuite";
+import { useAppDataContext } from "../../contexts/AppDataContext";
 
 type PopupMenu = {
   expand: boolean;
@@ -8,17 +8,17 @@ type PopupMenu = {
 };
 
 const PopupMenu = ({ expand, onChange }: PopupMenu) => {
-  const { token, setToken } = useToken();
+  const { appData, setToken } = useAppDataContext();
   const navigate = useNavigate();
 
   async function handleLogout() {
-    await fetch('/api/logout', {
-      headers: { Authorization: 'Bearer ' + token },
+    await fetch("/api/logout", {
+      headers: { Authorization: "Bearer " + appData.token },
     })
-      .then((res) => setToken(''))
-      .catch((err) => setToken(''));
+      .then((res) => setToken(""))
+      .catch((err) => setToken(""));
 
-    return navigate('/home');
+    return navigate("/home");
   }
 
   return (

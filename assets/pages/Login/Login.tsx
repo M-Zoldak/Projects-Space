@@ -5,29 +5,29 @@ import {
   Button,
   Form,
   Divider,
-} from 'rsuite';
-import LoginLayout from '../../layouts/LoginLayout';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import TextField from '../../components/Forms/TextField';
-import useToken from '../../components/App/useToken';
-import Dashboard from '../Dashboard';
+} from "rsuite";
+import LoginLayout from "../../layouts/LoginLayout";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import TextField from "../../components/Forms/TextField";
+import Dashboard from "../Dashboard";
+import { useAppDataContext } from "../../contexts/AppDataContext";
 
 function Login() {
   const navigate = useNavigate();
-  const { token, setToken } = useToken();
-  const [errorNotification, setErrorNotification] = useState('');
+  const { setToken } = useAppDataContext();
+  const [errorNotification, setErrorNotification] = useState("");
   const [formValue, setFormValue] = useState({
-    username: '',
-    password: '',
+    username: "",
+    password: "",
   });
 
   const login = async () => {
-    await fetch('/api/login', {
-      method: 'POST',
+    await fetch("/api/login", {
+      method: "POST",
       body: JSON.stringify(formValue),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     })
       .then((res) => res.json())
@@ -35,7 +35,7 @@ function Login() {
       .then(() => true)
       .catch((err) => setErrorNotification(err.getNotification()));
 
-    if (true) return navigate('/dashboard');
+    if (true) return navigate("/dashboard");
   };
 
   return (

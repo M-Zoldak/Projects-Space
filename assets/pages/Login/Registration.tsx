@@ -6,46 +6,46 @@ import {
   Form,
   DatePicker,
   Divider,
-} from 'rsuite';
-import LoginLayout from '../../layouts/LoginLayout';
-import { useState } from 'react';
-import { Link, Navigate, redirect, useNavigate } from 'react-router-dom';
-import FormError from '../../components/Forms/FormError';
-import TextField from '../../components/Forms/TextField';
+} from "rsuite";
+import LoginLayout from "../../layouts/LoginLayout";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import FormError from "../../components/Forms/FormError";
+import TextField from "../../components/Forms/TextField";
 
 function Registration() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    verifyPassword: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    verifyPassword: "",
     birthDate: null,
   });
 
   const [formValue, setFormValue] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    verifyPassword: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    verifyPassword: "",
     birthDate: null,
   });
 
   const handleSubmit = () => {
-    fetch('/user/create', {
-      method: 'POST',
+    fetch("/user/create", {
+      method: "POST",
       body: JSON.stringify(formValue),
       headers: {
-        'Content-Type': 'text/json',
+        "Content-Type": "text/json",
       },
     })
       .then((res: Response) => {
         if (res.status == 422) return Promise.reject(res);
         return res.json();
       })
-      .then(() => navigate('/register/confirm'))
+      .then(() => navigate("/register/confirm"))
       .catch((res: Response) => {
         res.json().then((data) => {
           setFormError(data);

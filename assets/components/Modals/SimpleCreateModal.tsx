@@ -1,12 +1,9 @@
 import { Button, Modal } from "rsuite";
 import { useEffect, useState } from "react";
-import useToken from "../../components/App/useToken";
 import FormComponent from "../../components/Forms/FormComponent";
-import { useNavigate } from "react-router-dom";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
-import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 
 type SimpleCreateModalProps<T> = {
