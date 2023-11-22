@@ -29,13 +29,7 @@ class Project extends Entity {
     public function getData(): array {
         return [
             "id" => $this->getId(),
-            "appId" => $this->getApp()->getId(),
-            "name" => $this->getName(),
-            "userPermissions" => [
-                "hasOptions" => true,
-                "hasView" => true,
-                "destroyable" => true,
-            ]
+            "name" => $this->getName()
         ];
     }
 

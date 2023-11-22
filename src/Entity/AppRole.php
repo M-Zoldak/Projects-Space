@@ -41,7 +41,6 @@ class AppRole extends Entity {
             if ($roleName == "Head Admin") {
                 $sectionPermissions = new SectionPermissions($this, $section->value, true, true, true);
             } else {
-
                 $sectionPermissions = new SectionPermissions($this, $section->value);
             }
 
@@ -54,9 +53,7 @@ class AppRole extends Entity {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),
-            "destroyable" => $this->isDestroyable(),
-            "copyable" => false,
-            "sectionPermissions" => EntityCollectionUtil::createCollectionData($this->getSectionPermissions())
+            "rolePermissions" => $this->getSectionPermissions()
         ];
     }
 

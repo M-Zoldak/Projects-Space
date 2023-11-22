@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { Button, ButtonToolbar, Form } from "rsuite";
+import { SyntheticEvent, useEffect, useState } from "react";
+import { Button, ButtonToolbar, CheckboxGroup, DatePicker, Form } from "rsuite";
 import TextField from "./TextField";
 import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 import { http_methods } from "../../Functions/Fetch";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { FormDataType } from "../../interfaces/FormDataType";
+import FormError from "./FormError";
 
 type FormComponentProps<T> = {
   onSuccess: (data: T) => void;
@@ -28,38 +29,52 @@ export default function FormComponent<T>({
         data[field.name] = field.value;
         return data;
       },
-      { appId: appData.currentAppId }
+      appData?.currentAppId ? { appId: appData.currentAppId } : {}
     );
 
     setFormValue(formValues);
   }, [formData]);
 
-  const updateInput = (value: string, e: Event) => {
-    let editedField = e.target as HTMLInputElement;
-
-    formData = formData.map((field) => {
-      if (field.name == editedField.name) {
+  const updateInput = (value: string, fieldName: string) => {
+    let data = formData.map((field) => {
+      if (field.name == fieldName) {
         field.value = value;
         formValue[field.name] = value;
       }
       return field;
     });
 
-    setFormValue(formValue);
-    setFormData(formData);
+    setFormValue({ ...formValue });
+    setFormData(data);
   };
 
   const renderField = (field: FormDataType, key: number) => {
-    switch (field.type) {
+    switch (field.fieldType) {
       case "text": {
         return (
           <TextField
             key={key}
-            onChange={updateInput}
+            onChange={(val: any) => updateInput(val, field.name)}
             error={field.error}
             value={field.value}
             {...field}
           />
+        );
+      }
+
+      case "date": {
+        return (
+          <Form.Group controlId={field.name} key={key}>
+            <Form.ControlLabel>Date of birth</Form.ControlLabel>
+            <Form.Control
+              name={field.name}
+              accepter={DatePicker}
+              onChange={(value) => updateInput(value, field.name)}
+              oneTap
+              format="yyyy-MM-dd"
+            />
+            <FormError error={field.error} />
+          </Form.Group>
         );
       }
       default:
@@ -73,8 +88,12 @@ export default function FormComponent<T>({
 
   const validateData = () => {
     http_methods
-      .post<T>(appData.token, postPath, formValue)
-      .then((data) => onSuccess(data));
+      .post<T>(postPath, formValue, appData.token)
+      .then((data) => onSuccess(data))
+      .catch((res) => {
+        console.log(res);
+        console.log(" res from Validate");
+      });
   };
 
   return (

@@ -2,18 +2,14 @@
 
 namespace App\Repository;
 
-use Error;
 use App\Entity\Entity;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
-use App\Helpers\ValidatorHelper;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Validator\Validation;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
-class EntityRepository extends ServiceEntityRepository {
+abstract class EntityRepository extends ServiceEntityRepository {
     private EntityManager $entityManager;
 
     public function __construct(
@@ -37,11 +33,7 @@ class EntityRepository extends ServiceEntityRepository {
         if (is_null($object->getId())) $object->setCreatedAt(new DateTimeImmutable());
         $object->setModifiedAt(new DateTimeImmutable());
 
-        // try {
         $this->entityManager->persist($object);
-        // } catch (Error $err) {
-        // $this->entityManager->merge($object);
-        // }
         $this->entityManager->flush();
     }
 

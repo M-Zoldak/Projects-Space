@@ -16,43 +16,45 @@ class App extends Entity {
     private ?string $Name = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps')]
-    private Collection $Users;
+    private Collection $users;
 
-    #[ORM\OneToMany(mappedBy: 'App', targetEntity: Customer::class)]
+    #[ORM\OneToMany(mappedBy: 'App', targetEntity: Customer::class, orphanRemoval: true)]
     private Collection $customers;
 
-    #[ORM\OneToMany(mappedBy: 'App', targetEntity: Site::class)]
+    #[ORM\OneToMany(mappedBy: 'App', targetEntity: Site::class, orphanRemoval: true)]
     private Collection $sites;
 
-    #[ORM\OneToOne(mappedBy: 'app', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'app', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?SiteOptions $siteOptions = null;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: AppRole::class)]
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: AppRole::class, orphanRemoval: true)]
     private Collection $roles;
 
     #[ORM\Column(length: 255)]
     private ?string $appHeadAdminName = null;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class)]
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class, orphanRemoval: true)]
     private Collection $projects;
+
+    #[ORM\OneToMany(mappedBy: 'selectedApp', targetEntity: UserOptions::class)]
+    private Collection $userOptions;
 
     public function __construct() {
         parent::__construct();
-        $this->Users = new ArrayCollection();
+        $this->users = new ArrayCollection();
         $this->customers = new ArrayCollection();
         $this->sites = new ArrayCollection();
         $this->roles = new ArrayCollection();
         $this->projects = new ArrayCollection();
+        $this->userOptions = new ArrayCollection();
     }
 
     public function getData(): array {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),
-            "copyable" => false,
-            "hasView" => true,
-            "destroyable" => true,
-            "hasView" => true
+            // "roles" => $this->getRoles(),
+            // "users" => $this->getUsers()
         ];
     }
 
@@ -70,19 +72,19 @@ class App extends Entity {
      * @return Collection<int, User>
      */
     public function getUsers(): Collection {
-        return $this->Users;
+        return $this->users;
     }
 
     public function addUser(User $user): static {
-        if (!$this->Users->contains($user)) {
-            $this->Users->add($user);
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
         }
 
         return $this;
     }
 
     public function removeUser(User $user): static {
-        $this->Users->removeElement($user);
+        $this->users->removeElement($user);
 
         return $this;
     }
@@ -162,7 +164,7 @@ class App extends Entity {
     }
 
     /**
-     * @return Collection<int, Roles>
+     * @return Collection<int, AppRole[]>
      */
     public function getRoles(): Collection {
         return $this->roles;
@@ -219,6 +221,36 @@ class App extends Entity {
             // set the owning side to null (unless already changed)
             if ($project->getApp() === $this) {
                 $project->setApp(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserOptions>
+     */
+    public function getUserOptions(): Collection
+    {
+        return $this->userOptions;
+    }
+
+    public function addUserOption(UserOptions $userOption): static
+    {
+        if (!$this->userOptions->contains($userOption)) {
+            $this->userOptions->add($userOption);
+            $userOption->setSelectedApp($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserOption(UserOptions $userOption): static
+    {
+        if ($this->userOptions->removeElement($userOption)) {
+            // set the owning side to null (unless already changed)
+            if ($userOption->getSelectedApp() === $this) {
+                $userOption->setSelectedApp(null);
             }
         }
 

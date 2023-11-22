@@ -9,10 +9,11 @@ import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import StandardLayout from "../../layouts/StandardLayout";
 import { FormDataType } from "../../interfaces/FormDataType";
 import { useAppDataContext } from "../../contexts/AppDataContext";
+import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 export default function Create() {
   const navigate = useNavigate();
-  const { appData } = useAppDataContext();
+  const { appData, addApp } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
   const [formFields, setFormFields] = useState([]);
   const { addNotification } = useNotificationsContext();
@@ -29,7 +30,8 @@ export default function Create() {
       });
   }, []);
 
-  const actionOnSuccess = (successData: DynamicallyFilledObject) => {
+  const actionOnSuccess = (successData: AppType) => {
+    addApp(successData);
     return navigate("/apps", {
       state: {
         notification: `Your app ${successData.name} was created succesfully!`,
@@ -47,7 +49,7 @@ export default function Create() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
-        <FormComponent
+        <FormComponent<AppType>
           formData={formFields}
           onSuccess={actionOnSuccess}
           setFormData={setFormFields}

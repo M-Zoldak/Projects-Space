@@ -52,6 +52,7 @@ class AppsController extends AbstractController {
         } else if ($method == "POST") {
             $data = json_decode($request->getContent());
             $user = $this->getUser();
+
             $app = new App();
             $app->setName($data->name);
             $app->addUser($user);
@@ -80,57 +81,32 @@ class AppsController extends AbstractController {
         }
     }
 
-    #[Route('/apps/edit/{id}', name: 'app_api_app_edit', methods: ["GET", "POST"])]
-    public function edit(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
-        $method = $request->getMethod();
-        if ($method == "GET") {
-            $app = $this->appRepository->findOneById($id);
-            $formBuilder = $this->addAndEditForm($app);
-            return new JsonResponse($formBuilder->getFormData());
-        } else if ($method == "POST") {
-            $data = (object) json_decode($request->getContent());
-            $app = $this->appRepository->findOneById($id);
-
-            $app->setName($data->name);
-
-            $errors = ValidatorHelper::validateObject($app, $validator);
-
-            if (count((array) $errors)) {
-                return new JsonResponse($errors);
-            }
-
-            $this->appRepository->save($app);
-
-            return new JsonResponse((object) $app);
-        }
-    }
-
     #[Route('/apps/options/{id}', name: 'app_api_app_options', methods: ["GET", "POST"])]
-    public function options(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
+    public function options(string $id, Request $request): JsonResponse {
         $method = $request->getMethod();
+
         if ($method == "GET") {
             $app = $this->appRepository->findOneById($id);
             $appUsers = EntityCollectionUtil::createCollectionData($app->getUsers());
             $appRoles = EntityCollectionUtil::createCollectionData($app->getRoles());
-
-            return new JsonResponse(["roles" => $appRoles, "users" => $appUsers, "app_name" => $app->getName()]);
+            $formBuilder = $this->addAndEditForm($app);
+            return new JsonResponse([
+                "roles" => $appRoles,
+                "users" => $appUsers,
+                "app" => $app->getData(),
+                "form" => $formBuilder->getFormData()
+            ]);
         }
 
         return new JsonResponse([""]);
     }
 
-    #[Route('/app', name: 'app_api_app_delete', methods: ["DELETE"])]
+    #[Route('/apps', name: 'app_api_app_delete', methods: ["DELETE"])]
     public function delete(Request $request): JsonResponse {
         $data = json_decode($request->getContent());
 
         $app = $this->appRepository->findOneById($data->id);
         if (!$app) return new JsonResponse([], 404);
-
-        $roles = $app->getRoles()->toArray();
-
-        array_walk($roles, function ($role) {
-            $this->appRoleRepository->delete($role);
-        });
 
         $this->appRepository->delete($app);
 
@@ -141,5 +117,24 @@ class AppsController extends AbstractController {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "App name", FormField::TEXT, ["value" => $app?->getName() ?? ""]);
         return $formBuilder;
+    }
+
+    #[Route('/apps/{id}/update', name: 'app_api_app_update', methods: ["POST"])]
+    public function updateApp(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
+
+        $data = (object) json_decode($request->getContent());
+        $app = $this->appRepository->findOneById($id);
+
+        $app->setName($data->name);
+
+        $errors = ValidatorHelper::validateObject($app, $validator);
+
+        if (count((array) $errors)) {
+            return new JsonResponse($errors, 422);
+        }
+
+        $this->appRepository->save($app);
+
+        return new JsonResponse($app->getData());
     }
 }

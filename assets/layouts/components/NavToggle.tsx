@@ -8,17 +8,17 @@ type PopupMenu = {
 };
 
 const PopupMenu = ({ expand, onChange }: PopupMenu) => {
-  const { appData, setToken } = useAppDataContext();
+  const { appData, setToken, clear } = useAppDataContext();
   const navigate = useNavigate();
 
   async function handleLogout() {
     await fetch("/api/logout", {
       headers: { Authorization: "Bearer " + appData.token },
     })
-      .then((res) => setToken(""))
-      .catch((err) => setToken(""));
+      .then((res) => clear())
+      .catch((err) => clear());
 
-    return navigate("/home");
+    return navigate("/login");
   }
 
   return (

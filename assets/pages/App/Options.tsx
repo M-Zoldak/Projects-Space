@@ -12,19 +12,20 @@ import { AppOptionsType, AppType } from "../../interfaces/EntityTypes/AppType";
 import { AppRoleType } from "../../interfaces/EntityTypes/AppRoleType";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { UserType } from "../../interfaces/EntityTypes/UserType";
+import FormComponent from "../../components/Forms/FormComponent";
 
 export default function Options() {
   const { appData } = useAppDataContext();
   const location = useLocation();
   const params = useParams();
   const [loaded, setLoaded] = useState(false);
-  const [appName, setAppName] = useState("");
-  const [appRolesList, setAppRolesList] = useState<
-    Array<EditableListItemProps>
-  >([]);
+  const [app, setApp] = useState<AppType>();
   const { addNotification } = useNotificationsContext();
-  const [users, setUsers] = useState<Array<EditableListItemProps>>([]);
+  const [users, setUsers] = useState<EditableListItemProps[]>([]);
   const [newRole, setNewRole] = useState("");
+  const [newUser, setNewUser] = useState("");
+  const [formFields, setFormFields] = useState([]);
+  const [appRolesList, setAppRolesList] = useState<EditableListItemProps[]>([]);
 
   useEffect(() => {
     http_methods
@@ -32,7 +33,8 @@ export default function Options() {
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
-        setAppName(data.app_name);
+        setApp(data.app);
+        setFormFields(data.form);
         setLoaded(true);
       })
       .catch((err: Error) => {
@@ -42,21 +44,41 @@ export default function Options() {
 
   const createNewRole = async () => {
     const successData = await http_methods.post<AppRoleType>(
-      appData.token,
       `/app_role/add`,
       {
         name: newRole,
         appId: params.id,
-      }
+      },
+      appData.token
     );
 
     let role = successData as EditableListItemProps;
     setAppRolesList([...appRolesList, role]);
   };
 
-  console.log(appRolesList);
+  const sendInvitation = async () => {
+    await http_methods.post<any>(
+      `/app/invite`,
+      {
+        userEmail: newUser,
+      },
+      appData.token
+    );
+  };
+
+  const actionOnSuccess = (successData: AppType) => {
+    setApp(successData);
+    return addNotification({
+      text: "Changes were saved.",
+      notificationProps: { type: "success" },
+    });
+  };
+
   return (
-    <StandardLayout title={`${appName} overview`} activePage="My Apps">
+    <StandardLayout
+      title={app?.name ? `${app.name} overview` : "Loading..."}
+      activePage="My Apps"
+    >
       <FlexboxGrid className="buttons_container">
         <Button appearance="ghost" as={Link} to={"/apps"}>
           Back to overview
@@ -64,13 +86,30 @@ export default function Options() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
+        <FormComponent<AppType>
+          formData={formFields}
+          setFormData={setFormFields}
+          onSuccess={actionOnSuccess}
+          postPath={`/apps/${params.id}/update`}
+        />
+
         <h3>Users</h3>
         <EditableList<UserType>
           entity="user"
           items={users}
-          propsToShow={[{ name: "app_role" }]}
+          // propsToShow={[{ name: "app_role" }]}
           backlink={location.pathname}
         />
+        <FlexboxGrid>
+          <InputGroup>
+            <InputGroup.Addon>Invite user: </InputGroup.Addon>
+            <Input value={newUser} onChange={setNewUser} />
+            <InputGroup.Button onClick={sendInvitation}>
+              Send invitation
+            </InputGroup.Button>
+          </InputGroup>
+          {/* <Input  /> <Button>Create new</Button> */}
+        </FlexboxGrid>
 
         <h3>App Roles</h3>
         <EditableList<AppRoleType>

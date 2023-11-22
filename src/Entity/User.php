@@ -43,7 +43,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $birthDate = null;
 
-    #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'Users')]
+    #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'users')]
     private Collection $apps;
 
     #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
@@ -52,21 +52,24 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: ProjectRole::class, orphanRemoval: true)]
     private Collection $projectRoles;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?UserOptions $userOptions = null;
+
     public function __construct() {
+        parent::__construct();
         $this->apps = new ArrayCollection();
         $this->appRoles = new ArrayCollection();
         $this->projectRoles = new ArrayCollection();
+        $this->setUserOptions(new UserOptions());
     }
 
-    public function getData(): array {
+    public function getData(App $app = null): array {
+        $userPermissions = $app ? $this->getUserPermissions($app) : null;
         return [
             "id" => $this->getId(),
             "name" => $this->getFirstName() . " " . $this->getLastName(),
-            "copyable" => false,
-            "hasView" => true,
-            "destroyable" => true,
-            "hasView" => true,
-            "app_roles" => EntityCollectionUtil::createCollectionData($this->getAppRoles())
+            "userPermissions" => $userPermissions,
+            "userOptions" => $this->getUserOptions()->getData()
         ];
     }
 
@@ -192,6 +195,16 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this->appRoles;
     }
 
+    public function getUserPermissions(App $app) {
+        $roles = $app->getRoles()->toArray();
+
+        $role = array_filter($roles, function (AppRole $role) {
+            return in_array($this, $role->getUsers()->toArray());
+        });
+
+        return EntityCollectionUtil::createCollectionData($role[0]->getSectionPermissions());
+    }
+
     public function addAppRole(AppRole $appRole): static {
         if (!$this->appRoles->contains($appRole)) {
             $this->appRoles->add($appRole);
@@ -232,6 +245,21 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
                 $projectRole->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUserOptions(): ?UserOptions {
+        return $this->userOptions;
+    }
+
+    public function setUserOptions(UserOptions $userOptions): static {
+        // set the owning side of the relation if necessary
+        if ($userOptions->getUser() !== $this) {
+            $userOptions->setUser($this);
+        }
+
+        $this->userOptions = $userOptions;
 
         return $this;
     }

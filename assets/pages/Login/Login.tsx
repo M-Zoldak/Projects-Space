@@ -12,30 +12,38 @@ import { useState } from "react";
 import TextField from "../../components/Forms/TextField";
 import Dashboard from "../Dashboard";
 import { useAppDataContext } from "../../contexts/AppDataContext";
+import { http_methods } from "../../Functions/Fetch";
+import { UserType } from "../../interfaces/EntityTypes/UserType";
+import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 function Login() {
   const navigate = useNavigate();
-  const { setToken } = useAppDataContext();
-  const [errorNotification, setErrorNotification] = useState("");
+  const { setToken, setUser, setApps, setAppId } = useAppDataContext();
   const [formValue, setFormValue] = useState({
     username: "",
     password: "",
   });
 
   const login = async () => {
-    await fetch("/api/login", {
-      method: "POST",
-      body: JSON.stringify(formValue),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setToken(data.token))
-      .then(() => true)
-      .catch((err) => setErrorNotification(err.getNotification()));
+    let token = await http_methods
+      .post<any>("/login", formValue)
+      .then((data) => {
+        setToken(data.token);
+        return data.token;
+      })
+      .catch((err: Error) => console.log(err.message));
 
-    if (true) return navigate("/dashboard");
+    if (token) {
+      await http_methods
+        .fetch<any>(token, "/initial_data")
+        .then((data: { user: UserType; apps: AppType[] }) => {
+          setUser(data.user);
+          setApps(data.apps);
+          setAppId(data.user?.options?.currentAppId ?? data.apps[0].id);
+        });
+
+      if (true) return navigate("/dashboard");
+    }
   };
 
   return (

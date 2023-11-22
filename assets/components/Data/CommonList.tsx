@@ -3,30 +3,39 @@ import { Link } from "react-router-dom";
 import { Button, FlexboxGrid, List, ListItemProps, Modal } from "rsuite";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
-import { PermissionsType } from "../../interfaces/DefaultTypes";
+import {
+  ActionButtonsType,
+  PermissionsType,
+} from "../../interfaces/DefaultTypes";
 import { http_methods } from "../../Functions/Fetch";
 
 export type CommonListItemProps = {
-  props?: ListItemProps;
+  id: string;
   name: string;
-  id: number;
-} & PermissionsType;
+  props?: ListItemProps;
+};
 
 type CommonListProps<T> = {
   items: Array<CommonListItemProps>;
   entity: string;
-  onDelete: (items: any, item: T) => void;
+  onDelete: (item: T) => void;
+  buttons?: ActionButtonsType;
   userPermissions?: PermissionsType;
 };
 
 export default function CommonList<T>({
   items,
-  userPermissions = { hasView: true, destroyable: true, hasOptions: true },
+  buttons = {
+    destroyable: true,
+    hasOptions: true,
+    hasView: true,
+  },
   entity,
   onDelete,
+  userPermissions,
 }: CommonListProps<T>) {
   const { appData } = useAppDataContext();
-  const [chosenObjectId, setChosenObjectId] = useState(0);
+  const [chosenObjectId, setChosenObjectId] = useState("");
   const [destroyOpen, setDestroyOpen] = useState(false);
   const { addNotification } = useNotificationsContext();
 
@@ -34,51 +43,53 @@ export default function CommonList<T>({
     http_methods
       .delete<T>(appData.token, `/${entity}`, chosenObjectId)
       .then((data) => {
-        items = items.filter((item) => item.id != chosenObjectId);
+        onDelete(data);
         setDestroyOpen(false);
-        onDelete(items, data);
       })
       .catch((err: Error) => addNotification({ text: err.message }));
   };
 
   const renderActionButtons = (item: CommonListItemProps) => {
-    let overview = userPermissions.hasView && item.hasView && (
+    console.log(item);
+    let overview = buttons.hasView && (userPermissions?.hasView ?? false) && (
       <Button
         appearance="ghost"
         size="sm"
         as={Link}
-        to={`/${entity}/edit/${item.id}`}
+        to={`/${entity}/${item.id}`}
         color="blue"
       >
         Show
       </Button>
     );
 
-    let destroy = userPermissions.destroyable && item.destroyable && (
-      <Button
-        appearance="ghost"
-        size="sm"
-        color="red"
-        onClick={() => {
-          setChosenObjectId(item.id);
-          setDestroyOpen(true);
-        }}
-      >
-        Delete
-      </Button>
-    );
+    let destroy = buttons.destroyable &&
+      (userPermissions?.destroyable ?? false) && (
+        <Button
+          appearance="ghost"
+          size="sm"
+          color="red"
+          onClick={() => {
+            setChosenObjectId(item.id);
+            setDestroyOpen(true);
+          }}
+        >
+          Delete
+        </Button>
+      );
 
-    let options = userPermissions.hasOptions && item.hasOptions && (
-      <Button
-        appearance="ghost"
-        size="sm"
-        color="yellow"
-        as={Link}
-        to={`/${entity}/options/${item.id}`}
-      >
-        Options
-      </Button>
-    );
+    let options = buttons.hasOptions &&
+      (userPermissions?.hasOptions ?? false) && (
+        <Button
+          appearance="ghost"
+          size="sm"
+          color="yellow"
+          as={Link}
+          to={`/${entity}/options/${item.id}`}
+        >
+          Options
+        </Button>
+      );
 
     return (
       <FlexboxGrid className="buttons_container">

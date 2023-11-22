@@ -6,9 +6,12 @@ export type DynamicallyFilledObject = {
   [key: string]: string;
 };
 
-export type PermissionsType = {
+export type ActionButtonsType = {
   hasView?: boolean;
   destroyable?: boolean;
-  // copyable?: boolean;
   hasOptions?: boolean;
 };
+
+export type PermissionsType = {
+  name: string;
+} & ActionButtonsType;

@@ -1,8 +1,9 @@
-import { Form } from 'rsuite';
-import FormError from './FormError';
+import { Form } from "rsuite";
+import FormError from "./FormError";
 
 export default function TextField(props: any) {
-  const { name, label, accepter, error, value, onChange, ...rest } = props;
+  const { name, label, accepter, error, value, onChange, fieldType, ...rest } =
+    props;
 
   return (
     <Form.Group controlId={`${name}`}>

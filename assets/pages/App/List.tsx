@@ -1,7 +1,6 @@
 import { Button, FlexboxGrid } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
-import useToken from "../../components/App/useToken";
 import { Link, useLocation } from "react-router-dom";
 import CommonList, {
   CommonListItemProps,
@@ -49,14 +48,18 @@ export default function AppsList() {
         {appData?.apps?.length ? (
           <CommonList<AppType>
             items={appData.apps as CommonListItemProps[]}
-            entity="app"
-            onDelete={(items, item) => {
+            entity="apps"
+            userPermissions={appData.currentUser.userPermissions?.apps}
+            onDelete={(item) => {
+              console.log(item);
+              let newApps = appData.apps.filter((app) => app.id != item.id);
               addNotification({
                 text: `App ${item.name} was deleted succesfully`,
                 notificationProps: { type: "success" },
               });
-              setApps(items);
+              setApps(newApps);
             }}
+            buttons={{ hasView: false, destroyable: true, hasOptions: true }}
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>

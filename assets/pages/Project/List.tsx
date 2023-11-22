@@ -31,6 +31,8 @@ export default function ProjectsList() {
       });
   }, [appData.currentAppId]);
 
+  console.log(appData.currentUser);
+
   return (
     <StandardLayout title="Projects overview" activePage="Projects">
       <FlexboxGrid className="buttons_container">
@@ -53,9 +55,13 @@ export default function ProjectsList() {
         {projects?.length ? (
           <CommonList<ProjectType>
             items={projects}
-            entity="project"
-            onDelete={(items, item) => {
-              setProjects(items);
+            entity="projects"
+            userPermissions={appData.currentUser.userPermissions?.projects}
+            onDelete={(item) => {
+              let newProjects = projects.filter(
+                (project) => project.id != item.id
+              );
+              setProjects(newProjects);
               addNotification({
                 text: `Project ${item.name} was deleted succesfully`,
                 notificationProps: { type: "success" },

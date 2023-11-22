@@ -1,28 +1,30 @@
 import { Link, useNavigation } from "react-router-dom";
 import { Button, FlexboxGrid, List, ListItemProps } from "rsuite";
-import { PermissionsType } from "../../interfaces/DefaultTypes";
+import {
+  ActionButtonsType,
+  PermissionsType,
+} from "../../interfaces/DefaultTypes";
 
 export type EditableListItemProps = {
-  props?: ListItemProps;
   name: string;
   id: number;
-  userPermissions: PermissionsType;
 };
 
-export type extraPropsToShow = {
-  name: string;
-  options?: {
-    tag: boolean;
-  };
-};
+// export type extraPropsToShow = {
+//   name: string;
+//   options?: {
+//     tag: boolean;
+//   };
+// };
 
 type EditableListProps = {
   items: Array<EditableListItemProps>;
   entity: string;
   title?: string;
-  propsToShow?: Array<extraPropsToShow>;
+  // propsToShow?: Array<extraPropsToShow>;
   backlink: string;
-  buttons?: PermissionsType;
+  buttons?: ActionButtonsType;
+  userPermissions?: PermissionsType;
 };
 
 export default function EditableList<T>({
@@ -34,17 +36,18 @@ export default function EditableList<T>({
     hasOptions: true,
     hasView: true,
   },
+  userPermissions,
 }: EditableListProps) {
   const destroyAction = () => {};
 
   const renderActionButtons = (item: EditableListItemProps) => {
     let overview =
-      buttons.hasView && item.userPermissions.hasView ? (
+      buttons.hasView && (userPermissions?.hasView ?? false) ? (
         <Button
           appearance="ghost"
           size="sm"
           as={Link}
-          to={`/${entity}/edit/${item.id}`}
+          to={`/${entity}/${item.id}`}
           color="blue"
         >
           Show
@@ -53,22 +56,8 @@ export default function EditableList<T>({
         ""
       );
 
-    let destroy =
-      buttons.destroyable && item.userPermissions.destroyable ? (
-        <Button
-          appearance="ghost"
-          size="sm"
-          color="red"
-          onClick={destroyAction}
-        >
-          Delete
-        </Button>
-      ) : (
-        ""
-      );
-
     let options =
-      buttons.hasOptions && item.userPermissions.hasOptions ? (
+      buttons.hasOptions && (userPermissions?.hasOptions ?? false) ? (
         <Button
           appearance="ghost"
           size="sm"
@@ -78,6 +67,20 @@ export default function EditableList<T>({
           state={{ backlink: backlink }}
         >
           Options
+        </Button>
+      ) : (
+        ""
+      );
+
+    let destroy =
+      buttons.destroyable && (userPermissions?.destroyable ?? false) ? (
+        <Button
+          appearance="ghost"
+          size="sm"
+          color="red"
+          onClick={destroyAction}
+        >
+          Delete
         </Button>
       ) : (
         ""
@@ -99,6 +102,8 @@ export default function EditableList<T>({
   //   props.map((prop) => {
   //     // return <>{item.prop.name}</>;
   //   });
+
+  console.log(items);
 
   return (
     <List hover bordered>

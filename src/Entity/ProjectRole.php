@@ -20,7 +20,9 @@ class ProjectRole extends Entity {
     private ?string $role = null;
 
     public function getData(): array {
-        return [];
+        return [
+            "id" => $this->getId()
+        ];
     }
 
     public function getProject(): ?Project {

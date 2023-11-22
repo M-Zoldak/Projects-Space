@@ -13,7 +13,6 @@ import Protected from "./components/Protection/Protected";
 import RegistrationConfirmation from "./pages/Login/RegistrationConfirmation";
 import GuestsOnly from "./components/Protection/GuestsOnly";
 import CreateApp from "./pages/App/Create";
-import EditApp from "./pages/App/Edit";
 import OptionsApp from "./pages/App/Options";
 import OptionsAppRole from "./pages/AppRole/Options";
 import ProjectsList from "./pages/Project/List";
@@ -84,15 +83,7 @@ function Main() {
           }
         />
         <Route
-          path="/app/edit/:id"
-          element={
-            <Protected>
-              <EditApp />
-            </Protected>
-          }
-        />
-        <Route
-          path="/app/options/:id"
+          path="/apps/options/:id"
           element={
             <Protected>
               <OptionsApp />
@@ -109,15 +100,6 @@ function Main() {
           }
         />
 
-        {/* <Route
-          path="/project/:id"
-          element={
-            <Protected>
-              <ProjectIndex />
-            </Protected>
-          }
-        /> */}
-
         <Route
           path="/app_role/options/:id"
           element={
@@ -126,32 +108,7 @@ function Main() {
             </Protected>
           }
         />
-        {/* <Route path="/site">
-          <Route
-            index
-            element={
-              <Protected>
-                <Site />
-              </Protected>
-            }
-          />
-          <Route
-            path="/site/:id"
-            element={
-              <Protected>
-                <Site />
-              </Protected>
-            }
-          />
-          <Route
-            path="/site/create"
-            element={
-              <Protected>
-                <CreateSite />
-              </Protected>
-            }
-          />
-        </Route> */}
+
         <Route
           path="/about"
           element={

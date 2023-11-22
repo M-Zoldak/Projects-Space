@@ -7,6 +7,7 @@ use App\Enums\FormField;
 use App\Classes\FormBuilder;
 use App\Repository\AppRepository;
 use App\Utils\EntityCollectionUtil;
+use App\Repository\AppRoleRepository;
 use App\Repository\ProjectRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ProjectsController extends AbstractController {
     public function __construct(
         private ProjectRepository $projectRepository,
-        private AppRepository $appRepository
+        private AppRepository $appRepository,
+        private AppRoleRepository $appRoleRepository
     ) {
     }
 
@@ -50,45 +52,6 @@ class ProjectsController extends AbstractController {
         return $formBuilder;
     }
 
-
-    // #[Route('/app/create', name: 'app_api_app_create', methods: ["GET", "POST"])]
-    // public function create(Request $request, ValidatorInterface $validator): JsonResponse {
-    //     $method = $request->getMethod();
-
-    //     if ($method == "GET") {
-    //         $formBuilder = $this->addAndEditForm();
-    //         return new JsonResponse($formBuilder->getFormData());
-    //     } else if ($method == "POST") {
-    //         $data = json_decode($request->getContent());
-    //         $user = $this->getUser();
-    //         $app = new App();
-    //         $app->setName($data->name);
-    //         $app->addUser($user);
-    //         $app->setAppHeadAdminName("Head Admin");
-
-    //         $ownerRole = new AppRole("Head Admin", $app, $this->sectionPermissionsRepository);
-    //         $ownerRole->setIsDestroyable(false);
-
-    //         $this->appRoleRepository->save($ownerRole);
-
-    //         if ($user instanceof User) {
-    //             $user->addAppRole($ownerRole);
-    //         }
-
-    //         $app->addRole($ownerRole);
-
-    //         $errors = ValidatorHelper::validateObject($app, $validator);
-
-    //         if (count((array) $errors)) {
-    //             return new JsonResponse($errors);
-    //         }
-
-    //         $this->appRepository->save($app);
-
-    //         return new JsonResponse((object) $app->getData());
-    //     }
-    // }
-
     #[Route('/projects', name: 'app_api_projects_overview', methods: ["GET"])]
     public function list(Request $request): JsonResponse {
         $appId = $request->query->get("appId");
@@ -103,10 +66,14 @@ class ProjectsController extends AbstractController {
         return new JsonResponse($project->getData());
     }
 
-    #[Route('/project/delete/{id}', name: 'app_api_projects_delete', methods: ["GET"])]
-    public function delete($id): Response {
-        $project = $this->projectRepository->findOneById($id);
+    #[Route('/projects', name: 'app_api_projects_delete', methods: ["DELETE"])]
+    public function delete(Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        $project = $this->projectRepository->findOneById($data->id);
+        $projectData = $project->getData();
+
         $this->projectRepository->delete($project);
-        return new Response($project->getDomain() . " deleted successfully.");
+        return new JsonResponse($projectData);
     }
 }

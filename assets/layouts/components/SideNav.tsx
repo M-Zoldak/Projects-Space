@@ -14,6 +14,8 @@ import {
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { useEffect } from "react";
+import { http_methods } from "../../Functions/Fetch";
+import { UserType } from "../../interfaces/EntityTypes/UserType";
 
 export interface PageLinkInterface {
   name: string;
@@ -66,7 +68,13 @@ function AppChooser(index: number) {
   const { appData, setAppId } = useAppDataContext();
 
   const handleChange = (appId: string) => {
-    setAppId(appId);
+    http_methods
+      .post("/updateSelectedApp", {
+        appId: appId,
+        userId: appData.currentUser.id.toString(),
+      })
+      .then((res) => setAppId(appId))
+      .catch((err) => err);
   };
 
   const provideSelectData = (apps: Array<AppType>) => {
@@ -75,7 +83,7 @@ function AppChooser(index: number) {
     });
   };
 
-  return appData.apps && appData.apps.length ? (
+  return appData?.apps?.length ? (
     <SelectPicker
       key={index}
       data={provideSelectData(appData.apps)}
@@ -104,9 +112,17 @@ function AppChooser(index: number) {
 }
 
 export default function SideNav({ activePage }: { activePage: string }) {
-  const { appData } = useAppDataContext();
+  const { appData, setUser } = useAppDataContext();
 
-  useEffect(() => {}, [appData.currentAppId]);
+  useEffect(() => {
+    let appendAppDependentData = appData.currentAppId
+      ? "?appId=" + appData.currentAppId
+      : "";
+
+    http_methods
+      .fetch<UserType>(appData.token, `/user_data${appendAppDependentData}`)
+      .then((data) => setUser(data));
+  }, [appData.currentAppId]);
 
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(

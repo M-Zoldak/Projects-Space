@@ -14,14 +14,15 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
 #[DiscriminatorColumn(name: 'discr', type: 'string')]
 #[DiscriminatorMap([
     'user' => User::class,
+    'user_options' => UserOptions::class,
     'site' => Site::class,
     'app' => App::class,
-    'customer' => Customer::class,
-    'site_options' => SiteOptions::class,
     'app_role' => AppRole::class,
     'section_permissions' => SectionPermissions::class,
     'project' => Project::class,
-    'project_role' => ProjectRole::class
+    'project_role' => ProjectRole::class,
+    'customer' => Customer::class,
+    'site_options' => SiteOptions::class,
 ])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 abstract class Entity {
@@ -79,5 +80,5 @@ abstract class Entity {
         return $this;
     }
 
-    abstract function getData(): array;
+    // abstract function getData(): array;
 }

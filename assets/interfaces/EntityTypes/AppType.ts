@@ -3,13 +3,14 @@ import { AppRoleType } from "./AppRoleType";
 import { UserType } from "./UserType";
 
 export type AppType = {
-  id: number;
+  id: string;
   name: string;
-} & PermissionsType;
+  userPermissions: PermissionsType;
+};
 
 export type AppOptionsType = {
-  app_id: number;
-  app_name: string;
+  app: AppType;
   roles: Array<AppRoleType>;
   users: Array<UserType>;
+  form: any;
 };

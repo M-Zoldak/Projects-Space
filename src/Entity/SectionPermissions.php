@@ -33,14 +33,15 @@ class SectionPermissions extends Entity {
         $this->setEdit($isEditable);
     }
 
-    public function getData(): array {
-        return [
-            "id" => $this->getId(),
-            "roleId" => $this->getAppRole(),
-            "name" => $this->getSectionName(),
-            "read" => $this->isReview(),
-            "delete" => $this->isDestroy(),
-            "edit" => $this->isEdit()
+    public function getData(): object {
+        return (object) [
+            $this->getSectionName() =>  [
+                "id" => $this->getId(),
+                "roleId" => $this->getAppRole()->getId(),
+                "hasShow" => $this->isReview(),
+                "deleteable" => $this->isDestroy(),
+                "hasOptions" => $this->isEdit()
+            ]
         ];
     }
 
