@@ -1,10 +1,7 @@
 import StandardLayout from "../layouts/StandardLayout";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "rsuite";
 import { useAppDataContext } from "../contexts/AppDataContext";
-import { http_methods } from "../Functions/Fetch";
-import { UserType } from "../interfaces/EntityTypes/UserType";
-import { AppType } from "../interfaces/EntityTypes/AppType";
 
 const Dashboard = () => {
   const [data, setData] = useState("");

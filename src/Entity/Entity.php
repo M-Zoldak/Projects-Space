@@ -79,6 +79,4 @@ abstract class Entity {
 
         return $this;
     }
-
-    // abstract function getData(): array;
 }

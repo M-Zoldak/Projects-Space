@@ -75,18 +75,28 @@ function Main() {
           }
         />
         <Route
-          path="/app/create"
+          path="/apps/create"
           element={
             <Protected>
               <CreateApp />
             </Protected>
           }
         />
+
         <Route
-          path="/apps/options/:id"
+          path="/apps/:id/options"
           element={
             <Protected>
               <OptionsApp />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/apps/:appId/roles/:roleId/options"
+          element={
+            <Protected>
+              <OptionsAppRole />
             </Protected>
           }
         />
@@ -96,15 +106,6 @@ function Main() {
           element={
             <Protected>
               <ProjectsList />
-            </Protected>
-          }
-        />
-
-        <Route
-          path="/app_role/options/:id"
-          element={
-            <Protected>
-              <OptionsAppRole />
             </Protected>
           }
         />

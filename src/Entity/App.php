@@ -36,7 +36,7 @@ class App extends Entity {
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class, orphanRemoval: true)]
     private Collection $projects;
 
-    #[ORM\OneToMany(mappedBy: 'selectedApp', targetEntity: UserOptions::class)]
+    #[ORM\OneToMany(mappedBy: 'selectedApp', targetEntity: UserOptions::class, orphanRemoval: true)]
     private Collection $userOptions;
 
     public function __construct() {
@@ -230,13 +230,11 @@ class App extends Entity {
     /**
      * @return Collection<int, UserOptions>
      */
-    public function getUserOptions(): Collection
-    {
+    public function getUserOptions(): Collection {
         return $this->userOptions;
     }
 
-    public function addUserOption(UserOptions $userOption): static
-    {
+    public function addUserOption(UserOptions $userOption): static {
         if (!$this->userOptions->contains($userOption)) {
             $this->userOptions->add($userOption);
             $userOption->setSelectedApp($this);
@@ -245,8 +243,7 @@ class App extends Entity {
         return $this;
     }
 
-    public function removeUserOption(UserOptions $userOption): static
-    {
+    public function removeUserOption(UserOptions $userOption): static {
         if ($this->userOptions->removeElement($userOption)) {
             // set the owning side to null (unless already changed)
             if ($userOption->getSelectedApp() === $this) {

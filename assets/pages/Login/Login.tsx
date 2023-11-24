@@ -12,7 +12,7 @@ import { useState } from "react";
 import TextField from "../../components/Forms/TextField";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { http_methods } from "../../Functions/Fetch";
-import { UserType } from "../../interfaces/EntityTypes/UserType";
+import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 function Login() {

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\User;
 use App\Entity\Project;
 use App\Enums\FormField;
 use App\Classes\FormBuilder;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProjectsController extends AbstractController {
@@ -53,11 +55,13 @@ class ProjectsController extends AbstractController {
     }
 
     #[Route('/projects', name: 'app_api_projects_overview', methods: ["GET"])]
-    public function list(Request $request): JsonResponse {
-        $appId = $request->query->get("appId");
-        $projects = $this->projectRepository->findBy(["app" => $appId]);
+    public function list(Request $request, #[CurrentUser] ?User $user): JsonResponse {
+
+        $app = $user->getUserOptions()->getSelectedApp();
+        $projects = $app->getProjects();
         $projectsData = EntityCollectionUtil::createCollectionData($projects);
-        return new JsonResponse($projectsData ?? []);
+
+        return new JsonResponse($projectsData);
     }
 
     #[Route('/projects/{id}', name: 'app_api_projects', methods: ["GET"])]

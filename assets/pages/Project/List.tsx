@@ -18,10 +18,7 @@ export default function ProjectsList() {
   useEffect(() => {
     setLoaded(false);
     http_methods
-      .fetchAll<ProjectType>(
-        appData.token,
-        `/projects?appId=${appData.currentUser.userOptions.selectedAppId}`
-      )
+      .fetchAll<ProjectType>(appData.token, `/projects`)
       .then((data) => {
         setProjects(data);
         setLoaded(true);
@@ -29,7 +26,7 @@ export default function ProjectsList() {
       .catch((err: Error) => {
         addNotification({ text: err.message });
       });
-  }, [appData.currentUser.userOptions.selectedAppId]);
+  }, [appData]);
 
   console.log(appData.currentUser);
 
@@ -56,7 +53,9 @@ export default function ProjectsList() {
           <CommonList<ProjectType>
             items={projects}
             entity="projects"
-            userPermissions={appData.currentUser.userPermissions?.projects}
+            userPermissions={
+              appData.currentUser.currentAppRole.permissions?.projects
+            }
             onDelete={(item) => {
               let newProjects = projects.filter(
                 (project) => project.id != item.id

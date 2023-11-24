@@ -1,19 +1,18 @@
-import { PermissionsType } from "../DefaultTypes";
+import { AppRoleType } from "./AppRoleType";
 
 export type UserOptionsType = {
   selectedAppId: string;
 };
 
-export type UserType = {
+export type CurrentUserType = {
   id: number;
   name: string;
-  userPermissions: UserStandardPermissions;
+  currentAppRole: AppRoleType;
   userOptions: UserOptionsType;
 };
 
-export type UserStandardPermissions = {
-  projects: PermissionsType;
-  websites: PermissionsType;
-  customers: PermissionsType;
-  apps: PermissionsType;
+export type UserType = {
+  id: number;
+  name: string;
+  appRole: AppRoleType;
 };

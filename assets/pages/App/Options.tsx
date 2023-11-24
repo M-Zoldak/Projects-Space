@@ -4,32 +4,30 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
-import EditableList, {
-  EditableListItemProps,
-} from "../../components/Forms/EditableList";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { AppOptionsType, AppType } from "../../interfaces/EntityTypes/AppType";
 import { AppRoleType } from "../../interfaces/EntityTypes/AppRoleType";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { UserType } from "../../interfaces/EntityTypes/UserType";
 import FormComponent from "../../components/Forms/FormComponent";
+import CommonList from "../../components/Data/CommonList";
+import { filterOutItem } from "../../Functions/Collections";
 
 export default function Options() {
   const { appData } = useAppDataContext();
-  const location = useLocation();
+  const { addNotification } = useNotificationsContext();
   const params = useParams();
   const [loaded, setLoaded] = useState(false);
   const [app, setApp] = useState<AppType>();
-  const { addNotification } = useNotificationsContext();
-  const [users, setUsers] = useState<EditableListItemProps[]>([]);
+  const [users, setUsers] = useState([]);
   const [newRole, setNewRole] = useState("");
   const [newUser, setNewUser] = useState("");
   const [formFields, setFormFields] = useState([]);
-  const [appRolesList, setAppRolesList] = useState<EditableListItemProps[]>([]);
+  const [appRolesList, setAppRolesList] = useState([]);
 
   useEffect(() => {
     http_methods
-      .fetch<AppOptionsType>(appData.token, `/apps/options/${params.id}`)
+      .fetch<AppOptionsType>(appData.token, `/apps/${params.id}/options`)
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
@@ -44,7 +42,7 @@ export default function Options() {
 
   const createNewRole = async () => {
     const successData = await http_methods.post<AppRoleType>(
-      `/app_role/add`,
+      `/app-roles/create`,
       {
         name: newRole,
         appId: params.id,
@@ -52,13 +50,13 @@ export default function Options() {
       appData.token
     );
 
-    let role = successData as EditableListItemProps;
+    let role = successData;
     setAppRolesList([...appRolesList, role]);
   };
 
   const sendInvitation = async () => {
     await http_methods.post<any>(
-      `/app/invite`,
+      `/apps/${params.id}/invite`,
       {
         userEmail: newUser,
       },
@@ -94,41 +92,60 @@ export default function Options() {
         />
 
         <h3>Users</h3>
-        <EditableList<UserType>
+        <CommonList<UserType>
           entity="user"
           items={users}
-          // propsToShow={[{ name: "app_role" }]}
-          backlink={location.pathname}
-          userPermissions={appData.currentUser.userPermissions.apps}
+          userPermissions={appData.currentUser.currentAppRole.permissions.apps}
+          buttons={{
+            deleteable: (item: UserType) => !item.appRole.isOwnerRole,
+            hasOptions: true,
+            hasView: false,
+          }}
+          onDelete={(item) => {
+            let newUsers = filterOutItem(users, item);
+            setAppRolesList(newUsers);
+          }}
         />
-        <FlexboxGrid>
-          <InputGroup>
-            <InputGroup.Addon>Invite user: </InputGroup.Addon>
-            <Input value={newUser} onChange={setNewUser} />
-            <InputGroup.Button onClick={sendInvitation}>
-              Send invitation
-            </InputGroup.Button>
-          </InputGroup>
-          {/* <Input  /> <Button>Create new</Button> */}
-        </FlexboxGrid>
+
+        {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
+          <FlexboxGrid>
+            <InputGroup>
+              <InputGroup.Addon>Invite user: </InputGroup.Addon>
+              <Input value={newUser} onChange={setNewUser} />
+              <InputGroup.Button onClick={sendInvitation}>
+                Send invitation
+              </InputGroup.Button>
+            </InputGroup>
+          </FlexboxGrid>
+        )}
 
         <h3>App Roles</h3>
-        <EditableList<AppRoleType>
-          entity="app_role"
+        <CommonList<AppRoleType>
+          entity="app-roles"
           items={appRolesList}
-          backlink={location.pathname}
-          userPermissions={appData.currentUser.userPermissions.apps}
+          userPermissions={appData.currentUser.currentAppRole.permissions.apps}
+          buttons={{
+            deleteable: (item: AppRoleType) => !item.isOwnerRole,
+            hasOptions: true,
+            hasView: false,
+          }}
+          onDelete={(item) => {
+            let roles = filterOutItem(appRolesList, item);
+            setAppRolesList(roles);
+          }}
         />
-        <FlexboxGrid>
-          <InputGroup>
-            <InputGroup.Addon>New role name: </InputGroup.Addon>
-            <Input value={newRole} onChange={setNewRole} />
-            <InputGroup.Button onClick={createNewRole}>
-              Create new
-            </InputGroup.Button>
-          </InputGroup>
-          {/* <Input  /> <Button>Create new</Button> */}
-        </FlexboxGrid>
+
+        {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
+          <FlexboxGrid>
+            <InputGroup>
+              <InputGroup.Addon>New role name: </InputGroup.Addon>
+              <Input value={newRole} onChange={setNewRole} />
+              <InputGroup.Button onClick={createNewRole}>
+                Create new
+              </InputGroup.Button>
+            </InputGroup>
+          </FlexboxGrid>
+        )}
       </ContentLoader>
     </StandardLayout>
   );

@@ -10,11 +10,11 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 /**
  * @extends ServiceEntityRepository<AppRole>
  *
- * @method Role|null find($id, $lockMode = null, $lockVersion = null)
- * @method Role|null findOneBy(array $criteria, array $orderBy = null)
- * @method Role|null findOneById(array $criteria, array $orderBy = null)
- * @method Role[]    findAll()
- * @method Role[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method AppRole|null find($id, $lockMode = null, $lockVersion = null)
+ * @method AppRole|null findOneBy(array $criteria, array $orderBy = null)
+ * @method AppRole|null findOneById(array $criteria, array $orderBy = null)
+ * @method AppRole[]    findAll()
+ * @method AppRole[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class AppRoleRepository extends EntityRepository {
     public function __construct(ManagerRegistry $registry) {

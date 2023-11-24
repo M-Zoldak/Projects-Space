@@ -1,6 +1,6 @@
 import { PermissionsType } from "../DefaultTypes";
 import { AppRoleType } from "./AppRoleType";
-import { UserType } from "./UserType";
+import { CurrentUserType, UserType } from "./UserType";
 
 export type AppType = {
   id: string;

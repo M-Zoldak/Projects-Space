@@ -12,7 +12,7 @@ import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 export default function AppsList() {
-  const { appData, updateAppData } = useAppDataContext();
+  const { appData, refreshAppData } = useAppDataContext();
   const location = useLocation();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
@@ -27,8 +27,8 @@ export default function AppsList() {
 
     http_methods
       .fetchAll<AppType>(appData.token, "/apps")
-      .then((appsData) => {
-        updateAppData({ apps: appsData });
+      .then(async (appsData) => {
+        await refreshAppData();
         setLoaded(true);
       })
       .catch((err: Error) => {
@@ -47,17 +47,17 @@ export default function AppsList() {
       <ContentLoader loaded={loaded}>
         {appData?.apps?.length ? (
           <CommonList<AppType>
-            items={appData.apps as CommonListItemProps[]}
+            items={appData.apps}
             entity="apps"
-            userPermissions={appData.currentUser.userPermissions?.apps}
+            userPermissions={
+              appData.currentUser.currentAppRole.permissions.apps
+            }
             onDelete={(item) => {
-              console.log(item);
-              let newApps = appData.apps.filter((app) => app.id != item.id);
               addNotification({
                 text: `App ${item.name} was deleted succesfully`,
                 notificationProps: { type: "success" },
               });
-              updateAppData({ apps: newApps });
+              refreshAppData();
             }}
             buttons={{ hasView: false, deleteable: true, hasOptions: true }}
           />

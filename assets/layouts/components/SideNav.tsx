@@ -15,7 +15,7 @@ import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { useEffect } from "react";
 import { http_methods } from "../../Functions/Fetch";
-import { UserType } from "../../interfaces/EntityTypes/UserType";
+import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
 import { app } from "../../bootstrap";
 
 export interface PageLinkInterface {
@@ -53,28 +53,24 @@ class PageLink implements PageLinkInterface {
 }
 
 function AppChooser(index: number) {
-  const { appData, updateAppData } = useAppDataContext();
+  const { appData, refreshAppData } = useAppDataContext();
 
   useEffect(() => {}, [appData]);
 
   const handleChange = (appId: string) => {
     http_methods
-      .post<UserType>(
+      .post<CurrentUserType>(
         "/user/updateSelectedApp",
         {
           appId: appId,
         },
         appData.token
       )
-      .then((res) => {
-        appData.currentUser.userOptions = res.userOptions;
-        updateAppData(appData);
-      })
+      .then((res) => refreshAppData)
       .catch((err) => err);
   };
 
   const provideSelectData = (apps: Array<AppType>) => {
-    console.log(apps);
     return apps.map((app) => {
       return { label: app.name, value: app.id.toString() };
     });
@@ -87,7 +83,7 @@ function AppChooser(index: number) {
       key={index}
       data={provideSelectData(appData.apps)}
       searchable={false}
-      defaultValue={appData.currentUser.userOptions.selectedAppId.toString()}
+      defaultValue={appData.currentUser.userOptions?.selectedAppId?.toString()}
       onChange={handleChange}
       style={{
         width: "calc(100% - 40px)",
@@ -113,10 +109,7 @@ function AppChooser(index: number) {
 export default function SideNav({ activePage }: { activePage: string }) {
   const { appData } = useAppDataContext();
 
-  useEffect(() => {}, [
-    appData?.apps,
-    appData.currentUser.userOptions.selectedAppId,
-  ]);
+  useEffect(() => {}, [appData]);
 
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(
@@ -125,7 +118,7 @@ export default function SideNav({ activePage }: { activePage: string }) {
       <FontAwesomeIcon icon={faGaugeHigh} />
     ),
     appData?.currentUser?.userOptions?.selectedAppId &&
-      appData.currentUser?.userPermissions?.projects?.hasView &&
+      appData.currentUser?.currentAppRole?.permissions.projects?.hasView &&
       new PageLink(
         "Projects",
         "/projects",

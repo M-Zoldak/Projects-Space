@@ -46,7 +46,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'users')]
     private Collection $apps;
 
-    #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
+    #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"], orphanRemoval: true)]
     private Collection $appRoles;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: ProjectRole::class, orphanRemoval: true)]
@@ -64,11 +64,20 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     }
 
     public function getData(App $app = null): array {
-        $userPermissions = $app ? $this->getUserPermissions($app) : null;
+        $userPermissions = $app ? $this->getCurrentAppRole($app) : null;
         return [
             "id" => $this->getId(),
             "name" => $this->getFirstName() . " " . $this->getLastName(),
-            "userPermissions" => $userPermissions,
+            "appRole" => $userPermissions
+        ];
+    }
+
+    public function getCurrentUserData(App $app = null): array {
+        $userPermissions = $app ? $this->getCurrentAppRole($app) : null;
+        return [
+            "id" => $this->getId(),
+            "name" => $this->getFirstName() . " " . $this->getLastName(),
+            "currentAppRole" => $userPermissions,
             "userOptions" => $this->getUserOptions()->getData()
         ];
     }
@@ -195,14 +204,13 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this->appRoles;
     }
 
-    public function getUserPermissions(App $app) {
+    public function getCurrentAppRole(App $app) {
         $roles = $app->getRoles()->toArray();
 
         $role = array_filter($roles, function (AppRole $role) {
             return in_array($this, $role->getUsers()->toArray());
         });
-
-        return (object) EntityCollectionUtil::createNamedCollectionData($role[0]->getSectionPermissions(), "sectionName");
+        return (object) $role[0]->getData();
     }
 
     public function addAppRole(AppRole $appRole): static {

@@ -29,6 +29,9 @@ class AppRole extends Entity {
     #[ORM\OneToMany(mappedBy: 'appRole', targetEntity: SectionPermissions::class, orphanRemoval: true)]
     private Collection $sectionPermissions;
 
+    #[ORM\Column]
+    private ?bool $isOwnerRole = null;
+
     public function __construct(string $roleName, App $app, private SectionPermissionsRepository $sectionPermissionsRepository) {
         parent::__construct();
 
@@ -36,9 +39,10 @@ class AppRole extends Entity {
         $this->users = new ArrayCollection();
         $this->setApp($app);
         $this->sectionPermissions = new ArrayCollection();
-        foreach (StandardSections::cases() as $section) {
+        $this->setIsOwnerRole($roleName == "Owner" ? true : false);
 
-            if ($roleName == "Head Admin") {
+        foreach (StandardSections::cases() as $section) {
+            if ($roleName == "Owner") {
                 $sectionPermissions = new SectionPermissions($this, $section->value, true, true, true);
             } else {
                 $sectionPermissions = new SectionPermissions($this, $section->value);
@@ -53,7 +57,8 @@ class AppRole extends Entity {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),
-            "rolePermissions" => EntityCollectionUtil::createNamedCollectionData($this->getSectionPermissions(), "sectionName")
+            "isOwnerRole" => $this->isOwnerRole(),
+            "permissions" => EntityCollectionUtil::createNamedCollectionData($this->getSectionPermissions(), "sectionName")
         ];
     }
 
@@ -131,6 +136,16 @@ class AppRole extends Entity {
                 $sectionPermission->setAppRole(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isOwnerRole(): ?bool {
+        return $this->isOwnerRole;
+    }
+
+    public function setIsOwnerRole(bool $isOwnerRole): static {
+        $this->isOwnerRole = $isOwnerRole;
 
         return $this;
     }

@@ -4,7 +4,6 @@ import FormComponent from "../../components/Forms/FormComponent";
 import { Link, useNavigate } from "react-router-dom";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
-import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import StandardLayout from "../../layouts/StandardLayout";
 import { FormDataType } from "../../interfaces/FormDataType";
@@ -13,7 +12,7 @@ import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 export default function Create() {
   const navigate = useNavigate();
-  const { appData, addApp } = useAppDataContext();
+  const { appData, refreshAppData } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
   const [formFields, setFormFields] = useState([]);
   const { addNotification } = useNotificationsContext();
@@ -30,8 +29,8 @@ export default function Create() {
       });
   }, []);
 
-  const actionOnSuccess = (successData: AppType) => {
-    addApp(successData);
+  const actionOnSuccess = async (successData: AppType) => {
+    await refreshAppData();
     return navigate("/apps", {
       state: {
         notification: `Your app ${successData.name} was created succesfully!`,

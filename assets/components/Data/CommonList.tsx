@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Button, FlexboxGrid, List, ListItemProps, Modal } from "rsuite";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
@@ -35,13 +35,14 @@ export default function CommonList<T>({
   userPermissions,
 }: CommonListProps<T>) {
   const { appData } = useAppDataContext();
+  const { addNotification } = useNotificationsContext();
+  const params = useParams();
   const [chosenObjectId, setChosenObjectId] = useState("");
   const [destroyOpen, setDestroyOpen] = useState(false);
-  const { addNotification } = useNotificationsContext();
 
   const destroyObject = async () => {
     http_methods
-      .delete<T>(appData.token, `/${entity}`, chosenObjectId)
+      .delete<T>(appData.token, `/${entity}/${chosenObjectId}`)
       .then((data) => {
         onDelete(data);
         setDestroyOpen(false);
@@ -50,7 +51,7 @@ export default function CommonList<T>({
   };
 
   const renderActionButtons = (item: CommonListItemProps) => {
-    let overview = buttons.hasView && (userPermissions?.hasView ?? false) && (
+    let overview = buttons.hasView && userPermissions?.hasView && (
       <Button
         appearance="ghost"
         size="sm"
@@ -62,33 +63,35 @@ export default function CommonList<T>({
       </Button>
     );
 
-    let destroy = buttons.deleteable &&
-      (userPermissions?.deleteable ?? false) && (
-        <Button
-          appearance="ghost"
-          size="sm"
-          color="red"
-          onClick={() => {
-            setChosenObjectId(item.id);
-            setDestroyOpen(true);
-          }}
-        >
-          Delete
-        </Button>
-      );
+    let isDestroyable =
+      typeof buttons.deleteable == "function"
+        ? buttons.deleteable(item)
+        : buttons.deleteable;
+    let destroy = isDestroyable && userPermissions?.deleteable && (
+      <Button
+        appearance="ghost"
+        size="sm"
+        color="red"
+        onClick={() => {
+          setChosenObjectId(item.id);
+          setDestroyOpen(true);
+        }}
+      >
+        Delete
+      </Button>
+    );
 
-    let options = buttons.hasOptions &&
-      (userPermissions?.hasOptions ?? false) && (
-        <Button
-          appearance="ghost"
-          size="sm"
-          color="yellow"
-          as={Link}
-          to={`/${entity}/options/${item.id}`}
-        >
-          Options
-        </Button>
-      );
+    let options = buttons.hasOptions && userPermissions?.hasOptions && (
+      <Button
+        appearance="ghost"
+        size="sm"
+        color="yellow"
+        as={Link}
+        to={`/${entity}/${item.id}/options`}
+      >
+        Options
+      </Button>
+    );
 
     return (
       <FlexboxGrid className="buttons_container">

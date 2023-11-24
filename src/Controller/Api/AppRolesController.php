@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\User;
 use App\Entity\AppRole;
 use App\Repository\AppRepository;
 use App\Utils\EntityCollectionUtil;
@@ -11,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\SectionPermissionsRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AppRolesController extends AbstractController {
@@ -23,8 +25,8 @@ class AppRolesController extends AbstractController {
     ) {
     }
 
-    #[Route('/app_role/add', name: 'app_api_role_add')]
-    public function add(Request $request): JsonResponse {
+    #[Route('/app-roles/create', name: 'app_api_role_create')]
+    public function create(Request $request): JsonResponse {
         $data = json_decode($request->getContent());
 
         $app = $this->appRepository->findOneById($data->appId);
@@ -35,16 +37,23 @@ class AppRolesController extends AbstractController {
         return new JsonResponse($appRole?->getData());
     }
 
-    #[Route('/app_role/options/{id}', name: 'app_api_role_options')]
-    public function index(string $id): JsonResponse {
+    #[Route('/app-roles/{id}/options', name: 'app_api_role_options', methods: ["GET"])]
+    public function index(string $id, #[CurrentUser] ?User $user): JsonResponse {
         $appRole = $this->appRoleRepository->findOneById($id);
 
         if (empty($appRole)) return new JsonResponse(null, 404);
 
-        return new JsonResponse([
-            "id" => $appRole->getId(),
-            "name" => $appRole->getName(),
-            "app_role" => $appRole->getData(),
-        ]);
+        return new JsonResponse($appRole->getData());
+    }
+
+    #[Route('/app-roles/{id}', name: 'app_api_role_delete', methods: ["DELETE"])]
+    public function delete(string $id, #[CurrentUser] ?User $user): JsonResponse {
+        $appRole = $this->appRoleRepository->findOneById($id);
+        $deletedAppRoleData = $appRole->getData();
+        if ($appRole) {
+            $this->appRoleRepository->delete($appRole);
+        }
+
+        return new JsonResponse($deletedAppRoleData);
     }
 }

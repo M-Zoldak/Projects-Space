@@ -43,7 +43,7 @@ class UserOptions {
         return $this->selectedApp;
     }
 
-    public function setSelectedApp(?App $selectedApp): static {
+    public function setSelectedApp(?App $selectedApp = null): static {
         $this->selectedApp = $selectedApp;
 
         return $this;

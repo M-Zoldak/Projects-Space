@@ -56,9 +56,9 @@ class AppsController extends AbstractController {
             $app = new App();
             $app->setName($data->name);
             $app->addUser($user);
-            $app->setAppHeadAdminName("Head Admin");
+            $app->setAppHeadAdminName("Owner");
 
-            $ownerRole = new AppRole("Head Admin", $app, $this->sectionPermissionsRepository);
+            $ownerRole = new AppRole("Owner", $app, $this->sectionPermissionsRepository);
             $ownerRole->setIsDestroyable(false);
 
             $this->appRoleRepository->save($ownerRole);
@@ -81,19 +81,19 @@ class AppsController extends AbstractController {
         }
     }
 
-    #[Route('/apps/options/{id}', name: 'app_api_app_options', methods: ["GET", "POST"])]
+    #[Route('/apps/{id}/options', name: 'app_api_app_options', methods: ["GET", "POST"])]
     public function options(string $id, Request $request): JsonResponse {
         $method = $request->getMethod();
 
         if ($method == "GET") {
             $app = $this->appRepository->findOneById($id);
-            $appUsers = EntityCollectionUtil::createCollectionData($app->getUsers());
+            $appUsers = EntityCollectionUtil::createCollectionData($app->getUsers(), [$app]);
             $appRoles = EntityCollectionUtil::createCollectionData($app->getRoles());
             $formBuilder = $this->addAndEditForm($app);
             return new JsonResponse([
+                "app" => $app->getData(),
                 "roles" => $appRoles,
                 "users" => $appUsers,
-                "app" => $app->getData(),
                 "form" => $formBuilder->getFormData()
             ]);
         }
@@ -101,16 +101,13 @@ class AppsController extends AbstractController {
         return new JsonResponse([""]);
     }
 
-    #[Route('/apps', name: 'app_api_app_delete', methods: ["DELETE"])]
-    public function delete(Request $request): JsonResponse {
-        $data = json_decode($request->getContent());
-
-        $app = $this->appRepository->findOneById($data->id);
+    #[Route('/apps/{id}', name: 'app_api_app_delete', methods: ["DELETE"])]
+    public function delete(string $id, Request $request): JsonResponse {
+        $app = $this->appRepository->findOneById($id);
         if (!$app) return new JsonResponse([], 404);
 
-        $null = null;
         $users = $app->getUsers()->toArray();
-        array_walk($users, fn (User $user) => $user->getUserOptions()->setSelectedApp($null));
+        array_walk($users, fn (User $user) => $user->getUserOptions()->setSelectedApp());
         $deletedAppData = $app->getData();
         $this->appRepository->delete($app);
 

@@ -44,14 +44,9 @@ async function fetchAll<T>(token: string, path: string): Promise<Array<T>> {
   return await fetchObject<Array<T>>(token, `${path}`);
 }
 
-async function sendDelete<T>(
-  token: string,
-  path: string,
-  objectId: string
-): Promise<T> {
+async function sendDelete<T>(token: string, path: string): Promise<T> {
   return await fetch(`/api${path}`, {
     method: "DELETE",
-    body: JSON.stringify({ id: objectId }),
     headers: {
       Authorization: "Bearer " + token,
     },

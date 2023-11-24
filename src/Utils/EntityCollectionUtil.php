@@ -7,10 +7,10 @@ use Doctrine\Common\Collections\Collection;
 
 class EntityCollectionUtil {
 
-    public static function createCollectionData(Collection|array $collection): array {
+    public static function createCollectionData(Collection|array $collection, array $functionParameters = []): array {
 
-        return array_map(function ($item) {
-            return $item->getData();
+        return array_map(function ($item) use ($functionParameters) {
+            return $item->getData(...$functionParameters);
         }, self::toArray($collection));
     }
 

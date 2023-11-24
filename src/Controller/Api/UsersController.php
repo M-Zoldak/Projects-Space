@@ -31,6 +31,6 @@ class UsersController extends AbstractController {
         $user->getUserOptions()->setSelectedApp($app);
         $this->userRepository->save($user);
 
-        return new JsonResponse($user->getData());
+        return new JsonResponse($user->getCurrentUserData());
     }
 }

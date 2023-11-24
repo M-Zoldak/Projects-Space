@@ -22,7 +22,10 @@ export default function OptionsAppRole() {
 
   useEffect(() => {
     http_methods
-      .fetch<AppRoleType>(appData.token, `/app_role/options/${params.id}`)
+      .fetch<AppRoleType>(
+        appData.token,
+        `apps/${params.appId}/app-roles/${params.roleId}/options`
+      )
       .then((data) => {
         setLoaded(true);
         setAppRole(data);
@@ -49,7 +52,7 @@ export default function OptionsAppRole() {
         {!!appRole ? (
           <PermissionsTable
             id={appRole?.id.toString()}
-            items={appRole.userPermissions}
+            items={appRole.permissions}
             label="none yet"
             name="some Name"
             setItems={updateAppRole}
