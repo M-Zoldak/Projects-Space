@@ -24,7 +24,8 @@ class ApiLoginController extends AbstractController {
         // $tokenCreator->setUser()
         return new JsonResponse([
             'user'  => $user->getUserIdentifier(),
-            'username' => $user->getUserName()
+            'username' => $user->getUserName(),
+            "token" => $token
         ]);
     }
 
@@ -37,23 +38,6 @@ class ApiLoginController extends AbstractController {
         return new JsonResponse([
             'apps'  => $appsData,
             "user" => $userData
-        ]);
-    }
-
-    #[Route('/api/user_data', name: 'api_user_data')]
-    public function user_data(#[CurrentUser] ?User $user, Request $request): Response {
-        $appId = $request->query->get("appId");
-        $app = array_filter(
-            $user->getApps()->toArray(),
-            function ($app) use ($appId) {
-                return $app->getId() == $appId;
-            }
-        )[0] ?? null;
-
-        $userData = $user->getData($app);
-
-        return new JsonResponse([
-            'user'  => $userData,
         ]);
     }
 }

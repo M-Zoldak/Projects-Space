@@ -202,7 +202,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
             return in_array($this, $role->getUsers()->toArray());
         });
 
-        return EntityCollectionUtil::createCollectionData($role[0]->getSectionPermissions());
+        return (object) EntityCollectionUtil::createNamedCollectionData($role[0]->getSectionPermissions(), "sectionName");
     }
 
     public function addAppRole(AppRole $appRole): static {

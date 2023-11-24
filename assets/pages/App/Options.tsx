@@ -99,6 +99,7 @@ export default function Options() {
           items={users}
           // propsToShow={[{ name: "app_role" }]}
           backlink={location.pathname}
+          userPermissions={appData.currentUser.userPermissions.apps}
         />
         <FlexboxGrid>
           <InputGroup>
@@ -116,6 +117,7 @@ export default function Options() {
           entity="app_role"
           items={appRolesList}
           backlink={location.pathname}
+          userPermissions={appData.currentUser.userPermissions.apps}
         />
         <FlexboxGrid>
           <InputGroup>

@@ -10,7 +10,6 @@ import LoginLayout from "../../layouts/LoginLayout";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TextField from "../../components/Forms/TextField";
-import Dashboard from "../Dashboard";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { http_methods } from "../../Functions/Fetch";
 import { UserType } from "../../interfaces/EntityTypes/UserType";
@@ -18,7 +17,7 @@ import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 function Login() {
   const navigate = useNavigate();
-  const { setToken, setUser, setApps, setAppId } = useAppDataContext();
+  const { initializeAppData } = useAppDataContext();
   const [formValue, setFormValue] = useState({
     username: "",
     password: "",
@@ -27,23 +26,17 @@ function Login() {
   const login = async () => {
     let token = await http_methods
       .post<any>("/login", formValue)
-      .then((data) => {
-        setToken(data.token);
-        return data.token;
-      })
+      .then(async (data) => data.token)
       .catch((err: Error) => console.log(err.message));
 
-    if (token) {
-      await http_methods
-        .fetch<any>(token, "/initial_data")
-        .then((data: { user: UserType; apps: AppType[] }) => {
-          setUser(data.user);
-          setApps(data.apps);
-          setAppId(data.user?.options?.currentAppId ?? data.apps[0].id);
-        });
+    let dataLoaded = await initializeAppData(token);
 
-      if (true) return navigate("/dashboard");
+    if (dataLoaded) {
+      return navigate("/dashboard");
+    } else {
+      throw new Error("Necessary data couldn't be loaded");
     }
+    // })
   };
 
   return (

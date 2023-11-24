@@ -15,8 +15,13 @@ async function post<T>(
   })
     .then((res) => {
       if (res.status >= 200 && res.status <= 299) return res.json();
+      else throw new Error(res.status.toString());
     })
     .catch((err: Error) => {
+      switch (err.message) {
+        case "401":
+          throw new Error("Invalid credentials!");
+      }
       throw new Error(err.message);
     });
 }

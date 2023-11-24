@@ -32,7 +32,7 @@ export default function EditableList<T>({
   entity,
   backlink,
   buttons = {
-    destroyable: true,
+    deleteable: true,
     hasOptions: true,
     hasView: true,
   },
@@ -73,7 +73,7 @@ export default function EditableList<T>({
       );
 
     let destroy =
-      buttons.destroyable && (userPermissions?.destroyable ?? false) ? (
+      buttons.deleteable && (userPermissions?.deleteable ?? false) ? (
         <Button
           appearance="ghost"
           size="sm"

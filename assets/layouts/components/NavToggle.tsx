@@ -8,7 +8,7 @@ type PopupMenu = {
 };
 
 const PopupMenu = ({ expand, onChange }: PopupMenu) => {
-  const { appData, setToken, clear } = useAppDataContext();
+  const { appData, clear } = useAppDataContext();
   const navigate = useNavigate();
 
   async function handleLogout() {

@@ -8,7 +8,7 @@ export type PermissionsTableProps = {
   name: string;
   label: string;
   propsToRender: Array<PermissionRenderProps>;
-  items: Array<{}>;
+  items: any;
   setItems: Function;
 };
 

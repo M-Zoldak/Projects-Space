@@ -8,7 +8,7 @@ export type DynamicallyFilledObject = {
 
 export type ActionButtonsType = {
   hasView?: boolean;
-  destroyable?: boolean;
+  deleteable?: boolean;
   hasOptions?: boolean;
 };
 

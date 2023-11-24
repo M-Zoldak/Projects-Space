@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use stdClass;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SectionPermissionsRepository;
 
@@ -33,15 +34,13 @@ class SectionPermissions extends Entity {
         $this->setEdit($isEditable);
     }
 
-    public function getData(): object {
-        return (object) [
-            $this->getSectionName() =>  [
-                "id" => $this->getId(),
-                "roleId" => $this->getAppRole()->getId(),
-                "hasShow" => $this->isReview(),
-                "deleteable" => $this->isDestroy(),
-                "hasOptions" => $this->isEdit()
-            ]
+    public function getData(): array {
+        return [
+            "id" => $this->getId(),
+            "roleId" => $this->getAppRole()->getId(),
+            "hasView" => $this->isReview(),
+            "deleteable" => $this->isDestroy(),
+            "hasOptions" => $this->isEdit()
         ];
     }
 

@@ -1,24 +1,30 @@
 import { PropsWithChildren, createContext, useContext } from "react";
 import { useState } from "react";
 import { AppType } from "../interfaces/EntityTypes/AppType";
-import { UserType } from "../interfaces/EntityTypes/UserType";
+import {
+  UserStandardPermissions,
+  UserType,
+} from "../interfaces/EntityTypes/UserType";
 import { PermissionsType } from "../interfaces/DefaultTypes";
+import { http_methods } from "../Functions/Fetch";
+import { redirect } from "react-router-dom";
 
 interface AppDataType {
-  currentAppId: string | null;
-  currentUser: UserType;
-  apps: Array<AppType>;
-  token: string;
+  currentUser?: UserType;
+  apps?: Array<AppType>;
+  token?: string;
 }
 
 type AppDataContextType = {
   appData: AppDataType;
-  setAppId: (currentAppId: string) => void;
-  setUser: (currentUser: UserType) => void;
-  setApps: (apps: Array<AppType>) => void;
+  initializeAppData: (token: string) => Promise<boolean>;
+  updateAppData: (appData: AppDataType) => void;
   addApp: (app: AppType) => void;
-  setToken: (token: string) => void;
   clear: () => void;
+};
+
+const setLocalItem = (key: string, item: any) => {
+  localStorage.setItem(key, JSON.stringify(item));
 };
 
 const getLocalItem = (itemName: string) => {
@@ -33,46 +39,36 @@ export const useAppDataContext = () =>
   useContext(AppDataContext) as AppDataContextType;
 
 export default function AppDataProvider({ children }: PropsWithChildren) {
-  const [appData, setAppData] = useState<AppDataType>({
-    apps: getLocalItem("appsData"),
-    token: localStorage.getItem("token"),
-    currentAppId: localStorage.getItem("currentAppId"),
-    currentUser: getLocalItem("currentUser"),
-  });
+  const [appData, setAppData] = useState<AppDataType>(
+    getLocalItem("appData") ?? ({} as AppDataType)
+  );
 
-  console.log(appData.currentUser);
+  console.log(appData);
 
-  const setAppId = (currentAppId: string = null) => {
-    localStorage.setItem("currentAppId", currentAppId);
-    setAppData({ ...appData, currentAppId });
+  const initializeAppData = async (token: string = "") => {
+    if (token || appData.token) {
+      return await http_methods
+        .fetch<any>(token, "/initial_data")
+        .then((data: { user: UserType; apps: AppType[] }) => {
+          appData.token = token;
+          appData.currentUser = data.user;
+          appData.apps = data.apps;
+          setAppData({ ...appData });
+        })
+        .then(() => true);
+    } else {
+      redirect("/login");
+    }
   };
 
-  const setUser = (currentUser: UserType) => {
-    if (currentUser.userPermissions) {
-      currentUser.userPermissions = Object.assign(
-        {},
-        // @ts-ignore
-        ...currentUser.userPermissions
-      );
-    }
-    localStorage.setItem("currentUser", JSON.stringify(currentUser));
-    setAppData({ ...appData, currentUser });
+  const updateAppData = (newAppData: AppDataType) => {
+    setLocalItem("appData", { ...appData, ...newAppData });
+    setAppData({ ...appData, ...newAppData });
   };
 
   const addApp = (app: AppType) => {
     let apps = [...appData.apps, app];
-    localStorage.setItem("appsData", JSON.stringify(apps));
-    setAppData({ ...appData, apps });
-  };
-
-  const setApps = (apps: Array<AppType>) => {
-    localStorage.setItem("appsData", JSON.stringify(apps));
-    setAppData({ ...appData, apps });
-  };
-
-  const setToken = (token: string) => {
-    localStorage.setItem("token", token);
-    setAppData({ ...appData, token });
+    updateAppData({ ...appData, apps });
   };
 
   const clear = () => {
@@ -83,10 +79,8 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
     <AppDataContext.Provider
       value={{
         appData,
-        setAppId,
-        setUser,
-        setApps,
-        setToken,
+        initializeAppData,
+        updateAppData,
         clear,
         addApp,
       }}

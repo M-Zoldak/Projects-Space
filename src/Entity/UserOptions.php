@@ -21,8 +21,7 @@ class UserOptions {
 
     public function getData(): array {
         return [
-            "id" => $this->getId(),
-            "selectedApp" => $this->getSelectedApp()
+            "selectedAppId" => $this->getSelectedApp()?->getId()
         ];
     }
 

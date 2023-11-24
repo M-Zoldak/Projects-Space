@@ -46,10 +46,10 @@ export default function OptionsAppRole() {
 
       <ContentLoader loaded={loaded}>
         <h3>{appRole?.name} permissions</h3>
-        {/* {!!appRole ? (
+        {!!appRole ? (
           <PermissionsTable
             id={appRole?.id.toString()}
-            items={appRole?.userPermissions}
+            items={appRole.userPermissions}
             label="none yet"
             name="some Name"
             setItems={updateAppRole}
@@ -57,7 +57,7 @@ export default function OptionsAppRole() {
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>
-        )} */}
+        )}
       </ContentLoader>
     </StandardLayout>
   );

@@ -108,9 +108,13 @@ class AppsController extends AbstractController {
         $app = $this->appRepository->findOneById($data->id);
         if (!$app) return new JsonResponse([], 404);
 
+        $null = null;
+        $users = $app->getUsers()->toArray();
+        array_walk($users, fn (User $user) => $user->getUserOptions()->setSelectedApp($null));
+        $deletedAppData = $app->getData();
         $this->appRepository->delete($app);
 
-        return new JsonResponse();
+        return new JsonResponse($deletedAppData);
     }
 
     private function addAndEditForm(?App $app = null): FormBuilder {

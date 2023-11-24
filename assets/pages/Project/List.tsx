@@ -20,7 +20,7 @@ export default function ProjectsList() {
     http_methods
       .fetchAll<ProjectType>(
         appData.token,
-        `/projects?appId=${appData.currentAppId}`
+        `/projects?appId=${appData.currentUser.userOptions.selectedAppId}`
       )
       .then((data) => {
         setProjects(data);
@@ -29,7 +29,7 @@ export default function ProjectsList() {
       .catch((err: Error) => {
         addNotification({ text: err.message });
       });
-  }, [appData.currentAppId]);
+  }, [appData.currentUser.userOptions.selectedAppId]);
 
   console.log(appData.currentUser);
 

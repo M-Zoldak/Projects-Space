@@ -16,6 +16,7 @@ import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { useEffect } from "react";
 import { http_methods } from "../../Functions/Fetch";
 import { UserType } from "../../interfaces/EntityTypes/UserType";
+import { app } from "../../bootstrap";
 
 export interface PageLinkInterface {
   name: string;
@@ -51,44 +52,42 @@ class PageLink implements PageLinkInterface {
   }
 }
 
-function compare(a: string, b: string) {
-  let nameA = a.toUpperCase();
-  let nameB = b.toUpperCase();
-
-  if (nameA < nameB) {
-    return -1;
-  }
-  if (nameA > nameB) {
-    return 1;
-  }
-  return 0;
-}
-
 function AppChooser(index: number) {
-  const { appData, setAppId } = useAppDataContext();
+  const { appData, updateAppData } = useAppDataContext();
+
+  useEffect(() => {}, [appData]);
 
   const handleChange = (appId: string) => {
     http_methods
-      .post("/updateSelectedApp", {
-        appId: appId,
-        userId: appData.currentUser.id.toString(),
+      .post<UserType>(
+        "/user/updateSelectedApp",
+        {
+          appId: appId,
+        },
+        appData.token
+      )
+      .then((res) => {
+        appData.currentUser.userOptions = res.userOptions;
+        updateAppData(appData);
       })
-      .then((res) => setAppId(appId))
       .catch((err) => err);
   };
 
   const provideSelectData = (apps: Array<AppType>) => {
+    console.log(apps);
     return apps.map((app) => {
       return { label: app.name, value: app.id.toString() };
     });
   };
+
+  console.log(appData.currentUser.userOptions.selectedAppId);
 
   return appData?.apps?.length ? (
     <SelectPicker
       key={index}
       data={provideSelectData(appData.apps)}
       searchable={false}
-      defaultValue={appData?.currentAppId}
+      defaultValue={appData.currentUser.userOptions.selectedAppId.toString()}
       onChange={handleChange}
       style={{
         width: "calc(100% - 40px)",
@@ -112,17 +111,12 @@ function AppChooser(index: number) {
 }
 
 export default function SideNav({ activePage }: { activePage: string }) {
-  const { appData, setUser } = useAppDataContext();
+  const { appData } = useAppDataContext();
 
-  useEffect(() => {
-    let appendAppDependentData = appData.currentAppId
-      ? "?appId=" + appData.currentAppId
-      : "";
-
-    http_methods
-      .fetch<UserType>(appData.token, `/user_data${appendAppDependentData}`)
-      .then((data) => setUser(data));
-  }, [appData.currentAppId]);
+  useEffect(() => {}, [
+    appData?.apps,
+    appData.currentUser.userOptions.selectedAppId,
+  ]);
 
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(
@@ -130,7 +124,8 @@ export default function SideNav({ activePage }: { activePage: string }) {
       "/dashboard",
       <FontAwesomeIcon icon={faGaugeHigh} />
     ),
-    appData.currentAppId &&
+    appData?.currentUser?.userOptions?.selectedAppId &&
+      appData.currentUser?.userPermissions?.projects?.hasView &&
       new PageLink(
         "Projects",
         "/projects",

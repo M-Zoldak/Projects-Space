@@ -53,7 +53,7 @@ class AppRole extends Entity {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),
-            "rolePermissions" => $this->getSectionPermissions()
+            "rolePermissions" => EntityCollectionUtil::createNamedCollectionData($this->getSectionPermissions(), "sectionName")
         ];
     }
 

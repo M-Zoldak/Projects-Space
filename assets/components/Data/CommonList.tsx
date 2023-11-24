@@ -26,7 +26,7 @@ type CommonListProps<T> = {
 export default function CommonList<T>({
   items,
   buttons = {
-    destroyable: true,
+    deleteable: true,
     hasOptions: true,
     hasView: true,
   },
@@ -50,7 +50,6 @@ export default function CommonList<T>({
   };
 
   const renderActionButtons = (item: CommonListItemProps) => {
-    console.log(item);
     let overview = buttons.hasView && (userPermissions?.hasView ?? false) && (
       <Button
         appearance="ghost"
@@ -63,8 +62,8 @@ export default function CommonList<T>({
       </Button>
     );
 
-    let destroy = buttons.destroyable &&
-      (userPermissions?.destroyable ?? false) && (
+    let destroy = buttons.deleteable &&
+      (userPermissions?.deleteable ?? false) && (
         <Button
           appearance="ghost"
           size="sm"

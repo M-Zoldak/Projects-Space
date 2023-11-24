@@ -12,7 +12,7 @@ import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 export default function AppsList() {
-  const { appData, setApps } = useAppDataContext();
+  const { appData, updateAppData } = useAppDataContext();
   const location = useLocation();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
@@ -27,8 +27,8 @@ export default function AppsList() {
 
     http_methods
       .fetchAll<AppType>(appData.token, "/apps")
-      .then((data) => {
-        setApps(data);
+      .then((appsData) => {
+        updateAppData({ apps: appsData });
         setLoaded(true);
       })
       .catch((err: Error) => {
@@ -57,9 +57,9 @@ export default function AppsList() {
                 text: `App ${item.name} was deleted succesfully`,
                 notificationProps: { type: "success" },
               });
-              setApps(newApps);
+              updateAppData({ apps: newApps });
             }}
-            buttons={{ hasView: false, destroyable: true, hasOptions: true }}
+            buttons={{ hasView: false, deleteable: true, hasOptions: true }}
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>
