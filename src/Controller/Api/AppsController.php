@@ -68,6 +68,7 @@ class AppsController extends AbstractController {
             }
 
             $app->addRole($ownerRole);
+            $app->setDefaultRole($ownerRole);
 
             $errors = ValidatorHelper::validateObject($app, $validator);
 
@@ -120,7 +121,7 @@ class AppsController extends AbstractController {
         return $formBuilder;
     }
 
-    #[Route('/apps/{id}/update', name: 'app_api_app_update', methods: ["POST"])]
+    #[Route('/apps/{id}/update', name: 'app_api_app_update', methods: ["PUT"])]
     public function updateApp(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
 
         $data = (object) json_decode($request->getContent());
@@ -136,6 +137,16 @@ class AppsController extends AbstractController {
 
         $this->appRepository->save($app);
 
+        return new JsonResponse($app->getData());
+    }
+
+    #[Route('/apps/{id}/updateDefaultRole', name: 'app_api_app_update_default_role', methods: ["PUT"])]
+    public function updateAppDefaultRole(string $id, Request $request): JsonResponse {
+        $data = (object) json_decode($request->getContent());
+        $app = $this->appRepository->findOneById($id);
+        $role = $this->appRoleRepository->findOneById($data->defaultRoleId);
+        $app->setDefaultRole($role);
+        $this->appRepository->save($app);
         return new JsonResponse($app->getData());
     }
 }

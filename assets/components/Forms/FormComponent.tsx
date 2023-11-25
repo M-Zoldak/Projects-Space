@@ -31,7 +31,7 @@ export default function FormComponent<T>({
         data[field.name] = field.value;
         return data;
       },
-      appData?.currentUser.userOptions.selectedAppId
+      appData?.currentUser?.userOptions?.selectedAppId
         ? { appId: appData.currentUser.userOptions.selectedAppId }
         : {}
     );

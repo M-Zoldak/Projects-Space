@@ -39,6 +39,10 @@ class App extends Entity {
     #[ORM\OneToMany(mappedBy: 'selectedApp', targetEntity: UserOptions::class, orphanRemoval: true)]
     private Collection $userOptions;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?AppRole $defaultRole = null;
+
     public function __construct() {
         parent::__construct();
         $this->users = new ArrayCollection();
@@ -53,6 +57,7 @@ class App extends Entity {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),
+            "defaultRoleId" => $this->getDefaultRole()->getId(),
             "statistics" => [
                 "usersCount" => $this->getUsers()->count()
             ]
@@ -173,6 +178,13 @@ class App extends Entity {
         return $this->roles;
     }
 
+    public function getAdminRole() {
+        $roles = array_filter($this->getRoles()->toArray(), function (AppRole $role) {
+            return $role->isOwnerRole();
+        });
+        return $roles[0];
+    }
+
     public function addRole(AppRole $role): static {
         if (!$this->roles->contains($role)) {
             $this->roles->add($role);
@@ -253,6 +265,17 @@ class App extends Entity {
                 $userOption->setSelectedApp(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDefaultRole(): ?AppRole {
+        if ($this->defaultRole->getId() == 0) $this->setDefaultRole($this->getAdminRole());
+        return $this->defaultRole;
+    }
+
+    public function setDefaultRole(?AppRole $defaultRole): static {
+        $this->defaultRole = $defaultRole;
 
         return $this;
     }

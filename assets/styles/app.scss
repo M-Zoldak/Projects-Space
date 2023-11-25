@@ -103,6 +103,13 @@ body {
   gap: 1rem;
 }
 
+.rs-radio-wrapper {
+  cursor: pointer;
+  input[type="radio"] {
+    pointer-events: none;
+  }
+}
+
 // .rs-message-container .rs-btn-close {
 //   right: 28px;
 //   .rs-icon {

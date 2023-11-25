@@ -1,4 +1,4 @@
-import { Button, FlexboxGrid, Input, InputGroup } from "rsuite";
+import { Button, FlexboxGrid, Input, InputGroup, Radio } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
@@ -18,6 +18,7 @@ import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { HoverTooltip } from "../../components/Text/Tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserTie } from "@fortawesome/free-solid-svg-icons";
+import { faCreativeCommonsBy } from "@fortawesome/free-brands-svg-icons";
 
 export default function Options() {
   const { appData } = useAppDataContext();
@@ -26,10 +27,10 @@ export default function Options() {
   const [loaded, setLoaded] = useState(false);
   const [app, setApp] = useState<AppType>();
   const [users, setUsers] = useState([]);
+  const [defaultRoleId, setDefaultRoleId] = useState("");
   const [appName, setAppName] = useState("");
   const [newRole, setNewRole] = useState("");
   const [newUser, setNewUser] = useState("");
-  const [formFields, setFormFields] = useState([]);
   const [appRolesList, setAppRolesList] = useState([]);
 
   useEffect(() => {
@@ -39,8 +40,8 @@ export default function Options() {
         setAppRolesList(data.roles);
         setUsers(data.users);
         setApp(data.app);
+        setDefaultRoleId(data.app.defaultRoleId);
         setAppName(data.app.name);
-        setFormFields(data.form);
         setLoaded(true);
       })
       .catch((err: Error) => {
@@ -74,14 +75,6 @@ export default function Options() {
     setNewUser("");
   };
 
-  const actionOnSuccess = (successData: AppType) => {
-    setApp(successData);
-    return addNotification({
-      text: "Changes were saved.",
-      notificationProps: { type: "success" },
-    });
-  };
-
   const updateAppName = () => {
     http_methods
       .put<AppType>(`/apps/${app.id}`, { name: appName }, appData.token)
@@ -96,6 +89,34 @@ export default function Options() {
         <FlexboxGridItem>
           <HoverTooltip text="User role">
             <FontAwesomeIcon icon={faUserTie} /> {item.appRole.name}
+          </HoverTooltip>
+        </FlexboxGridItem>
+      </FlexboxGrid>
+    );
+  };
+
+  const appRoleAdditionalInfo = (item: AppRoleType) => {
+    return (
+      <FlexboxGrid align="middle">
+        <FlexboxGridItem>
+          <HoverTooltip text="Click to choose as default role for new users">
+            <FontAwesomeIcon icon={faCreativeCommonsBy} />{" "}
+            <Radio
+              checked={item.id == defaultRoleId}
+              onClick={() => {
+                http_methods
+                  .put<AppType>(
+                    `/apps/${params.id}/updateDefaultRole`,
+                    {
+                      defaultRoleId: item.id,
+                    },
+                    appData.token
+                  )
+                  .then((data) => {
+                    setDefaultRoleId(data.defaultRoleId);
+                  });
+              }}
+            ></Radio>
           </HoverTooltip>
         </FlexboxGridItem>
       </FlexboxGrid>
@@ -164,6 +185,7 @@ export default function Options() {
             let roles = filterOutItem(appRolesList, item);
             setAppRolesList(roles);
           }}
+          additionalInfo={appRoleAdditionalInfo}
         />
 
         {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (

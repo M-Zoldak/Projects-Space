@@ -12,8 +12,11 @@ export function HoverTooltip({
       controlId="control-id-hover"
       trigger="hover"
       speaker={<Tooltip>{text}</Tooltip>}
+      delay={500}
     >
-      <div>{children}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: ".5em" }}>
+        {children}
+      </div>
     </Whisper>
   );
 }

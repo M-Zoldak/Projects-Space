@@ -49,6 +49,7 @@ export default function ProjectsList() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
+        <h3>Active projects</h3>
         {projects?.length ? (
           <CommonList<ProjectType>
             items={projects}
@@ -70,6 +71,9 @@ export default function ProjectsList() {
         ) : (
           <p>You don't have any projects yet. Create one now!</p>
         )}
+        <h3>Projects to delete</h3>
+
+        <h3>Archivized projects</h3>
       </ContentLoader>
     </StandardLayout>
   );

@@ -1,4 +1,4 @@
-import { Button, FlexboxGrid } from "rsuite";
+import { Button, FlexboxGrid, SelectPicker } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -67,6 +67,7 @@ export default function AppsList() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
+        <h3>Active Spaces</h3>
         {appData?.apps?.length ? (
           <CommonList<AppType>
             items={appData.apps}

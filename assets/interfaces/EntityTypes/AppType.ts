@@ -6,6 +6,7 @@ export type AppType = {
   id: string;
   name: string;
   userPermissions: PermissionsType;
+  defaultRoleId: string;
   statistics: {
     usersCount: number;
   };
