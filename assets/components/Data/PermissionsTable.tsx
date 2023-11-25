@@ -1,4 +1,7 @@
 import { Checkbox, Table } from "rsuite";
+import { PermissionsType } from "../../interfaces/DefaultTypes";
+import { PropsWithChildren } from "react";
+import { HoverTooltip } from "../Text/Tooltip";
 
 const { Column, HeaderCell, Cell } = Table;
 
@@ -8,43 +11,96 @@ export type PermissionsTableProps = {
   name: string;
   label: string;
   propsToRender: Array<PermissionRenderProps>;
-  items: any;
-  setItems: Function;
+  items: {};
+  isLoading: boolean;
 };
 
 type PermissionRenderProps = {
-  [key: string]: string | boolean;
   key: string;
   label: string;
-  fieldType: "string" | "checkbox";
+  fieldType: "description" | "string" | "checkbox";
+  values?: any;
+  onChange?: (item: any, value: any, updatedKey: string) => void;
+  disabled?: (item: any) => boolean;
+  disabledMessage?: string;
+};
+
+const CheckCell = ({
+  dataKey,
+  itemProps,
+  ...props
+}: {
+  dataKey: any;
+  itemProps: PermissionRenderProps;
+}) => {
+  return (
+    <Cell
+      verticalAlign="middle"
+      className="checkbox-cell"
+      {...props}
+      style={{ padding: 0 }}
+    >
+      {(rowData, rowIndex) => {
+        return itemProps.disabled && itemProps.disabled(rowData) ? (
+          <HoverTooltip text={itemProps.disabledMessage}>
+            <Checkbox
+              value={rowData[dataKey]}
+              checked={rowData[dataKey]}
+              disabled={
+                itemProps.disabled ? itemProps.disabled(rowData) : false
+              }
+              onChange={() =>
+                itemProps.onChange(rowData, rowData[dataKey], itemProps.key)
+              }
+            />
+          </HoverTooltip>
+        ) : (
+          <Checkbox
+            value={rowData[dataKey]}
+            checked={rowData[dataKey]}
+            disabled={itemProps.disabled ? itemProps.disabled(rowData) : false}
+            onChange={() =>
+              itemProps.onChange(rowData, rowData[dataKey], itemProps.key)
+            }
+          />
+        );
+      }}
+    </Cell>
+  );
 };
 
 export default function PermissionsTable({
   items,
   propsToRender,
-  setItems,
+  isLoading,
 }: PermissionsTableProps) {
   const createProperField = (props: PermissionRenderProps) => {
     switch (props.fieldType) {
       case "checkbox":
-        return (
-          <Cell style={{ alignContent: "center" }}>
-            <Checkbox onChange={(e) => setItems(e, props)} />
-          </Cell>
-        );
+        return <CheckCell dataKey={props.key} itemProps={props} />;
       case "string":
-        return <Cell dataKey={props.key} />;
+        return <Cell align="middle" dataKey={props.key} />;
+      case "description":
+        return <Cell align="middle" dataKey={props.key} />;
     }
   };
 
-  return (
-    <Table hover bordered data={items}>
-      {propsToRender.map((props, index) => {
-        let align = index > 0 && "center";
+  let itemsArr = Object.values(items).sort((itemA: any, itemB: any) =>
+    itemA.name > itemB.name ? 1 : -1
+  );
 
+  return (
+    <Table hover loading={isLoading} autoHeight bordered data={itemsArr}>
+      {propsToRender.map((props: PermissionRenderProps, index) => {
+        let align = index > 0 ? "center" : "";
         return (
-          <Column fixed key={props.key} align={align}>
-            <HeaderCell>{props.name}</HeaderCell>
+          <Column
+            fixed={props.fieldType == "checkbox"}
+            flexGrow={1}
+            key={props.label}
+            align={align}
+          >
+            <HeaderCell>{props.label}</HeaderCell>
             {createProperField(props)}
           </Column>
         );

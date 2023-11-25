@@ -93,7 +93,7 @@ function Main() {
         />
 
         <Route
-          path="/apps/:appId/roles/:roleId/options"
+          path="app-roles/:roleId/options"
           element={
             <Protected>
               <OptionsAppRole />

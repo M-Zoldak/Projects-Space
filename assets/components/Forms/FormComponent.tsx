@@ -21,11 +21,13 @@ export default function FormComponent<T>({
   postPath,
 }: FormComponentProps<T>) {
   const { appData } = useAppDataContext();
-  const [formValue, setFormValue] = useState<DynamicallyFilledObject>({});
+  const [formValue, setFormValue] = useState<DynamicallyFilledObject<string>>(
+    {}
+  );
 
   useEffect(() => {
     let formValues = formData.reduce(
-      (data: DynamicallyFilledObject, field: FormDataType) => {
+      (data: DynamicallyFilledObject<string>, field: FormDataType) => {
         data[field.name] = field.value;
         return data;
       },

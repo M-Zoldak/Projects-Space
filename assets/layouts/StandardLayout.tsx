@@ -12,6 +12,8 @@ import NavToggle from "./components/NavToggle";
 import { Link, useNavigate } from "react-router-dom";
 import SideNav from "./components/SideNav";
 import { useNotificationsContext } from "../contexts/NotificationsContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRocket } from "@fortawesome/free-solid-svg-icons";
 
 type StandardLayout = PropsWithChildren<{
   title: string;
@@ -24,7 +26,7 @@ const StandardLayout = ({
   activePage, // notifications,
 }: StandardLayout) => {
   const [expand, setExpand] = useState(true);
-  const { notifications } = useNotificationsContext();
+  const { notifications, removeNotification } = useNotificationsContext();
 
   return (
     <div className="sidebar-page">
@@ -36,7 +38,18 @@ const StandardLayout = ({
         >
           <Sidenav.Header>
             <Link to="/" className="navbar-brand">
-              <>My-Projects-Lib</>
+              <FontAwesomeIcon
+                icon={faRocket}
+                style={{
+                  marginRight: "1rem",
+                  fontSize: ".8em",
+                  border: "2px solid currentColor",
+                  padding: ".5rem",
+                  borderRadius: "50%",
+                }}
+              />
+              {/* <FontAwesomeIcon icon={} */}
+              <span>Projects Space</span>
             </Link>
           </Sidenav.Header>
           <Sidenav
@@ -70,6 +83,7 @@ const StandardLayout = ({
                   <Message
                     key={index}
                     closable={true}
+                    onClose={() => removeNotification(notification)}
                     type={notification.notificationProps?.type ?? "error"}
                   >
                     {notification.text}

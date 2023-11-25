@@ -16,7 +16,6 @@ import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { useEffect } from "react";
 import { http_methods } from "../../Functions/Fetch";
 import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
-import { app } from "../../bootstrap";
 
 export interface PageLinkInterface {
   name: string;
@@ -75,8 +74,6 @@ function AppChooser(index: number) {
       return { label: app.name, value: app.id.toString() };
     });
   };
-
-  console.log(appData.currentUser.userOptions.selectedAppId);
 
   return appData?.apps?.length ? (
     <SelectPicker

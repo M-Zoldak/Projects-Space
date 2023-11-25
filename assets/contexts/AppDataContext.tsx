@@ -13,8 +13,8 @@ interface AppDataType {
 
 type AppDataContextType = {
   appData: AppDataType;
-  initializeAppData: (token: string) => Promise<boolean>;
-  refreshAppData: () => Promise<boolean>;
+  initializeAppData: (token: string) => Promise<boolean | Response>;
+  refreshAppData: () => Promise<boolean | Response>;
   clear: () => void;
 };
 
@@ -43,21 +43,25 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
       return await http_methods
         .fetch<any>(token ?? appData.token, "/initial_data")
         .then(async (data: { user: CurrentUserType; apps: AppType[] }) => {
-          appData.currentUser = await setCurrentUserData(data.user);
+          appData.currentUser = setCurrentUserData(data.user);
           appData.token = token ?? appData.token;
           appData.apps = data.apps;
           setLocalItem("appData", { ...appData });
           setAppData({ ...appData });
         })
-        .then(() => true);
+        .then(() => true)
+        .catch((err: Error) => {
+          err.message == "Invalid token";
+          console.log("Token expired");
+          clear();
+          return redirect("/login");
+        });
     } else {
-      redirect("/login");
+      return redirect("/login");
     }
   };
 
-  const setCurrentUserData = async (
-    userData: CurrentUserType
-  ): Promise<CurrentUserType> => {
+  const setCurrentUserData = (userData: CurrentUserType): CurrentUserType => {
     if (userData.currentAppRole == null) {
       userData.currentAppRole = {
         id: null,

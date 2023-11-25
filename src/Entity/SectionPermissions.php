@@ -38,6 +38,7 @@ class SectionPermissions extends Entity {
         return [
             "id" => $this->getId(),
             "roleId" => $this->getAppRole()->getId(),
+            "name" => $this->getSectionName(),
             "hasView" => $this->isReview(),
             "deleteable" => $this->isDestroy(),
             "hasOptions" => $this->isEdit()

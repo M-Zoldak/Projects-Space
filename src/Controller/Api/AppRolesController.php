@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\User;
 use App\Entity\AppRole;
 use App\Repository\AppRepository;
+use App\Entity\SectionPermissions;
 use App\Utils\EntityCollectionUtil;
 use App\Repository\AppRoleRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -55,5 +56,33 @@ class AppRolesController extends AbstractController {
         }
 
         return new JsonResponse($deletedAppRoleData);
+    }
+
+
+    #[Route('/app-roles/{id}', name: 'app_api_role_update', methods: ["PUT"])]
+    public function update(string $id, #[CurrentUser] ?User $user, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+        $appRole = $this->appRoleRepository->findOneById($id);
+
+        $permissions = $appRole->getSectionPermissions()->toArray();
+        array_walk($permissions, function (SectionPermissions $permissions) use ($data) {
+            $permissions->setDestroy($data->permissions->{$permissions->getSectionName()}->deleteable);
+            $permissions->setReview($data->permissions->{$permissions->getSectionName()}->hasView);
+            $permissions->setEdit($data->permissions->{$permissions->getSectionName()}->hasOptions);
+            $this->sectionPermissionsRepository->save($permissions);
+        });
+
+        return new JsonResponse($appRole->getData());
+    }
+
+
+    #[Route('/app-roles/{id}/updateName', name: 'app_api_role_update_name', methods: ["PUT"])]
+    public function updateName(string $id, #[CurrentUser] ?User $user, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+        $appRole = $this->appRoleRepository->findOneById($id);
+
+        $appRole->setName($data->name);
+        $this->appRoleRepository->save($appRole);
+        return new JsonResponse($appRole->getData());
     }
 }

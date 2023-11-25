@@ -1,7 +1,7 @@
-import { PermissionsType } from "../DefaultTypes";
+import { DynamicallyFilledObject, PermissionsType } from "../DefaultTypes";
 
 export type AppRoleType = {
-  id: number;
+  id: string;
   name: string;
   isOwnerRole: boolean;
   permissions: UserStandardPermissions;
@@ -12,4 +12,4 @@ export type UserStandardPermissions = {
   websites?: PermissionsType;
   customers?: PermissionsType;
   apps: PermissionsType;
-};
+} & DynamicallyFilledObject<PermissionsType | any>;

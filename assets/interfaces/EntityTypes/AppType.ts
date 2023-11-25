@@ -6,6 +6,9 @@ export type AppType = {
   id: string;
   name: string;
   userPermissions: PermissionsType;
+  statistics: {
+    usersCount: number;
+  };
 };
 
 export type AppOptionsType = {

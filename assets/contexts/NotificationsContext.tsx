@@ -4,10 +4,10 @@ import {
   SetStateAction,
   createContext,
   useContext,
-} from 'react';
+} from "react";
 
-import { useState } from 'react';
-import { NotificationProps } from 'rsuite';
+import { useState } from "react";
+import { NotificationProps } from "rsuite";
 
 interface Notification {
   text: string;
@@ -17,6 +17,7 @@ interface Notification {
 type NotificationContextType = {
   notifications: Array<Notification>;
   addNotification: (notification: Notification) => void;
+  removeNotification: (notification: Notification) => void;
 };
 
 const NotificationsContext = createContext<NotificationContextType | null>(
@@ -33,8 +34,17 @@ export default function NotificationsProvider({ children }: PropsWithChildren) {
     setNotifications([...notifications, notification]);
   };
 
+  const removeNotification = (notification: Notification) => {
+    let newNotifications = notifications.filter(
+      (not) => !Object.is(not, notification)
+    );
+    setNotifications([...newNotifications]);
+  };
+
   return (
-    <NotificationsContext.Provider value={{ notifications, addNotification }}>
+    <NotificationsContext.Provider
+      value={{ notifications, addNotification, removeNotification }}
+    >
       {children}
     </NotificationsContext.Provider>
   );

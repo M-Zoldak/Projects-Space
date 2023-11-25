@@ -3,8 +3,8 @@
 namespace App\Enums;
 
 enum StandardSections: string {
-    case Projects = "projects";
-    case Websites = "websites";
-    case Customers = "customers";
-    case Apps = "apps";
+    case Apps = "Apps";
+    case Projects = "Projects";
+    case Websites = "Websites";
+    case Customers = "Customers";
 }

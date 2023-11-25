@@ -2,8 +2,8 @@ export interface defaultEntityData {
   id: number;
 }
 
-export type DynamicallyFilledObject = {
-  [key: string]: string;
+export type DynamicallyFilledObject<T> = {
+  [key: string]: T;
 };
 
 export type ActionButtonsType = {
@@ -13,5 +13,8 @@ export type ActionButtonsType = {
 };
 
 export type PermissionsType = {
-  name: string;
-} & ActionButtonsType;
+  id?: string;
+  roleId?: string;
+  name?: string;
+} & ActionButtonsType &
+  DynamicallyFilledObject<any>;

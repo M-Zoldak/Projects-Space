@@ -2,14 +2,16 @@ import { Button, FlexboxGrid } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import CommonList, {
-  CommonListItemProps,
-} from "../../components/Data/CommonList";
+import CommonList from "../../components/Data/CommonList";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+import { HoverTooltip } from "../../components/Text/Tooltip";
 
 export default function AppsList() {
   const { appData, refreshAppData } = useAppDataContext();
@@ -36,11 +38,31 @@ export default function AppsList() {
       });
   }, []);
 
+  const handleDelete = (item: AppType) => {
+    addNotification({
+      text: `App ${item.name} was deleted succesfully`,
+      notificationProps: { type: "success" },
+    });
+    refreshAppData();
+  };
+
+  const appAdditionalInfo = (item: AppType) => {
+    return (
+      <FlexboxGrid>
+        <FlexboxGridItem>
+          <HoverTooltip text="Users in space">
+            <FontAwesomeIcon icon={faUser} /> {item.statistics.usersCount}
+          </HoverTooltip>
+        </FlexboxGridItem>
+      </FlexboxGrid>
+    );
+  };
+
   return (
-    <StandardLayout title="Apps overview" activePage="My Apps">
+    <StandardLayout title="My apps" activePage="My Apps">
       <FlexboxGrid className="buttons_container">
         <Button color="green" appearance="ghost" as={Link} to={"/app/create"}>
-          Create new App
+          Create new Space
         </Button>
       </FlexboxGrid>
 
@@ -52,14 +74,9 @@ export default function AppsList() {
             userPermissions={
               appData.currentUser.currentAppRole.permissions.apps
             }
-            onDelete={(item) => {
-              addNotification({
-                text: `App ${item.name} was deleted succesfully`,
-                notificationProps: { type: "success" },
-              });
-              refreshAppData();
-            }}
+            onDelete={handleDelete}
             buttons={{ hasView: false, deleteable: true, hasOptions: true }}
+            additionalInfo={appAdditionalInfo}
           />
         ) : (
           <p>You don't have any apps yet. Create one now!</p>

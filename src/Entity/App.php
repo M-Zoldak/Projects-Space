@@ -53,6 +53,9 @@ class App extends Entity {
         return [
             "id" => $this->getId(),
             "name" => $this->getName(),
+            "statistics" => [
+                "usersCount" => $this->getUsers()->count()
+            ]
             // "roles" => $this->getRoles(),
             // "users" => $this->getUsers()
         ];

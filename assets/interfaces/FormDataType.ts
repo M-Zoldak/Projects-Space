@@ -6,4 +6,4 @@ export type FormDataType = {
   label: string;
   error: string;
   value?: string;
-} & DynamicallyFilledObject;
+} & DynamicallyFilledObject<string>;

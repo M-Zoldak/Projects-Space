@@ -12,6 +12,12 @@ import { UserType } from "../../interfaces/EntityTypes/UserType";
 import FormComponent from "../../components/Forms/FormComponent";
 import CommonList from "../../components/Data/CommonList";
 import { filterOutItem } from "../../Functions/Collections";
+import Backlink from "../../components/Buttons/Backlink";
+import InputButtonGroup from "../../components/Forms/InputButtonGroup";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+import { HoverTooltip } from "../../components/Text/Tooltip";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserTie } from "@fortawesome/free-solid-svg-icons";
 
 export default function Options() {
   const { appData } = useAppDataContext();
@@ -20,6 +26,7 @@ export default function Options() {
   const [loaded, setLoaded] = useState(false);
   const [app, setApp] = useState<AppType>();
   const [users, setUsers] = useState([]);
+  const [appName, setAppName] = useState("");
   const [newRole, setNewRole] = useState("");
   const [newUser, setNewUser] = useState("");
   const [formFields, setFormFields] = useState([]);
@@ -32,6 +39,7 @@ export default function Options() {
         setAppRolesList(data.roles);
         setUsers(data.users);
         setApp(data.app);
+        setAppName(data.app.name);
         setFormFields(data.form);
         setLoaded(true);
       })
@@ -52,6 +60,7 @@ export default function Options() {
 
     let role = successData;
     setAppRolesList([...appRolesList, role]);
+    setNewRole("");
   };
 
   const sendInvitation = async () => {
@@ -62,6 +71,7 @@ export default function Options() {
       },
       appData.token
     );
+    setNewUser("");
   };
 
   const actionOnSuccess = (successData: AppType) => {
@@ -72,30 +82,51 @@ export default function Options() {
     });
   };
 
+  const updateAppName = () => {
+    http_methods
+      .put<AppType>(`/apps/${app.id}`, { name: appName }, appData.token)
+      .then((appData) => {
+        setApp(appData);
+      });
+  };
+
+  const userAdditionalInfo = (item: UserType) => {
+    return (
+      <FlexboxGrid>
+        <FlexboxGridItem>
+          <HoverTooltip text="User role">
+            <FontAwesomeIcon icon={faUserTie} /> {item.appRole.name}
+          </HoverTooltip>
+        </FlexboxGridItem>
+      </FlexboxGrid>
+    );
+  };
+
   return (
     <StandardLayout
-      title={app?.name ? `${app.name} overview` : "Loading..."}
+      title={app?.name ? `App overview` : "Loading..."}
       activePage="My Apps"
     >
-      <FlexboxGrid className="buttons_container">
-        <Button appearance="ghost" as={Link} to={"/apps"}>
-          Back to overview
-        </Button>
-      </FlexboxGrid>
+      <Backlink link="/apps" />
 
       <ContentLoader loaded={loaded}>
-        <FormComponent<AppType>
-          formData={formFields}
-          setFormData={setFormFields}
-          onSuccess={actionOnSuccess}
-          postPath={`/apps/${params.id}/update`}
+        <h2>{app?.name} options</h2>
+
+        <InputButtonGroup
+          buttonText="Update app name"
+          label="App name: "
+          onChange={(val) => setAppName(val)}
+          value={appName}
+          onSubmit={updateAppName}
         />
 
         <h3>Users</h3>
         <CommonList<UserType>
           entity="user"
           items={users}
+          inViewBacklink={`/apps/${params.id}/options`}
           userPermissions={appData.currentUser.currentAppRole.permissions.apps}
+          linkPrepend={`/apps/${params.id}`}
           buttons={{
             deleteable: (item: UserType) => !item.appRole.isOwnerRole,
             hasOptions: true,
@@ -105,24 +136,24 @@ export default function Options() {
             let newUsers = filterOutItem(users, item);
             setAppRolesList(newUsers);
           }}
+          additionalInfo={userAdditionalInfo}
         />
 
         {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
-          <FlexboxGrid>
-            <InputGroup>
-              <InputGroup.Addon>Invite user: </InputGroup.Addon>
-              <Input value={newUser} onChange={setNewUser} />
-              <InputGroup.Button onClick={sendInvitation}>
-                Send invitation
-              </InputGroup.Button>
-            </InputGroup>
-          </FlexboxGrid>
+          <InputButtonGroup
+            label="Invite user: "
+            value={newUser}
+            onChange={(val: string) => setNewUser(val)}
+            buttonText="Send Invitation"
+            onSubmit={sendInvitation}
+          />
         )}
 
-        <h3>App Roles</h3>
+        <h3>Roles</h3>
         <CommonList<AppRoleType>
           entity="app-roles"
           items={appRolesList}
+          inViewBacklink={`/apps/${params.id}/options`}
           userPermissions={appData.currentUser.currentAppRole.permissions.apps}
           buttons={{
             deleteable: (item: AppRoleType) => !item.isOwnerRole,
@@ -136,15 +167,13 @@ export default function Options() {
         />
 
         {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
-          <FlexboxGrid>
-            <InputGroup>
-              <InputGroup.Addon>New role name: </InputGroup.Addon>
-              <Input value={newRole} onChange={setNewRole} />
-              <InputGroup.Button onClick={createNewRole}>
-                Create new
-              </InputGroup.Button>
-            </InputGroup>
-          </FlexboxGrid>
+          <InputButtonGroup
+            buttonText="Create new"
+            label="New role name: "
+            onChange={(val) => setNewRole(val)}
+            onSubmit={createNewRole}
+            value={newRole}
+          />
         )}
       </ContentLoader>
     </StandardLayout>

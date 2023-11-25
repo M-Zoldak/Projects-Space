@@ -1,18 +1,37 @@
-import { useState } from "react";
+import React, { Component, ReactElement, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Button, FlexboxGrid, List, ListItemProps, Modal } from "rsuite";
+import {
+  Button,
+  Col,
+  FlexboxGrid,
+  Grid,
+  List,
+  ListItemProps,
+  Modal,
+  Row,
+} from "rsuite";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import {
   ActionButtonsType,
+  DynamicallyFilledObject,
   PermissionsType,
 } from "../../interfaces/DefaultTypes";
 import { http_methods } from "../../Functions/Fetch";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 
 export type CommonListItemProps = {
   id: string;
   name: string;
   props?: ListItemProps;
+};
+
+type AdditionalInfoProps = {
+  icon?: typeof FontAwesomeIcon;
+  label: string;
+  description: string;
+  data: string;
 };
 
 type CommonListProps<T> = {
@@ -21,10 +40,14 @@ type CommonListProps<T> = {
   onDelete: (item: T) => void;
   buttons?: ActionButtonsType;
   userPermissions?: PermissionsType;
+  inViewBacklink?: string;
+  additionalInfo?: (item: T) => ReactElement;
+  linkPrepend?: string;
 };
 
 export default function CommonList<T>({
   items,
+  linkPrepend = "",
   buttons = {
     deleteable: true,
     hasOptions: true,
@@ -33,16 +56,17 @@ export default function CommonList<T>({
   entity,
   onDelete,
   userPermissions,
+  inViewBacklink,
+  additionalInfo,
 }: CommonListProps<T>) {
   const { appData } = useAppDataContext();
   const { addNotification } = useNotificationsContext();
-  const params = useParams();
   const [chosenObjectId, setChosenObjectId] = useState("");
   const [destroyOpen, setDestroyOpen] = useState(false);
 
   const destroyObject = async () => {
     http_methods
-      .delete<T>(appData.token, `/${entity}/${chosenObjectId}`)
+      .delete<T>(appData.token, `${linkPrepend}/${entity}/${chosenObjectId}`)
       .then((data) => {
         onDelete(data);
         setDestroyOpen(false);
@@ -56,10 +80,24 @@ export default function CommonList<T>({
         appearance="ghost"
         size="sm"
         as={Link}
-        to={`/${entity}/${item.id}`}
+        to={`${linkPrepend}/${entity}/${item.id}`}
         color="blue"
+        state={{ backlink: inViewBacklink }}
       >
         Show
+      </Button>
+    );
+
+    let options = buttons.hasOptions && userPermissions?.hasOptions && (
+      <Button
+        appearance="ghost"
+        size="sm"
+        color="yellow"
+        as={Link}
+        to={`${linkPrepend}/${entity}/${item.id}/options`}
+        state={{ backlink: inViewBacklink }}
+      >
+        Options
       </Button>
     );
 
@@ -81,18 +119,6 @@ export default function CommonList<T>({
       </Button>
     );
 
-    let options = buttons.hasOptions && userPermissions?.hasOptions && (
-      <Button
-        appearance="ghost"
-        size="sm"
-        color="yellow"
-        as={Link}
-        to={`/${entity}/${item.id}/options`}
-      >
-        Options
-      </Button>
-    );
-
     return (
       <FlexboxGrid className="buttons_container">
         {overview}
@@ -105,11 +131,20 @@ export default function CommonList<T>({
   return (
     <List hover bordered>
       {items &&
-        items.map((item) => (
+        items.map((item: CommonListItemProps) => (
           <List.Item key={item.id.toString()}>
-            <FlexboxGrid justify="space-between" align="middle">
-              <h5>{item.name}</h5>
-              {renderActionButtons(item)}
+            <FlexboxGrid align="middle" justify="space-between">
+              <FlexboxGridItem as={Col} colspan={24} md={9}>
+                <h5>{item.name}</h5>
+              </FlexboxGridItem>
+              {additionalInfo && (
+                <FlexboxGridItem as={Col} style={{ flexGrow: 1 }}>
+                  {additionalInfo(item as T)}
+                </FlexboxGridItem>
+              )}
+              <FlexboxGridItem as={Col} style={{ alignSelf: "end" }}>
+                {renderActionButtons(item)}
+              </FlexboxGridItem>
             </FlexboxGrid>
           </List.Item>
         ))}
