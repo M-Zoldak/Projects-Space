@@ -1,4 +1,4 @@
-import React, { Component, ReactElement, useState } from "react";
+import React, { Component, ReactElement, ReactNode, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   Button,
@@ -43,6 +43,7 @@ type CommonListProps<T> = {
   inViewBacklink?: string;
   additionalInfo?: (item: T) => ReactElement;
   linkPrepend?: string;
+  ownButtons?: (item: T) => ReactNode;
 };
 
 export default function CommonList<T>({
@@ -58,6 +59,7 @@ export default function CommonList<T>({
   userPermissions,
   inViewBacklink,
   additionalInfo,
+  ownButtons,
 }: CommonListProps<T>) {
   const { appData } = useAppDataContext();
   const { addNotification } = useNotificationsContext();
@@ -75,7 +77,11 @@ export default function CommonList<T>({
   };
 
   const renderActionButtons = (item: CommonListItemProps) => {
-    let overview = buttons.hasView && userPermissions?.hasView && (
+    let isViewable =
+      typeof buttons.hasView == "function"
+        ? buttons.hasView(item)
+        : buttons.hasView;
+    let overview = isViewable && userPermissions?.hasView && (
       <Button
         appearance="ghost"
         size="sm"
@@ -88,7 +94,11 @@ export default function CommonList<T>({
       </Button>
     );
 
-    let options = buttons.hasOptions && userPermissions?.hasOptions && (
+    let isOptionable =
+      typeof buttons.hasOptions == "function"
+        ? buttons.hasOptions(item)
+        : buttons.hasOptions;
+    let options = isOptionable && userPermissions?.hasOptions && (
       <Button
         appearance="ghost"
         size="sm"
@@ -143,7 +153,13 @@ export default function CommonList<T>({
                 </FlexboxGridItem>
               )}
               <FlexboxGridItem as={Col} style={{ alignSelf: "end" }}>
-                {renderActionButtons(item)}
+                {ownButtons ? (
+                  <FlexboxGrid className="buttons_container">
+                    {ownButtons(item as T)}
+                  </FlexboxGrid>
+                ) : (
+                  renderActionButtons(item)
+                )}
               </FlexboxGridItem>
             </FlexboxGrid>
           </List.Item>

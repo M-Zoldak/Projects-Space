@@ -23,6 +23,7 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
     'project_role' => ProjectRole::class,
     'customer' => Customer::class,
     'site_options' => SiteOptions::class,
+    'user_notifications' => UserNotification::class
 ])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 abstract class Entity {

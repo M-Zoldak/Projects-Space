@@ -13,7 +13,7 @@ class App extends Entity {
 
     #[Assert\NotBlank()]
     #[ORM\Column(length: 255, nullable: false)]
-    private ?string $Name = null;
+    private ?string $name = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps')]
     private Collection $users;
@@ -30,9 +30,6 @@ class App extends Entity {
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: AppRole::class, orphanRemoval: true)]
     private Collection $roles;
 
-    #[ORM\Column(length: 255)]
-    private ?string $appHeadAdminName = null;
-
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class, orphanRemoval: true)]
     private Collection $projects;
 
@@ -43,6 +40,10 @@ class App extends Entity {
     #[ORM\JoinColumn(nullable: false)]
     private ?AppRole $defaultRole = null;
 
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'appInvitations')]
+    #[ORM\JoinTable(name: "app_users_invitation")]
+    private Collection $invitedUsers;
+
     public function __construct() {
         parent::__construct();
         $this->users = new ArrayCollection();
@@ -51,6 +52,7 @@ class App extends Entity {
         $this->roles = new ArrayCollection();
         $this->projects = new ArrayCollection();
         $this->userOptions = new ArrayCollection();
+        $this->invitedUsers = new ArrayCollection();
     }
 
     public function getData(): array {
@@ -60,18 +62,19 @@ class App extends Entity {
             "defaultRoleId" => $this->getDefaultRole()->getId(),
             "statistics" => [
                 "usersCount" => $this->getUsers()->count()
-            ]
+            ],
+            "invitedUsers" => $this->getInvitedUsers()->toArray()
             // "roles" => $this->getRoles(),
             // "users" => $this->getUsers()
         ];
     }
 
     public function getName(): ?string {
-        return $this->Name;
+        return $this->name;
     }
 
-    public function setName(string $Name): static {
-        $this->Name = $Name;
+    public function setName(string $name): static {
+        $this->name = $name;
 
         return $this;
     }
@@ -95,6 +98,17 @@ class App extends Entity {
         $this->users->removeElement($user);
 
         return $this;
+    }
+
+    public function hasUser(User $user): bool {
+        $usersIds = array_map((
+            fn (User $user) => $user->getId()
+        ), $this->getUsers()->getValues());
+
+        return in_array(
+            $user->getId(),
+            $usersIds
+        );
     }
 
     /**
@@ -205,16 +219,6 @@ class App extends Entity {
         return $this;
     }
 
-    public function getAppHeadAdminName(): ?string {
-        return $this->appHeadAdminName;
-    }
-
-    public function setAppHeadAdminName(string $appHeadAdminName): static {
-        $this->appHeadAdminName = $appHeadAdminName;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Project>
      */
@@ -276,6 +280,27 @@ class App extends Entity {
 
     public function setDefaultRole(?AppRole $defaultRole): static {
         $this->defaultRole = $defaultRole;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getInvitedUsers(): Collection {
+        return $this->invitedUsers;
+    }
+
+    public function addInvitedUser(User $invitedUser): static {
+        if (!$this->invitedUsers->contains($invitedUser)) {
+            $this->invitedUsers->add($invitedUser);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitedUser(User $invitedUser): static {
+        $this->invitedUsers->removeElement($invitedUser);
 
         return $this;
     }

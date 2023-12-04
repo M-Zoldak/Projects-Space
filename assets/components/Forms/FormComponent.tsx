@@ -1,59 +1,81 @@
-import { SyntheticEvent, useEffect, useState } from "react";
-import { Button, ButtonToolbar, CheckboxGroup, DatePicker, Form } from "rsuite";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { Button, ButtonToolbar, DatePicker, Form, Input, Loader } from "rsuite";
 import TextField from "./TextField";
-import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 import { http_methods } from "../../Functions/Fetch";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { FormDataType } from "../../interfaces/FormDataType";
 import FormError from "./FormError";
+import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 
 type FormComponentProps<T> = {
   onSuccess: (data: T) => void;
-  formData: Array<FormDataType>;
-  setFormData: Function;
-  postPath: string;
+  entity: string;
 };
 
 export default function FormComponent<T>({
   onSuccess,
-  formData,
-  setFormData,
-  postPath,
+  entity,
 }: FormComponentProps<T>) {
   const { appData } = useAppDataContext();
-  const [formValue, setFormValue] = useState<DynamicallyFilledObject<string>>(
-    {}
-  );
+  const [formFields, setFormFields] = useState<FormDataType[]>([]);
+  const [loaded, setLoaded] = useState(true);
 
   useEffect(() => {
-    let formValues = formData.reduce(
+    http_methods
+      .fetchAll<FormDataType>(appData.token, `/${entity}/create`)
+      .then((data) => {
+        data = data.map((field) => {
+          if (field.name == "appId") {
+            field.value = appData.currentUser.userOptions.selectedAppId;
+          }
+          return field;
+        });
+        setFormFields(data);
+      });
+  }, []);
+
+  const validateData = () => {
+    setLoaded(false);
+    let formValues = formFields.reduce(
       (data: DynamicallyFilledObject<string>, field: FormDataType) => {
         data[field.name] = field.value;
         return data;
       },
-      appData?.currentUser?.userOptions?.selectedAppId
-        ? { appId: appData.currentUser.userOptions.selectedAppId }
-        : {}
+      {}
     );
 
-    setFormValue(formValues);
-  }, [formData]);
+    http_methods
+      .post<T>(`/${entity}`, formValues, appData.token)
+      .then((data) => onSuccess(data))
+      .catch((err: Error) => {
+        let errors = JSON.parse(err.message);
+        console.log(formFields);
+        console.log(errors);
+        let updatedFormFields;
+        Object.keys(errors).forEach((key: string) => {
+          updatedFormFields = formFields.map((field: FormDataType) => {
+            if (field.name == key) field.error = errors[key];
+            return field;
+          });
+        });
+        setFormFields(updatedFormFields);
+      });
+    setLoaded(true);
+  };
 
   const updateInput = (value: string, fieldName: string) => {
-    let data = formData.map((field) => {
-      if (field.name == fieldName) {
+    let form = formFields.map((field) => {
+      if (field.name == fieldName && value != field.value) {
         field.value = value;
-        formValue[field.name] = value;
+        field.error = "";
       }
       return field;
     });
-
-    setFormValue({ ...formValue });
-    setFormData(data);
+    setFormFields(form);
   };
 
   const renderField = (field: FormDataType, key: number) => {
-    switch (field.fieldType) {
+    switch (field.type) {
       case "text": {
         return (
           <TextField
@@ -65,7 +87,9 @@ export default function FormComponent<T>({
           />
         );
       }
-
+      case "hidden": {
+        return <Input key={key} value={field.value} type="hidden" />;
+      }
       case "date": {
         return (
           <Form.Group controlId={field.name} key={key}>
@@ -81,6 +105,17 @@ export default function FormComponent<T>({
           </Form.Group>
         );
       }
+      case "password": {
+        return (
+          <TextField
+            key={key}
+            onChange={(val: any) => updateInput(val, field.name)}
+            error={field.error}
+            value={field.value}
+            {...field}
+          />
+        );
+      }
       default:
         return (
           <>
@@ -90,19 +125,10 @@ export default function FormComponent<T>({
     }
   };
 
-  const validateData = () => {
-    http_methods
-      .post<T>(postPath, formValue, appData.token)
-      .then((data) => onSuccess(data))
-      .catch((res) => {
-        console.log(res);
-        console.log(" res from Validate");
-      });
-  };
-
   return (
     <Form>
-      {formData.map((field, index) => renderField(field, index))}
+      {formFields &&
+        formFields.map((field, index) => renderField(field, index))}
 
       <ButtonToolbar>
         <Button
@@ -111,7 +137,7 @@ export default function FormComponent<T>({
           onClick={validateData}
           onSubmit={validateData}
         >
-          Submit
+          {loaded ? "Submit" : <Loader center />}
         </Button>
       </ButtonToolbar>
     </Form>

@@ -1,7 +1,14 @@
-import { Button, FlexboxGrid, Input, InputGroup, Radio } from "rsuite";
+import {
+  Button,
+  ButtonToolbar,
+  FlexboxGrid,
+  Input,
+  Modal,
+  Radio,
+} from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
@@ -9,7 +16,6 @@ import { AppOptionsType, AppType } from "../../interfaces/EntityTypes/AppType";
 import { AppRoleType } from "../../interfaces/EntityTypes/AppRoleType";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { UserType } from "../../interfaces/EntityTypes/UserType";
-import FormComponent from "../../components/Forms/FormComponent";
 import CommonList from "../../components/Data/CommonList";
 import { filterOutItem } from "../../Functions/Collections";
 import Backlink from "../../components/Buttons/Backlink";
@@ -17,8 +23,9 @@ import InputButtonGroup from "../../components/Forms/InputButtonGroup";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { HoverTooltip } from "../../components/Text/Tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserTie } from "@fortawesome/free-solid-svg-icons";
+import { faClockFour, faUserTie } from "@fortawesome/free-solid-svg-icons";
 import { faCreativeCommonsBy } from "@fortawesome/free-brands-svg-icons";
+import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 
 export default function Options() {
   const { appData } = useAppDataContext();
@@ -27,11 +34,16 @@ export default function Options() {
   const [loaded, setLoaded] = useState(false);
   const [app, setApp] = useState<AppType>();
   const [users, setUsers] = useState([]);
+  const [invitedUsers, setInvitedUsers] = useState([]);
   const [defaultRoleId, setDefaultRoleId] = useState("");
   const [appName, setAppName] = useState("");
   const [newRole, setNewRole] = useState("");
   const [newUser, setNewUser] = useState("");
   const [appRolesList, setAppRolesList] = useState([]);
+  const [emailInvitationPopup, setEmailInvitationPopup] = useState<{
+    message: string;
+    show: boolean;
+  }>();
 
   useEffect(() => {
     http_methods
@@ -39,6 +51,7 @@ export default function Options() {
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
+        setInvitedUsers(data.invitedUsers);
         setApp(data.app);
         setDefaultRoleId(data.app.defaultRoleId);
         setAppName(data.app.name);
@@ -49,30 +62,109 @@ export default function Options() {
       });
   }, []);
 
-  const createNewRole = async () => {
-    const successData = await http_methods.post<AppRoleType>(
-      `/app-roles/create`,
-      {
-        name: newRole,
-        appId: params.id,
-      },
-      appData.token
-    );
-
-    let role = successData;
-    setAppRolesList([...appRolesList, role]);
-    setNewRole("");
+  const createNewRole = () => {
+    http_methods
+      .post<AppRoleType>(
+        `/app-roles`,
+        {
+          name: newRole,
+          appId: params.id,
+        },
+        appData.token
+      )
+      .then((role) => {
+        setAppRolesList([...appRolesList, role]);
+        setNewRole("");
+      })
+      .catch((err: Error) => {
+        addNotification({ text: JSON.parse(err.message).name });
+      });
   };
 
   const sendInvitation = async () => {
-    await http_methods.post<any>(
-      `/apps/${params.id}/invite`,
-      {
-        userEmail: newUser,
-      },
-      appData.token
+    await http_methods
+      .post<DynamicallyFilledObject<string>>(
+        `/apps/${params.id}/invite`,
+        {
+          userEmail: newUser,
+        },
+        appData.token
+      )
+      .then((res) => {
+        addNotification({
+          text: res.message,
+          notificationProps: { type: "success" },
+        });
+        setNewUser("");
+      })
+      .catch((res) => {
+        setEmailInvitationPopup({
+          message: JSON.parse(res.message).message,
+          show: true,
+        });
+      });
+  };
+
+  const renderInvitationModal = () => {
+    return (
+      <Modal
+        open={emailInvitationPopup.show}
+        onClose={() => {
+          setEmailInvitationPopup({ ...emailInvitationPopup, show: false });
+        }}
+      >
+        <Modal.Header>
+          <Modal.Title>We encountered a small problem...</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{emailInvitationPopup.message}</p>
+          <h6>Message:</h6>
+          <Input
+            readOnly
+            value="I want to collaborate with you on my Project at Projects Space!"
+          />
+        </Modal.Body>
+
+        <Modal.Footer>
+          {/* <ButtonGroup> */}
+          <ButtonToolbar>
+            <Button
+              appearance="ghost"
+              color="green"
+              onClick={() =>
+                http_methods
+                  .post<any>(
+                    "/apps/invite/email",
+                    {
+                      email: newUser,
+                      message:
+                        "I want to collaborate with you on my Project at Projects Space!",
+                    },
+                    appData.token
+                  )
+                  .then((res) => {
+                    setEmailInvitationPopup({
+                      ...emailInvitationPopup,
+                      show: false,
+                    });
+                    addNotification({
+                      text: res.message,
+                      notificationProps: { type: "success" },
+                    });
+                    setNewUser("");
+                  })
+              }
+            >
+              Send
+            </Button>
+            <Button appearance="ghost" color="red">
+              Abort
+            </Button>
+          </ButtonToolbar>
+          {/* </ButtonGroup> */}
+        </Modal.Footer>
+      </Modal>
     );
-    setNewUser("");
   };
 
   const updateAppName = () => {
@@ -83,13 +175,21 @@ export default function Options() {
       });
   };
 
-  const userAdditionalInfo = (item: UserType) => {
+  const userAdditionalInfo = (user: UserType) => {
+    const userIsActive = users.find((i) => i.id == user.id) ? true : false;
+
     return (
       <FlexboxGrid>
         <FlexboxGridItem>
-          <HoverTooltip text="User role">
-            <FontAwesomeIcon icon={faUserTie} /> {item.appRole.name}
-          </HoverTooltip>
+          {userIsActive ? (
+            <HoverTooltip text="User role">
+              <FontAwesomeIcon icon={faUserTie} /> {user.appRole.name}
+            </HoverTooltip>
+          ) : (
+            <>
+              <FontAwesomeIcon icon={faClockFour} /> Pending...
+            </>
+          )}
         </FlexboxGridItem>
       </FlexboxGrid>
     );
@@ -99,7 +199,7 @@ export default function Options() {
     return (
       <FlexboxGrid align="middle">
         <FlexboxGridItem>
-          <HoverTooltip text="Click to choose as default role for new users">
+          <HoverTooltip text="Check to set as default role for new users">
             <FontAwesomeIcon icon={faCreativeCommonsBy} />{" "}
             <Radio
               checked={item.id == defaultRoleId}
@@ -144,13 +244,14 @@ export default function Options() {
         <h3>Users</h3>
         <CommonList<UserType>
           entity="user"
-          items={users}
+          items={[...users, ...invitedUsers]}
           inViewBacklink={`/apps/${params.id}/options`}
           userPermissions={appData.currentUser.currentAppRole.permissions.apps}
           linkPrepend={`/apps/${params.id}`}
           buttons={{
-            deleteable: (item: UserType) => !item.appRole.isOwnerRole,
-            hasOptions: true,
+            deleteable: (item: UserType) => !item?.appRole?.isOwnerRole,
+            hasOptions: (item: UserType) =>
+              !invitedUsers.find((u) => u.id == item.id),
             hasView: false,
           }}
           onDelete={(item) => {
@@ -169,6 +270,7 @@ export default function Options() {
             onSubmit={sendInvitation}
           />
         )}
+        {emailInvitationPopup?.show && renderInvitationModal()}
 
         <h3>Roles</h3>
         <CommonList<AppRoleType>

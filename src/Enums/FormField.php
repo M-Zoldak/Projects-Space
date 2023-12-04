@@ -9,12 +9,15 @@ enum FormField: string {
     case CHECKBOX = "checkbox";
     case RADIO = "radio";
     case LIST = "list";
+    case HIDDEN = "hidden";
 
     public function hasDefaultValues(): bool {
         switch ($this) {
             case (self::TEXT):
                 return true;
             case (self::DATE):
+                return true;
+            case (self::HIDDEN):
                 return true;
             default:
                 return false;
@@ -25,6 +28,8 @@ enum FormField: string {
         switch ($this) {
             case (self::TEXT):
                 return ["autoComplete" => "off"];
+            case (self::HIDDEN):
+                return ["hidden" => true];
             case (self::DATE):
                 return ["dateFormat" => "yyyy-MM-dd"];
             default:

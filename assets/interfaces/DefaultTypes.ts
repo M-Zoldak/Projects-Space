@@ -8,8 +8,8 @@ export type DynamicallyFilledObject<T> = {
 
 export type ActionButtonsType = {
   deleteable?: boolean | ((item: any) => boolean);
-  hasView?: boolean;
-  hasOptions?: boolean;
+  hasView?: boolean | ((item: any) => boolean);
+  hasOptions?: boolean | ((item: any) => boolean);
 };
 
 export type PermissionsType = {

@@ -39,7 +39,12 @@ class AppRole extends Entity {
         $this->users = new ArrayCollection();
         $this->setApp($app);
         $this->sectionPermissions = new ArrayCollection();
-        $this->setIsOwnerRole($roleName == "Owner" ? true : false);
+        if ($roleName == "Owner") {
+            $this->setIsOwnerRole(true);
+            $app->setDefaultRole($this);
+        } else {
+            $this->setIsOwnerRole(false);
+        }
 
         foreach (StandardSections::cases() as $section) {
             if ($roleName == "Owner") {

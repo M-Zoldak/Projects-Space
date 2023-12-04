@@ -35,7 +35,7 @@ export default function ProjectsList() {
       <FlexboxGrid className="buttons_container">
         <SimpleCreateModal<ProjectType>
           title="New project"
-          createPath="/projects/create"
+          entity="projects"
           onSuccess={(project) => {
             setProjects([...projects, project]);
             addNotification({

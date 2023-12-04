@@ -7,6 +7,8 @@ use App\Entity\User;
 use App\Entity\AppRole;
 use App\Enums\FormField;
 use App\Classes\FormBuilder;
+use OpenApi\Attributes as OA;
+use App\Entity\UserNotification;
 use App\Helpers\ValidatorHelper;
 use App\Repository\AppRepository;
 use App\Repository\UserRepository;
@@ -16,13 +18,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\SectionPermissionsRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-
+#[OA\Tag(name: 'Apps')]
+#[Route("")]
 class AppsController extends AbstractController {
-
-    private User $user;
 
     public function __construct(
         private AppRepository $appRepository,
@@ -32,69 +34,78 @@ class AppsController extends AbstractController {
     ) {
     }
 
-    #[Route('/apps', name: 'app_api_apps', methods: ["GET"])]
+    #[Route('/apps', name: 'apps_list', methods: ["GET"])]
     public function index(): JsonResponse {
-        $this->user = $this->getUser();
-        $apps = $this->user->getApps();
+        /** @var User $user */
+        $user = $this->getUser();
+        $apps = $user->getApps();
+        $appsInvitations = $user->getAppInvitations();
 
         $appsData = EntityCollectionUtil::createCollectionData($apps);
+        $appsInvitationsData = EntityCollectionUtil::createCollectionData($appsInvitations);
 
-        return new JsonResponse($appsData);
+        return new JsonResponse(["apps" => $appsData, "appsInvitations" => $appsInvitationsData]);
     }
 
-    #[Route('/apps/create', name: 'app_api_app_create', methods: ["GET", "POST"])]
+    #[Route('/apps/create', name: 'app_create_form', methods: ["GET"])]
+    public function form(): JsonResponse {
+        $formBuilder = $this->addAndEditForm();
+        return new JsonResponse($formBuilder->getFormData());
+    }
+
+    #[Route('/apps', name: 'app_create', methods: ["POST"])]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse {
-        $method = $request->getMethod();
+        $data = json_decode($request->getContent());
+        /** @var User $user */
+        $user = $this->getUser();
 
-        if ($method == "GET") {
-            $formBuilder = $this->addAndEditForm();
-            return new JsonResponse($formBuilder->getFormData());
-        } else if ($method == "POST") {
-            $data = json_decode($request->getContent());
-            $user = $this->getUser();
+        $app = new App();
+        $app->setName($data->name);
+        $app->addUser($user);
 
-            $app = new App();
-            $app->setName($data->name);
-            $app->addUser($user);
-            $app->setAppHeadAdminName("Owner");
+        $errors = ValidatorHelper::validateObject($app, $validator);
 
-            $ownerRole = new AppRole("Owner", $app, $this->sectionPermissionsRepository);
-            $ownerRole->setIsDestroyable(false);
-
-            $this->appRoleRepository->save($ownerRole);
-
-            if ($user instanceof User) {
-                $user->addAppRole($ownerRole);
-            }
-
-            $app->addRole($ownerRole);
-            $app->setDefaultRole($ownerRole);
-
-            $errors = ValidatorHelper::validateObject($app, $validator);
-
-            if (count((array) $errors)) {
-                return new JsonResponse($errors);
-            }
-
-            $this->appRepository->save($app);
-
-            return new JsonResponse((object) $app->getData());
+        if (count((array) $errors)) {
+            return new JsonResponse($errors, 422);
         }
+
+        $ownerRole = new AppRole("Owner", $app, $this->sectionPermissionsRepository);
+        $ownerRole->setIsDestroyable(false);
+
+        $this->appRoleRepository->save($ownerRole);
+
+        $user->addAppRole($ownerRole);
+
+        $app->addRole($ownerRole);
+        $app->setDefaultRole($ownerRole);
+
+        $errors = ValidatorHelper::validateObject($app, $validator);
+
+        if (count((array) $errors)) {
+            return new JsonResponse($errors);
+        }
+
+        $this->appRepository->save($app);
+
+        return new JsonResponse((object) $app->getData());
     }
 
-    #[Route('/apps/{id}/options', name: 'app_api_app_options', methods: ["GET", "POST"])]
+    #[Route('/apps/{id}/options', name: 'app_options', methods: ["GET"])]
     public function options(string $id, Request $request): JsonResponse {
         $method = $request->getMethod();
 
         if ($method == "GET") {
             $app = $this->appRepository->findOneById($id);
             $appUsers = EntityCollectionUtil::createCollectionData($app->getUsers(), [$app]);
+            $appInvitedUsers = EntityCollectionUtil::createCollectionData($app->getInvitedUsers());
             $appRoles = EntityCollectionUtil::createCollectionData($app->getRoles());
             $formBuilder = $this->addAndEditForm($app);
+
             return new JsonResponse([
                 "app" => $app->getData(),
                 "roles" => $appRoles,
                 "users" => $appUsers,
+                "invitedUsers" => $appInvitedUsers ?? [],
                 "form" => $formBuilder->getFormData()
             ]);
         }
@@ -102,7 +113,7 @@ class AppsController extends AbstractController {
         return new JsonResponse([""]);
     }
 
-    #[Route('/apps/{id}', name: 'app_api_app_delete', methods: ["DELETE"])]
+    #[Route('/apps/{id}', name: 'app_delete', methods: ["DELETE"])]
     public function delete(string $id, Request $request): JsonResponse {
         $app = $this->appRepository->findOneById($id);
         if (!$app) return new JsonResponse([], 404);
@@ -115,13 +126,7 @@ class AppsController extends AbstractController {
         return new JsonResponse($deletedAppData);
     }
 
-    private function addAndEditForm(?App $app = null): FormBuilder {
-        $formBuilder = new FormBuilder();
-        $formBuilder->add("name", "App name", FormField::TEXT, ["value" => $app?->getName() ?? ""]);
-        return $formBuilder;
-    }
-
-    #[Route('/apps/{id}/update', name: 'app_api_app_update', methods: ["PUT"])]
+    #[Route('/apps/{id}', name: 'app_update', methods: ["PUT"])]
     public function updateApp(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
 
         $data = (object) json_decode($request->getContent());
@@ -140,7 +145,7 @@ class AppsController extends AbstractController {
         return new JsonResponse($app->getData());
     }
 
-    #[Route('/apps/{id}/updateDefaultRole', name: 'app_api_app_update_default_role', methods: ["PUT"])]
+    #[Route('/apps/{id}/updateDefaultRole', name: 'app_update_default_role', methods: ["PUT"])]
     public function updateAppDefaultRole(string $id, Request $request): JsonResponse {
         $data = (object) json_decode($request->getContent());
         $app = $this->appRepository->findOneById($id);
@@ -148,5 +153,42 @@ class AppsController extends AbstractController {
         $app->setDefaultRole($role);
         $this->appRepository->save($app);
         return new JsonResponse($app->getData());
+    }
+
+    #[Route('/apps/{id}/invite', name: 'app_invite_user', methods: ["POST"])]
+    public function inviteToApp(string $id, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        $app = $this->appRepository->findOneById($id);
+        $user = $this->userRepository->findOneBy(["email" => $data->userEmail]);
+
+        if (!$user) {
+            return new JsonResponse(["message" => "User with this e-mail is not registered. Would you like to invite him into Projects Space?"], 404);
+        }
+
+        $user->addAppInvitation($app);
+        $notification = new UserNotification("User was invited into your space.", $user);
+        $user->addNotification($notification);
+        $this->userRepository->save($user);
+
+        return new JsonResponse(["message" => "Invitation was sent to user."]);
+    }
+
+    #[Route('/apps/invite/email', name: 'app_cinvite_email', methods: ["POST"])]
+    public function emailInvitation(Request $request, #[CurrentUser] ?User $user): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        if (count($data->userEmail)) return new JsonResponse(["error" => "This field might not be empty"]);
+
+        $emailSent = mail($data->userEmail, "{$user->getFullName()} invites you to Projects Space!", $data->message . "\n\nhttps://$_SERVER[HTTP_HOST]/register");
+
+        if ($emailSent) return new JsonResponse(["message" => "E-mail to $data->userEmail was sent succesfully"]);
+        else return new JsonResponse(["message" => "Something went wrong. E-mail could not be sent. Please try again later"], 503);
+    }
+
+    private function addAndEditForm(App $app = null): FormBuilder {
+        $formBuilder = new FormBuilder();
+        $formBuilder->add("name", "App name", FormField::TEXT, ["value" => $app?->getName() ?? ""]);
+        return $formBuilder;
     }
 }

@@ -18,6 +18,7 @@ export default function AppsList() {
   const location = useLocation();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
+  const [appsInvitations, setAppsInvitations] = useState<AppType[]>([]);
 
   useEffect(() => {
     if (location.state?.notification) {
@@ -28,10 +29,14 @@ export default function AppsList() {
     }
 
     http_methods
-      .fetchAll<AppType>(appData.token, "/apps")
+      .fetch<{ apps: AppType[]; appsInvitations: AppType[] }>(
+        appData.token,
+        "/apps"
+      )
       .then(async (appsData) => {
         await refreshAppData();
         setLoaded(true);
+        setAppsInvitations(appsData.appsInvitations);
       })
       .catch((err: Error) => {
         addNotification({ text: err.message });
@@ -58,10 +63,24 @@ export default function AppsList() {
     );
   };
 
+  const acceptInvitation = (item: AppType) => {
+    http_methods
+      .post("/apps/invite/accept", { appId: item.id }, appData.token)
+      .then(async (res) => {
+        addNotification({
+          text: `You have joined ${item.name} space!`,
+          notificationProps: { type: "success" },
+        });
+
+        await refreshAppData();
+        setAppsInvitations(appsInvitations.filter((inv) => inv.id != item.id));
+      });
+  };
+
   return (
     <StandardLayout title="My apps" activePage="My Apps">
       <FlexboxGrid className="buttons_container">
-        <Button color="green" appearance="ghost" as={Link} to={"/app/create"}>
+        <Button color="green" appearance="ghost" as={Link} to={"/apps/create"}>
           Create new Space
         </Button>
       </FlexboxGrid>
@@ -80,7 +99,36 @@ export default function AppsList() {
             additionalInfo={appAdditionalInfo}
           />
         ) : (
-          <p>You don't have any apps yet. Create one now!</p>
+          <p>
+            You don't have any apps yet. Create one now or join someones other
+            space!
+          </p>
+        )}
+
+        {appsInvitations && (
+          <>
+            <h3>Invitations to spaces</h3>
+            <CommonList<AppType>
+              items={appsInvitations}
+              entity="apps"
+              userPermissions={
+                appData.currentUser.currentAppRole.permissions.apps
+              }
+              onDelete={handleDelete}
+              // buttons={{ hasView: false, deleteable: true, hasOptions: true }}
+              ownButtons={(item: AppType) => (
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  color="cyan"
+                  onClick={() => acceptInvitation(item)}
+                >
+                  Join space
+                </Button>
+              )}
+              additionalInfo={appAdditionalInfo}
+            />
+          </>
         )}
       </ContentLoader>
     </StandardLayout>

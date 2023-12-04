@@ -55,12 +55,21 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?UserOptions $userOptions = null;
 
+    #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'invitedUsers')]
+    #[ORM\JoinTable(name: "apps_users_invitation")]
+    private Collection $appInvitations;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserNotification::class, cascade: ["persist", "remove"])]
+    private Collection $notifications;
+
     public function __construct() {
         parent::__construct();
         $this->apps = new ArrayCollection();
         $this->appRoles = new ArrayCollection();
         $this->projectRoles = new ArrayCollection();
         $this->setUserOptions(new UserOptions());
+        $this->appInvitations = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     public function getData(App $app = null): array {
@@ -92,7 +101,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this;
     }
 
-    public function getUserName() {
+    public function getFullName() {
         return $this->getFirstName() . " " . $this->getLastName();
     }
 
@@ -268,6 +277,57 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         }
 
         $this->userOptions = $userOptions;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, App>
+     */
+    public function getAppInvitations(): Collection {
+        return $this->appInvitations;
+    }
+
+    public function addAppInvitation(App $appInvitation): static {
+        if (!$this->appInvitations->contains($appInvitation)) {
+            $this->appInvitations->add($appInvitation);
+            $appInvitation->addInvitedUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAppInvitation(App $appInvitation): static {
+        if ($this->appInvitations->removeElement($appInvitation)) {
+            $appInvitation->removeInvitedUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserNotification>
+     */
+    public function getNotifications(): Collection {
+        return $this->notifications;
+    }
+
+    public function addNotification(UserNotification $notification): static {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(UserNotification $notification): static {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
+            }
+        }
 
         return $this;
     }

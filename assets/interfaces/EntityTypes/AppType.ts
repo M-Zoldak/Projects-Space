@@ -16,5 +16,6 @@ export type AppOptionsType = {
   app: AppType;
   roles: Array<AppRoleType>;
   users: Array<UserType>;
+  invitedUsers: Array<UserType>;
   form: any;
 };

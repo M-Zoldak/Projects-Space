@@ -14,14 +14,14 @@ export default function Create() {
   const navigate = useNavigate();
   const { appData, refreshAppData } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
-  const [formFields, setFormFields] = useState([]);
+  // const [formFields, setFormFields] = useState([]);
   const { addNotification } = useNotificationsContext();
 
   useEffect(() => {
     http_methods
       .fetch<Array<FormDataType>>(appData.token, "/apps/create")
       .then((data) => {
-        setFormFields(data);
+        // setFormFields(data);
         setLoaded(true);
       })
       .catch((err: Error) => {
@@ -48,12 +48,7 @@ export default function Create() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
-        <FormComponent<AppType>
-          formData={formFields}
-          onSuccess={actionOnSuccess}
-          setFormData={setFormFields}
-          postPath="/apps/create"
-        />
+        <FormComponent<AppType> onSuccess={actionOnSuccess} entity="apps" />
       </ContentLoader>
     </StandardLayout>
   );

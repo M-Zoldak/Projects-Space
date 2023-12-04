@@ -1,7 +1,8 @@
+import { HTMLInputTypeAttribute } from "react";
 import { DynamicallyFilledObject } from "./DefaultTypes";
 
 export type FormDataType = {
-  fieldType: "text" | "date" | "checkbox" | "radio" | "list_readonly" | "list";
+  type: HTMLInputTypeAttribute;
   name: string;
   label: string;
   error: string;

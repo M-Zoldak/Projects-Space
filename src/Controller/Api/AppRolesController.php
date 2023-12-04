@@ -2,8 +2,10 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\App;
 use App\Entity\User;
 use App\Entity\AppRole;
+use OpenApi\Attributes as OA;
 use App\Repository\AppRepository;
 use App\Entity\SectionPermissions;
 use App\Utils\EntityCollectionUtil;
@@ -16,6 +18,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+#[OA\Tag(name: 'App Roles')]
+#[Route("")]
 class AppRolesController extends AbstractController {
 
 
@@ -26,20 +30,28 @@ class AppRolesController extends AbstractController {
     ) {
     }
 
-    #[Route('/app-roles/create', name: 'app_api_role_create')]
-    public function create(Request $request): JsonResponse {
+    #[Route('/app-roles', name: 'app_roles_create', methods: ["POST"])]
+    public function create(Request $request): Response {
+        // TODO Make check
         $data = json_decode($request->getContent());
-
         $app = $this->appRepository->findOneById($data->appId);
 
+        if ($this->roleNameExistsInApp($app, $data->name)) {
+            return new JsonResponse([
+                "name" => "Role name already exists in this projects space"
+            ], 422);
+        }
+
         $appRole = new AppRole($data->name, $app, $this->sectionPermissionsRepository);
+
         $this->appRoleRepository->save($appRole);
 
         return new JsonResponse($appRole?->getData());
     }
 
-    #[Route('/app-roles/{id}/options', name: 'app_api_role_options', methods: ["GET"])]
+    #[Route('/app-roles/{id}/options', name: 'app_roles_options', methods: ["GET"])]
     public function index(string $id, #[CurrentUser] ?User $user): JsonResponse {
+        // TODO Make check
         $appRole = $this->appRoleRepository->findOneById($id);
 
         if (empty($appRole)) return new JsonResponse(null, 404);
@@ -47,8 +59,9 @@ class AppRolesController extends AbstractController {
         return new JsonResponse($appRole->getData());
     }
 
-    #[Route('/app-roles/{id}', name: 'app_api_role_delete', methods: ["DELETE"])]
+    #[Route('/app-roles/{id}', name: 'role_delete', methods: ["DELETE"])]
     public function delete(string $id, #[CurrentUser] ?User $user): JsonResponse {
+        // TODO Make check
         $appRole = $this->appRoleRepository->findOneById($id);
         $deletedAppRoleData = $appRole->getData();
         if ($appRole) {
@@ -59,8 +72,9 @@ class AppRolesController extends AbstractController {
     }
 
 
-    #[Route('/app-roles/{id}', name: 'app_api_role_update', methods: ["PUT"])]
+    #[Route('/app-roles/{id}', name: 'role_update', methods: ["PUT"])]
     public function update(string $id, #[CurrentUser] ?User $user, Request $request): JsonResponse {
+        // TODO Make check
         $data = json_decode($request->getContent());
         $appRole = $this->appRoleRepository->findOneById($id);
 
@@ -76,13 +90,25 @@ class AppRolesController extends AbstractController {
     }
 
 
-    #[Route('/app-roles/{id}/updateName', name: 'app_api_role_update_name', methods: ["PUT"])]
+    #[Route('/app-roles/{id}/updateName', name: 'role_update_name', methods: ["PUT"])]
     public function updateName(string $id, #[CurrentUser] ?User $user, Request $request): JsonResponse {
+        // TODO Make check
+        // $user->hasAccess()
         $data = json_decode($request->getContent());
         $appRole = $this->appRoleRepository->findOneById($id);
+
+        if ($this->roleNameExistsInApp($appRole->getApp(), $data->name)) {
+            return new JsonResponse(["error" => "Role name already exists in this projects space"], 422);
+        }
 
         $appRole->setName($data->name);
         $this->appRoleRepository->save($appRole);
         return new JsonResponse($appRole->getData());
+    }
+
+    private function roleNameExistsInApp(App $app, $roleName) {
+        return array_any($app->getRoles()->toArray(), function (AppRole $role) use ($roleName) {
+            return strtolower($role->getName()) == strtolower($roleName);
+        });
     }
 }

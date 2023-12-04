@@ -13,16 +13,10 @@ import { useNavigate } from "react-router-dom";
 import FormComponent from "../../components/Forms/FormComponent";
 import { http_methods } from "../../Functions/Fetch";
 import { FormDataType } from "../../interfaces/FormDataType";
+import ContentLoader from "../../components/Loader";
 
 function Registration() {
   const navigate = useNavigate();
-  const [formValue, setFormValue] = useState([]);
-
-  useEffect(() => {
-    http_methods.fetch<Array<FormDataType>>("", "/register").then((res) => {
-      setFormValue(res);
-    });
-  }, []);
 
   const handleSuccess = (successData: any) => {
     navigate("/register/confirm");
@@ -33,16 +27,9 @@ function Registration() {
       <FlexboxGrid justify="center">
         <FlexboxGrid.Item>
           <Panel header={<h3>Registration</h3>} bordered>
-            {formValue ? (
-              <FormComponent<any>
-                formData={formValue}
-                postPath="/register"
-                setFormData={setFormValue}
-                onSuccess={handleSuccess}
-              ></FormComponent>
-            ) : (
-              "Loading..."
-            )}
+            {/* <ContentLoader loaded={loaded}> */}
+            <FormComponent<any> entity="register" onSuccess={handleSuccess} />
+            {/* </ContentLoader> */}
           </Panel>
         </FlexboxGrid.Item>
       </FlexboxGrid>

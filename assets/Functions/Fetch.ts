@@ -2,7 +2,7 @@ import { DynamicallyFilledObject } from "../interfaces/DefaultTypes";
 
 async function post<T>(
   path: string,
-  body: DynamicallyFilledObject<string>,
+  body: DynamicallyFilledObject<string> | Array<any>,
   token?: string
 ): Promise<T> {
   return await fetch(`/api${path}`, {
@@ -12,17 +12,12 @@ async function post<T>(
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",
     },
-  })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 299) return res.json();
-      else throw new Error(res.status.toString());
-    })
-    .catch(errorHandler);
+  }).then(processResponse);
 }
 
 async function put<T>(
   path: string,
-  body: DynamicallyFilledObject<any>,
+  body: DynamicallyFilledObject<any> | Array<any>,
   token?: string
 ): Promise<T> {
   return await fetch(`/api${path}`, {
@@ -32,12 +27,7 @@ async function put<T>(
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",
     },
-  })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 299) return res.json();
-      else throw new Error(res.status.toString());
-    })
-    .catch(errorHandler);
+  }).then(processResponse);
 }
 
 async function fetchObject<T>(token: string, path: string): Promise<T> {
@@ -45,11 +35,7 @@ async function fetchObject<T>(token: string, path: string): Promise<T> {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 299) return res.json();
-    })
-    .catch(errorHandler);
+  }).then(processResponse);
 }
 
 async function fetchAll<T>(token: string, path: string): Promise<Array<T>> {
@@ -62,20 +48,17 @@ async function sendDelete<T>(token: string, path: string): Promise<T> {
     headers: {
       Authorization: "Bearer " + token,
     },
-  })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 299) return res.json();
-    })
-    .catch(errorHandler);
+  }).then(processResponse);
 }
 
-const errorHandler = (err: Error) => {
-  switch (err.message) {
-    case "401":
-      throw new Error("Token expired");
-    default:
-      throw new Error(err.message);
-  }
+const processResponse = (res: Response) => {
+  // console.log(res);
+  if (res.status >= 200 && res.status <= 299) return res.json();
+  // try {
+  else
+    return res.json().then((errorData) => {
+      throw new Error(JSON.stringify(errorData));
+    });
 };
 
 export const http_methods = {

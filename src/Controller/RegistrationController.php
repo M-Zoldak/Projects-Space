@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use App\Enums\FormField;
 use PasswordRequirements;
 use App\Classes\FormBuilder;
+use OpenApi\Attributes as OA;
 use App\Helpers\ValidatorHelper;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+#[OA\Tag(name: 'Register')]
+#[Route("")]
 class RegistrationController extends AbstractController {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher,
@@ -24,57 +27,53 @@ class RegistrationController extends AbstractController {
     ) {
     }
 
-    #[Route('/api/register', name: 'app_api_create_user', methods: ["POST", "GET"])]
+    #[Route('/api/register/create', name: 'create_user', methods: ["GET"])]
     public function createUser(Request $request, ValidatorInterface $validator) {
+        $formBuilder = new FormBuilder();
+        $formBuilder->add("firstName", "First name", FormField::TEXT, ["required" => true]);
+        $formBuilder->add("lastName", "Last name", FormField::TEXT, ["required" => true]);
+        $formBuilder->add("birthDate", "Date of birth", FormField::DATE, ["required" => true]);
+        $formBuilder->add("email", "E-mail", FormField::TEXT, ["required" => true]);
+        $formBuilder->add("password", "Password", FormField::TEXT, ["type" => "password", "required" => true]);
+        $formBuilder->add("verifyPassword", "Verify Password", FormField::TEXT, ["type" => "password", "required" => true]);
+        return new JsonResponse($formBuilder->getFormData());
+    }
 
-        $request->getMethod();
+    #[Route('/api/register', name: 'create_user', methods: ["POST"])]
+    public function saveUser(Request $request, ValidatorInterface $validator) {
+        $data = json_decode($request->getContent());
+        $user = new User();
 
-        switch ($request->getMethod()) {
-            case "GET": {
-                    $formBuilder = new FormBuilder();
-                    $formBuilder->add("firstName", "First name", FormField::TEXT);
-                    $formBuilder->add("lastName", "Last name", FormField::TEXT);
-                    $formBuilder->add("birthDate", "Date of birth", FormField::DATE);
-                    $formBuilder->add("email", "E-mail", FormField::TEXT);
-                    $formBuilder->add("password", "Password", FormField::TEXT, ["type" => "password"]);
-                    $formBuilder->add("verifyPassword", "Verify Password", FormField::TEXT, ["type" => "password"]);
-                    return new JsonResponse($formBuilder->getFormData());
-                }
-            case "POST": {
-                    $data = json_decode($request->getContent());
+        $user->setFirstName($data->firstName);
+        $user->setLastName($data->lastName);
 
-                    $user = new User();
+        $birthDate = new DateTimeImmutable($data->birthDate);
+        $birthDate->setTime(00, 00, 00);
+        $user->setBirthDate($birthDate);
 
-                    $user->setFirstName($data->firstName);
-                    $user->setLastName($data->lastName);
+        $user->setEmail($data->email);
+        $user->setPassword($this->passwordHasher->hashPassword($user, $data->password));
 
-                    $birthDate = new DateTimeImmutable($data->birthDate);
-                    $birthDate->setTime(00, 00, 00);
-                    $user->setBirthDate($birthDate);
+        $errors = ValidatorHelper::validateObject($user, $validator);
 
-                    $user->setEmail($data->email);
-                    $user->setPassword($this->passwordHasher->hashPassword($user, $data->password));
+        $passwordValidation = $validator->validate(
+            $data->password,
+            new PasswordRequirements()
+        );
 
-                    $errors = ValidatorHelper::validateObject($user, $validator);
-
-                    $passwordValidation = $validator->validate(
-                        $data->password,
-                        new PasswordRequirements()
-                    );
-
-                    if (count($passwordValidation)) {
-                        $errors->password = $passwordValidation[0]->getMessage();
-                    }
-
-                    if ($data->password !== $data->verifyPassword) {
-                        $errors->verifyPassword = "Passwords are not the same";
-                    }
-                    if (count((array) $errors)) return new JsonResponse($errors, 422);
-
-                    $this->userRepository->save($user);
-
-                    return new JsonResponse($user->getData());
-                }
+        if (count($passwordValidation)) {
+            $errors->password = $passwordValidation[0]->getMessage();
         }
+
+        if ($data->password !== $data->verifyPassword) {
+            $errors->verifyPassword = "Passwords are not the same";
+        }
+        if (count((array) $errors)) {
+            return new JsonResponse($errors, 422);
+        }
+
+        $this->userRepository->save($user);
+
+        return new JsonResponse($user->getData());
     }
 }

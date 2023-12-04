@@ -8,32 +8,16 @@ import { useAppDataContext } from "../../contexts/AppDataContext";
 
 type SimpleCreateModalProps<T> = {
   title: string;
-  createPath: string;
+  entity: string;
   onSuccess: ({}: T) => void;
 };
 
 export default function SimpleCreateModal<T>({
-  createPath,
+  entity,
   onSuccess,
   title,
 }: SimpleCreateModalProps<T>) {
-  const { appData } = useAppDataContext();
-  const [loaded, setLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [formFields, setFormFields] = useState([]);
-  const { addNotification } = useNotificationsContext();
-
-  useEffect(() => {
-    http_methods
-      .fetchAll<T>(appData.token, createPath)
-      .then((data) => {
-        setFormFields(data);
-        setLoaded(true);
-      })
-      .catch((err: Error) => {
-        addNotification({ text: err.message });
-      });
-  }, []);
 
   return (
     <>
@@ -45,26 +29,22 @@ export default function SimpleCreateModal<T>({
         Create New
       </Button>
 
-      {modalOpen && (
-        <Modal open={modalOpen} onClose={() => setModalOpen(!modalOpen)}>
-          <Modal.Header>
-            <Modal.Title>{title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <ContentLoader loaded={loaded}>
-              <FormComponent<T>
-                formData={formFields}
-                onSuccess={(data) => {
-                  setModalOpen(false);
-                  onSuccess(data);
-                }}
-                setFormData={setFormFields}
-                postPath={createPath}
-              />
-            </ContentLoader>
-          </Modal.Body>
-        </Modal>
-      )}
+      <Modal open={modalOpen} onClose={() => setModalOpen(!modalOpen)}>
+        <Modal.Header>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* <ContentLoader loaded={loaded}> */}
+          <FormComponent<T>
+            onSuccess={(data) => {
+              setModalOpen(false);
+              onSuccess(data);
+            }}
+            entity={entity}
+          />
+          {/* </ContentLoader> */}
+        </Modal.Body>
+      </Modal>
     </>
   );
 }
