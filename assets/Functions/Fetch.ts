@@ -52,7 +52,6 @@ async function sendDelete<T>(token: string, path: string): Promise<T> {
 }
 
 const processResponse = (res: Response) => {
-  // console.log(res);
   if (res.status >= 200 && res.status <= 299) return res.json();
   // try {
   else

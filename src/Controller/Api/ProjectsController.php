@@ -27,7 +27,7 @@ class ProjectsController extends AbstractController {
     ) {
     }
 
-    #[Route('/projects/create', name: 'projects_create', methods: ["GET"])]
+    #[Route('/projects/create', name: 'projects_create_form', methods: ["GET"])]
     public function addForm(Request $request): JsonResponse {
         $formBuilder = $this->addAndEditForm();
         return new JsonResponse($formBuilder->getFormData());
@@ -37,8 +37,10 @@ class ProjectsController extends AbstractController {
     public function create(Request $request): JsonResponse {
         $data = json_decode($request->getContent());
         $app = $this->appRepository->findOneById($data->appId);
+
         $project = new Project($app, $data->name);
         $this->projectRepository->save($project);
+
         $app->addProject($project);
         $this->appRepository->save($app);
 

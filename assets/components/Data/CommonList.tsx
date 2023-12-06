@@ -39,7 +39,6 @@ type CommonListProps<T> = {
   entity: string;
   onDelete: (item: T) => void;
   buttons?: ActionButtonsType;
-  userPermissions?: PermissionsType;
   inViewBacklink?: string;
   additionalInfo?: (item: T) => ReactElement;
   linkPrepend?: string;
@@ -56,7 +55,6 @@ export default function CommonList<T>({
   },
   entity,
   onDelete,
-  userPermissions,
   inViewBacklink,
   additionalInfo,
   ownButtons,
@@ -81,7 +79,7 @@ export default function CommonList<T>({
       typeof buttons.hasView == "function"
         ? buttons.hasView(item)
         : buttons.hasView;
-    let overview = isViewable && userPermissions?.hasView && (
+    let overview = isViewable && (
       <Button
         appearance="ghost"
         size="sm"
@@ -98,7 +96,7 @@ export default function CommonList<T>({
       typeof buttons.hasOptions == "function"
         ? buttons.hasOptions(item)
         : buttons.hasOptions;
-    let options = isOptionable && userPermissions?.hasOptions && (
+    let options = isOptionable && (
       <Button
         appearance="ghost"
         size="sm"
@@ -115,7 +113,7 @@ export default function CommonList<T>({
       typeof buttons.deleteable == "function"
         ? buttons.deleteable(item)
         : buttons.deleteable;
-    let destroy = isDestroyable && userPermissions?.deleteable && (
+    let destroy = isDestroyable && (
       <Button
         appearance="ghost"
         size="sm"

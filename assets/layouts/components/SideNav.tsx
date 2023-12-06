@@ -54,7 +54,7 @@ class PageLink implements PageLinkInterface {
 function AppChooser(index: number) {
   const { appData, refreshAppData } = useAppDataContext();
 
-  useEffect(() => {}, [appData]);
+  useEffect(() => {}, [appData.currentUser.userOptions.selectedAppId]);
 
   const handleChange = (appId: string) => {
     http_methods
@@ -65,7 +65,7 @@ function AppChooser(index: number) {
         },
         appData.token
       )
-      .then((res) => refreshAppData)
+      .then((res) => refreshAppData())
       .catch((err) => err);
   };
 
@@ -107,6 +107,8 @@ export default function SideNav({ activePage }: { activePage: string }) {
   const { appData } = useAppDataContext();
 
   useEffect(() => {}, [appData]);
+
+  console.log(appData.currentUser.currentAppRole);
 
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(

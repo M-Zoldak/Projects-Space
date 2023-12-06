@@ -7,7 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use App\Utils\EntityCollectionUtil;
 use Doctrine\Common\Collections\Collection;
+use App\Classes\Notifications\AppInvitation;
 use Doctrine\Common\Collections\ArrayCollection;
+use App\Classes\Notifications\DefaultNotification;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -46,21 +48,24 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'users')]
     private Collection $apps;
 
-    #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"], orphanRemoval: true)]
+    #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
     private Collection $appRoles;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ProjectRole::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ProjectRole::class)]
     private Collection $projectRoles;
 
-    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ["persist"])]
     private ?UserOptions $userOptions = null;
 
     #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'invitedUsers')]
     #[ORM\JoinTable(name: "apps_users_invitation")]
     private Collection $appInvitations;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserNotification::class, cascade: ["persist", "remove"])]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserNotification::class, cascade: ["persist"], orphanRemoval: true)]
     private Collection $notifications;
+
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: App::class)]
+    private Collection $ownedApps;
 
     public function __construct() {
         parent::__construct();
@@ -70,6 +75,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         $this->setUserOptions(new UserOptions());
         $this->appInvitations = new ArrayCollection();
         $this->notifications = new ArrayCollection();
+        $this->ownedApps = new ArrayCollection();
     }
 
     public function getData(App $app = null): array {
@@ -87,7 +93,9 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
             "id" => $this->getId(),
             "name" => $this->getFirstName() . " " . $this->getLastName(),
             "currentAppRole" => $userPermissions,
-            "userOptions" => $this->getUserOptions()->getData()
+            "userOptions" => $this->getUserOptions()->getData(),
+            "notifications" => EntityCollectionUtil::createCollectionData($this->getNotifications()),
+            "userOwnedAppsIds" => $this->getOwnedAppsIds()
         ];
     }
 
@@ -201,6 +209,9 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     public function removeApp(App $app): static {
         if ($this->apps->removeElement($app)) {
             $app->removeUser($this);
+            $removedFromApp = new DefaultNotification("You were removed from {$app->getName()}.");
+            $notification = new UserNotification($removedFromApp, $this);
+            $this->addNotification($notification);
         }
 
         return $this;
@@ -215,11 +226,19 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
 
     public function getCurrentAppRole(App $app) {
         $roles = $app->getRoles()->toArray();
+        $userRoles = $this->getAppRoles()->toArray();
 
-        $role = array_filter($roles, function (AppRole $role) {
-            return in_array($this, $role->getUsers()->toArray());
-        });
-        return (object) $role[0]->getData();
+        $userRole = null;
+
+        foreach ($roles as $role) {
+            foreach ($userRoles as $userRole) {
+                if ($role->getId() == $userRole->getId()) {
+                    $userRole = $role;
+                }
+            }
+        }
+
+        return (object) $userRole->getData();
     }
 
     public function addAppRole(AppRole $appRole): static {
@@ -288,18 +307,23 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this->appInvitations;
     }
 
-    public function addAppInvitation(App $appInvitation): static {
-        if (!$this->appInvitations->contains($appInvitation)) {
-            $this->appInvitations->add($appInvitation);
-            $appInvitation->addInvitedUser($this);
+    public function addAppInvitation(App $app): static {
+        if (!$this->appInvitations->contains($app)) {
+            $this->appInvitations->add($app);
+            $app->addInvitedUser($this);
+            $notification = new UserNotification(new AppInvitation($this, $app), $this);
+            $this->addNotification($notification);
         }
 
         return $this;
     }
 
-    public function removeAppInvitation(App $appInvitation): static {
-        if ($this->appInvitations->removeElement($appInvitation)) {
-            $appInvitation->removeInvitedUser($this);
+    public function removeAppInvitation(App $app): static {
+        if ($this->appInvitations->removeElement($app)) {
+            $app->removeInvitedUser($this);
+            $revokedInvitationNotification = new DefaultNotification("Your invitation to {$app->getName()} was revoked.");
+            $notification = new UserNotification($revokedInvitationNotification, $this);
+            $this->addNotification($notification);
         }
 
         return $this;
@@ -326,6 +350,40 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
             // set the owning side to null (unless already changed)
             if ($notification->getUser() === $this) {
                 $notification->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, App>
+     */
+    public function getOwnedApps(): Collection {
+        return $this->ownedApps;
+    }
+
+    /**
+     * @return Array<int>
+     */
+    public function getOwnedAppsIds(): array {
+        return array_map(fn ($app) => $app->getId(), $this->ownedApps->toArray());
+    }
+
+    public function addOwnedApp(App $getOwnedApp): static {
+        if (!$this->ownedApps->contains($getOwnedApp)) {
+            $this->ownedApps->add($getOwnedApp);
+            $getOwnedApp->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOwnedApp(App $getOwnedApp): static {
+        if ($this->ownedApps->removeElement($getOwnedApp)) {
+            // set the owning side to null (unless already changed)
+            if ($getOwnedApp->getOwner() === $this) {
+                $getOwnedApp->setOwner(null);
             }
         }
 

@@ -27,8 +27,8 @@ class RegistrationController extends AbstractController {
     ) {
     }
 
-    #[Route('/api/register/create', name: 'create_user', methods: ["GET"])]
-    public function createUser(Request $request, ValidatorInterface $validator) {
+    #[Route('/api/register/create', name: 'create_user_form', methods: ["GET"])]
+    public function createUser() {
         $formBuilder = new FormBuilder();
         $formBuilder->add("firstName", "First name", FormField::TEXT, ["required" => true]);
         $formBuilder->add("lastName", "Last name", FormField::TEXT, ["required" => true]);

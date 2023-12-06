@@ -19,7 +19,7 @@ class EntityCollectionUtil {
         return array_reduce(
             self::toArray($collection),
             function ($obj, $item) use ($propertyName) {
-                $obj->{$item->{"get$propertyName"}()} = $item->getData();
+                $obj->{lcfirst($item->{"get$propertyName"}())} = $item->getData();
                 return $obj;
             },
             new stdClass

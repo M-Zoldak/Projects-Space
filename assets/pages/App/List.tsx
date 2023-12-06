@@ -18,7 +18,7 @@ export default function AppsList() {
   const location = useLocation();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
-  const [appsInvitations, setAppsInvitations] = useState<AppType[]>([]);
+  const [appsInvitations, setAppsInvitations] = useState<AppType[]>();
 
   useEffect(() => {
     if (location.state?.notification) {
@@ -33,10 +33,12 @@ export default function AppsList() {
         appData.token,
         "/apps"
       )
-      .then(async (appsData) => {
+      .then(async (data) => {
         await refreshAppData();
         setLoaded(true);
-        setAppsInvitations(appsData.appsInvitations);
+        setAppsInvitations(
+          data.appsInvitations.length ? data.appsInvitations : null
+        );
       })
       .catch((err: Error) => {
         addNotification({ text: err.message });
@@ -65,17 +67,19 @@ export default function AppsList() {
 
   const acceptInvitation = (item: AppType) => {
     http_methods
-      .post("/apps/invite/accept", { appId: item.id }, appData.token)
+      .post(`/apps/${item.id}/invite/accept`, null, appData.token)
       .then(async (res) => {
         addNotification({
           text: `You have joined ${item.name} space!`,
           notificationProps: { type: "success" },
         });
 
-        await refreshAppData();
         setAppsInvitations(appsInvitations.filter((inv) => inv.id != item.id));
+        await refreshAppData();
       });
   };
+
+  console.log(appData.currentUser.userOwnedAppsIds);
 
   return (
     <StandardLayout title="My apps" activePage="My Apps">
@@ -91,11 +95,14 @@ export default function AppsList() {
           <CommonList<AppType>
             items={appData.apps}
             entity="apps"
-            userPermissions={
-              appData.currentUser.currentAppRole.permissions.apps
-            }
             onDelete={handleDelete}
-            buttons={{ hasView: false, deleteable: true, hasOptions: true }}
+            buttons={{
+              hasView: false,
+              deleteable: (item: AppType) =>
+                appData.currentUser.id.toString() == item.ownerId,
+              hasOptions: true,
+              // appData.currentUser.currentAppRole.permissions.apps.hasOptions,
+            }}
             additionalInfo={appAdditionalInfo}
           />
         ) : (
@@ -111,9 +118,6 @@ export default function AppsList() {
             <CommonList<AppType>
               items={appsInvitations}
               entity="apps"
-              userPermissions={
-                appData.currentUser.currentAppRole.permissions.apps
-              }
               onDelete={handleDelete}
               // buttons={{ hasView: false, deleteable: true, hasOptions: true }}
               ownButtons={(item: AppType) => (

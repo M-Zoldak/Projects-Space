@@ -26,7 +26,7 @@ class AppRole extends Entity {
     #[ORM\Column(options: ["default" => true])]
     private ?bool $destroyable = true;
 
-    #[ORM\OneToMany(mappedBy: 'appRole', targetEntity: SectionPermissions::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'appRole', targetEntity: SectionPermissions::class, cascade: ["remove", "persist"], orphanRemoval: true)]
     private Collection $sectionPermissions;
 
     #[ORM\Column]

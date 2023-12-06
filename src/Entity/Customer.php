@@ -32,7 +32,7 @@ class Customer extends Entity {
     private ?string $homeNumber = null;
 
     #[ORM\ManyToOne(inversedBy: 'customers')]
-    private ?App $App = null;
+    private ?App $app = null;
 
     public function getData(): array {
         return [];
@@ -119,11 +119,11 @@ class Customer extends Entity {
     }
 
     public function getApp(): ?App {
-        return $this->App;
+        return $this->app;
     }
 
-    public function setApp(?App $App): static {
-        $this->App = $App;
+    public function setApp(?App $app): static {
+        $this->app = $app;
 
         return $this;
     }

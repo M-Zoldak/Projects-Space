@@ -14,12 +14,15 @@ use App\Repository\AppRepository;
 use App\Repository\UserRepository;
 use App\Utils\EntityCollectionUtil;
 use App\Repository\AppRoleRepository;
+use App\Classes\Notifications\AppInvitation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\SectionPermissionsRepository;
+use App\Classes\Notifications\NewAppNotification;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\ORM\Internal\TopologicalSort\CycleDetectedException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[OA\Tag(name: 'Apps')]
@@ -62,6 +65,7 @@ class AppsController extends AbstractController {
         $app = new App();
         $app->setName($data->name);
         $app->addUser($user);
+        $app->setOwner($user);
 
         $errors = ValidatorHelper::validateObject($app, $validator);
 
@@ -118,10 +122,17 @@ class AppsController extends AbstractController {
         $app = $this->appRepository->findOneById($id);
         if (!$app) return new JsonResponse([], 404);
 
-        $users = $app->getUsers()->toArray();
-        array_walk($users, fn (User $user) => $user->getUserOptions()->setSelectedApp());
+        // $users = $app->getUsers()->toArray();
+        // array_walk($users, fn (User $user) => $user->getUserOptions()->setSelectedApp());
         $deletedAppData = $app->getData();
-        $this->appRepository->delete($app);
+        try {
+            $app->setDefaultRole(null);
+            $app->getRoles()->forAll(fn ($roleKey, $role) => $this->appRoleRepository->delete($role));
+            $this->appRepository->delete($app);
+        } catch (CycleDetectedException $exc) {
+            dump($exc->getCycle());
+            // dd($exc->getCycle());
+        }
 
         return new JsonResponse($deletedAppData);
     }
@@ -167,23 +178,49 @@ class AppsController extends AbstractController {
         }
 
         $user->addAppInvitation($app);
-        $notification = new UserNotification("User was invited into your space.", $user);
-        $user->addNotification($notification);
         $this->userRepository->save($user);
 
-        return new JsonResponse(["message" => "Invitation was sent to user."]);
+        return new JsonResponse(["message" => "Invitation was sent to user.", "user" => $user->getData()]);
+    }
+
+    #[Route('/apps/{id}/invite/accept', name: 'app_invitation_confirm', methods: ["POST"])]
+    public function acceptInvitationToApp(string $id, #[CurrentUser] ?User $user, Request $request): JsonResponse {
+        $app = $this->appRepository->findOneById($id);
+
+        $defaultRole = $app->getDefaultRole();
+        $user->addAppRole($defaultRole);
+        $app->addUser($user);
+        $app->removeInvitedUser($user);
+        $this->appRepository->save($app);
+        return new JsonResponse($user->getData());
     }
 
     #[Route('/apps/invite/email', name: 'app_cinvite_email', methods: ["POST"])]
     public function emailInvitation(Request $request, #[CurrentUser] ?User $user): JsonResponse {
         $data = json_decode($request->getContent());
 
-        if (count($data->userEmail)) return new JsonResponse(["error" => "This field might not be empty"]);
+        if (strlen($data->userEmail) == 0) return new JsonResponse(["error" => "This field might not be empty"]);
 
         $emailSent = mail($data->userEmail, "{$user->getFullName()} invites you to Projects Space!", $data->message . "\n\nhttps://$_SERVER[HTTP_HOST]/register");
 
         if ($emailSent) return new JsonResponse(["message" => "E-mail to $data->userEmail was sent succesfully"]);
         else return new JsonResponse(["message" => "Something went wrong. E-mail could not be sent. Please try again later"], 503);
+    }
+
+    #[Route('/apps/{appId}/user/{userId}', name: 'app_revoku_user_invitation', methods: ["DELETE"])]
+    public function revokeInvitationToApp(string $appId, string $userId, Request $request): JsonResponse {
+        $app = $this->appRepository->findOneById($appId);
+        $user = $this->userRepository->findOneById($userId);
+
+        if ($app->hasUser($user)) {
+            $user->removeApp($app);
+        } else {
+            $user->removeAppInvitation($app);
+        }
+
+        $this->appRepository->save($app);
+
+        return new JsonResponse($user->getData());
     }
 
     private function addAndEditForm(App $app = null): FormBuilder {

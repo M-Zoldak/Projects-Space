@@ -8,12 +8,13 @@ import {
   Message,
 } from "rsuite";
 import { PropsWithChildren, useState } from "react";
-import NavToggle from "./components/NavToggle";
+import TopNav from "./components/TopNav";
 import { Link, useNavigate } from "react-router-dom";
 import SideNav from "./components/SideNav";
 import { useNotificationsContext } from "../contexts/NotificationsContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRocket } from "@fortawesome/free-solid-svg-icons";
+import { useAppDataContext } from "../contexts/AppDataContext";
 
 type StandardLayout = PropsWithChildren<{
   title: string;
@@ -27,6 +28,7 @@ const StandardLayout = ({
 }: StandardLayout) => {
   const [expand, setExpand] = useState(true);
   const { notifications, removeNotification } = useNotificationsContext();
+  const { appData } = useAppDataContext();
 
   return (
     <div className="sidebar-page">
@@ -61,7 +63,6 @@ const StandardLayout = ({
               {
                 <Nav>
                   <SideNav activePage={activePage} />
-                  {/* <SideNav activePage={activePage} /> */}
                 </Nav>
               }
             </Sidenav.Body>
@@ -71,9 +72,9 @@ const StandardLayout = ({
         <Container>
           <Header className="site_header">
             <h2>{title}</h2>
-
-            <div>
-              <NavToggle expand={expand} onChange={() => setExpand(!expand)} />
+            <h5>Logged in as: {appData.currentUser.name}</h5>
+            <div style={{ display: "flex", alignItems: "stretch" }}>
+              <TopNav expand={expand} onChange={() => setExpand(!expand)} />
             </div>
           </Header>
           <Container>

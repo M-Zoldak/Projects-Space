@@ -33,19 +33,22 @@ export default function ProjectsList() {
   return (
     <StandardLayout title="Projects overview" activePage="Projects">
       <FlexboxGrid className="buttons_container">
-        <SimpleCreateModal<ProjectType>
-          title="New project"
-          entity="projects"
-          onSuccess={(project) => {
-            setProjects([...projects, project]);
-            addNotification({
-              text: `Project ${project.name} was created succesfully!`,
-              notificationProps: {
-                type: "success",
-              },
-            });
-          }}
-        />
+        {appData.currentUser.currentAppRole.permissions?.projects
+          .hasOptions && (
+          <SimpleCreateModal<ProjectType>
+            title="New project"
+            entity="projects"
+            onSuccess={(project) => {
+              setProjects([...projects, project]);
+              addNotification({
+                text: `Project ${project.name} was created succesfully!`,
+                notificationProps: {
+                  type: "success",
+                },
+              });
+            }}
+          />
+        )}
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
@@ -54,9 +57,6 @@ export default function ProjectsList() {
           <CommonList<ProjectType>
             items={projects}
             entity="projects"
-            userPermissions={
-              appData.currentUser.currentAppRole.permissions?.projects
-            }
             onDelete={(item) => {
               let newProjects = projects.filter(
                 (project) => project.id != item.id
@@ -66,6 +66,17 @@ export default function ProjectsList() {
                 text: `Project ${item.name} was deleted succesfully`,
                 notificationProps: { type: "success" },
               });
+            }}
+            buttons={{
+              deleteable:
+                appData.currentUser.currentAppRole.permissions?.projects
+                  .deleteable,
+              hasOptions:
+                appData.currentUser.currentAppRole.permissions?.projects
+                  .hasOptions,
+              hasView:
+                appData.currentUser.currentAppRole.permissions?.projects
+                  .hasView,
             }}
           />
         ) : (

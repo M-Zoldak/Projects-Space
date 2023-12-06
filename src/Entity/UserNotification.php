@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use FrontEndActions;
 use Doctrine\ORM\Mapping as ORM;
+use App\Interfaces\INotification;
 use App\Repository\UserNotificationsRepository;
 
 #[ORM\Entity(repositoryClass: UserNotificationsRepository::class)]
@@ -21,10 +23,25 @@ class UserNotification extends Entity {
     #[ORM\Column(length: 2048)]
     private ?string $message = null;
 
-    public function __construct(string $message, User $user) {
+    #[ORM\Column]
+    private ?bool $isSeen = null;
+
+    public function __construct(INotification $notification, User $user) {
         parent::__construct();
         $this->setUser($user);
-        $this->setMessage($message);
+        $this->setMessage($notification->getMessage());
+        $this->setIcon($notification->getIcon());
+        $this->setIsSeen(false);
+    }
+
+    public function getData() {
+        return [
+            "id" => $this->getId(),
+            "message" => $this->getMessage(),
+            "isSeen" => $this->isSeen(),
+            "icon" => $this->getIcon(),
+            "actions" => ""
+        ];
     }
 
     public function getId(): ?int {
@@ -57,6 +74,16 @@ class UserNotification extends Entity {
 
     public function setMessage(string $message): static {
         $this->message = $message;
+
+        return $this;
+    }
+
+    public function isSeen(): ?bool {
+        return $this->isSeen ?? false;
+    }
+
+    public function setIsSeen(bool $isSeen): static {
+        $this->isSeen = $isSeen;
 
         return $this;
     }

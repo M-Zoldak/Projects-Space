@@ -15,19 +15,19 @@ class App extends Entity {
     #[ORM\Column(length: 255, nullable: false)]
     private ?string $name = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps', cascade: ["persist"])]
     private Collection $users;
 
-    #[ORM\OneToMany(mappedBy: 'App', targetEntity: Customer::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Customer::class, orphanRemoval: true)]
     private Collection $customers;
 
-    #[ORM\OneToMany(mappedBy: 'App', targetEntity: Site::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Site::class, orphanRemoval: true)]
     private Collection $sites;
 
     #[ORM\OneToOne(mappedBy: 'app', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?SiteOptions $siteOptions = null;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: AppRole::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', cascade: ['persist', 'remove'], targetEntity: AppRole::class, orphanRemoval: true)]
     private Collection $roles;
 
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class, orphanRemoval: true)]
@@ -37,12 +37,16 @@ class App extends Entity {
     private Collection $userOptions;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?AppRole $defaultRole = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'appInvitations')]
     #[ORM\JoinTable(name: "app_users_invitation")]
     private Collection $invitedUsers;
+
+    #[ORM\ManyToOne(inversedBy: 'ownedApps', cascade: ['persist'])]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $owner = null;
 
     public function __construct() {
         parent::__construct();
@@ -51,15 +55,15 @@ class App extends Entity {
         $this->sites = new ArrayCollection();
         $this->roles = new ArrayCollection();
         $this->projects = new ArrayCollection();
-        $this->userOptions = new ArrayCollection();
         $this->invitedUsers = new ArrayCollection();
     }
 
     public function getData(): array {
         return [
             "id" => $this->getId(),
+            "ownerId" => $this->getOwner()->getId(),
             "name" => $this->getName(),
-            "defaultRoleId" => $this->getDefaultRole()->getId(),
+            "defaultRoleId" => $this->getDefaultRole()?->getId(),
             "statistics" => [
                 "usersCount" => $this->getUsers()->count()
             ],
@@ -196,7 +200,7 @@ class App extends Entity {
         $roles = array_filter($this->getRoles()->toArray(), function (AppRole $role) {
             return $role->isOwnerRole();
         });
-        return $roles[0];
+        return $roles[0] ?? null;
     }
 
     public function addRole(AppRole $role): static {
@@ -246,35 +250,8 @@ class App extends Entity {
         return $this;
     }
 
-    /**
-     * @return Collection<int, UserOptions>
-     */
-    public function getUserOptions(): Collection {
-        return $this->userOptions;
-    }
-
-    public function addUserOption(UserOptions $userOption): static {
-        if (!$this->userOptions->contains($userOption)) {
-            $this->userOptions->add($userOption);
-            $userOption->setSelectedApp($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserOption(UserOptions $userOption): static {
-        if ($this->userOptions->removeElement($userOption)) {
-            // set the owning side to null (unless already changed)
-            if ($userOption->getSelectedApp() === $this) {
-                $userOption->setSelectedApp(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getDefaultRole(): ?AppRole {
-        if ($this->defaultRole->getId() == 0) $this->setDefaultRole($this->getAdminRole());
+        if (!$this->defaultRole?->getId()) $this->setDefaultRole($this->getAdminRole());
         return $this->defaultRole;
     }
 
@@ -301,6 +278,16 @@ class App extends Entity {
 
     public function removeInvitedUser(User $invitedUser): static {
         $this->invitedUsers->removeElement($invitedUser);
+
+        return $this;
+    }
+
+    public function getOwner(): ?User {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static {
+        $this->owner = $owner;
 
         return $this;
     }

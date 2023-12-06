@@ -15,7 +15,7 @@ class Site extends Entity {
     private ?string $hosting = null;
 
     #[ORM\ManyToOne(inversedBy: 'sites')]
-    private ?App $App = null;
+    private ?App $app = null;
 
     public function getDomain(): ?string {
         return $this->domain;
@@ -46,11 +46,11 @@ class Site extends Entity {
     }
 
     public function getApp(): ?App {
-        return $this->App;
+        return $this->app;
     }
 
-    public function setApp(?App $App): static {
-        $this->App = $App;
+    public function setApp(?App $app): static {
+        $this->app = $app;
 
         return $this;
     }

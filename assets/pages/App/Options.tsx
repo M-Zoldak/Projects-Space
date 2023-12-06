@@ -95,7 +95,7 @@ export default function Options() {
           text: res.message,
           notificationProps: { type: "success" },
         });
-        setNewUser("");
+        setInvitedUsers([...invitedUsers, res.user]);
       })
       .catch((res) => {
         setEmailInvitationPopup({
@@ -136,7 +136,7 @@ export default function Options() {
                   .post<any>(
                     "/apps/invite/email",
                     {
-                      email: newUser,
+                      userEmail: newUser,
                       message:
                         "I want to collaborate with you on my Project at Projects Space!",
                     },
@@ -152,6 +152,13 @@ export default function Options() {
                       notificationProps: { type: "success" },
                     });
                     setNewUser("");
+                  })
+                  .catch((err: Error) => {
+                    addNotification({ text: JSON.parse(err.message).message });
+                    setEmailInvitationPopup({
+                      ...emailInvitationPopup,
+                      show: false,
+                    });
                   })
               }
             >
@@ -216,7 +223,7 @@ export default function Options() {
                     setDefaultRoleId(data.defaultRoleId);
                   });
               }}
-            ></Radio>
+            />
           </HoverTooltip>
         </FlexboxGridItem>
       </FlexboxGrid>
@@ -246,7 +253,6 @@ export default function Options() {
           entity="user"
           items={[...users, ...invitedUsers]}
           inViewBacklink={`/apps/${params.id}/options`}
-          userPermissions={appData.currentUser.currentAppRole.permissions.apps}
           linkPrepend={`/apps/${params.id}`}
           buttons={{
             deleteable: (item: UserType) => !item?.appRole?.isOwnerRole,
@@ -255,8 +261,21 @@ export default function Options() {
             hasView: false,
           }}
           onDelete={(item) => {
-            let newUsers = filterOutItem(users, item);
-            setAppRolesList(newUsers);
+            if (users.find((u) => u.id == item.id)) {
+              let newUsers = filterOutItem(users, item);
+              setUsers(newUsers);
+              addNotification({
+                text: `User ${item.name} was removed from App.`,
+                notificationProps: { type: "success" },
+              });
+            } else {
+              let newUsers = filterOutItem(invitedUsers, item);
+              setInvitedUsers(newUsers);
+              addNotification({
+                text: `Invitation for ${item.name} was revoked.`,
+                notificationProps: { type: "success" },
+              });
+            }
           }}
           additionalInfo={userAdditionalInfo}
         />
@@ -277,7 +296,6 @@ export default function Options() {
           entity="app-roles"
           items={appRolesList}
           inViewBacklink={`/apps/${params.id}/options`}
-          userPermissions={appData.currentUser.currentAppRole.permissions.apps}
           buttons={{
             deleteable: (item: AppRoleType) => !item.isOwnerRole,
             hasOptions: true,

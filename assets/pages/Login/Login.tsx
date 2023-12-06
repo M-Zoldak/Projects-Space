@@ -14,6 +14,8 @@ import { useAppDataContext } from "../../contexts/AppDataContext";
 import { http_methods } from "../../Functions/Fetch";
 import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
+import FormComponent from "../../components/Forms/FormComponent";
+import FormError from "../../components/Forms/FormError";
 
 function Login() {
   const navigate = useNavigate();
@@ -22,21 +24,15 @@ function Login() {
     username: "",
     password: "",
   });
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const login = async () => {
-    let token = await http_methods
+  const login = () => {
+    http_methods
       .post<any>("/login", formValue)
-      .then(async (data) => data.token)
-      .catch((err: Error) => console.log(err.message));
-
-    let dataLoaded = await initializeAppData(token);
-
-    if (dataLoaded) {
-      return navigate("/dashboard");
-    } else {
-      throw new Error("Necessary data couldn't be loaded");
-    }
-    // })
+      .then((data) => data.token)
+      .then((token) => initializeAppData(token))
+      .then(() => navigate("/dashboard"))
+      .catch((err: Error) => setErrorMsg("Invalid email or password."));
   };
 
   return (
@@ -45,13 +41,19 @@ function Login() {
         <FlexboxGrid.Item colspan={12}>
           <Panel header={<h3>Login</h3>} bordered>
             <Form fluid onChange={setFormValue}>
-              <TextField name="username" label="Email address" />
+              <TextField name="username" label="Email" />
               <TextField
                 label="Password"
                 name="password"
                 type="password"
                 autoComplete="off"
               />
+              {errorMsg && (
+                <>
+                  <FormError error={errorMsg} />
+                  <br />
+                </>
+              )}
               <ButtonToolbar>
                 <Button
                   appearance="primary"

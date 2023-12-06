@@ -8,10 +8,10 @@ export default function Protected({ children }: PropsWithChildren) {
 
   return !appData.token ? (
     <>
-      {(() => {
+      {/* {(() => {
         clear();
         redirect("/login");
-      })()}
+      })()} */}
     </>
   ) : (
     children

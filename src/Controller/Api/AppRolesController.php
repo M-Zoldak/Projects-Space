@@ -8,7 +8,6 @@ use App\Entity\AppRole;
 use OpenApi\Attributes as OA;
 use App\Repository\AppRepository;
 use App\Entity\SectionPermissions;
-use App\Utils\EntityCollectionUtil;
 use App\Repository\AppRoleRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +20,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 #[OA\Tag(name: 'App Roles')]
 #[Route("")]
 class AppRolesController extends AbstractController {
-
 
     public function __construct(
         private AppRoleRepository $appRoleRepository,
@@ -63,6 +61,11 @@ class AppRolesController extends AbstractController {
     public function delete(string $id, #[CurrentUser] ?User $user): JsonResponse {
         // TODO Make check
         $appRole = $this->appRoleRepository->findOneById($id);
+        $app = $appRole->getApp();
+        if ($app->getDefaultRole() == $appRole) {
+            $app->setDefaultRole($app->getRoles()->toArray()[0]);
+        }
+
         $deletedAppRoleData = $appRole->getData();
         if ($appRole) {
             $this->appRoleRepository->delete($appRole);
