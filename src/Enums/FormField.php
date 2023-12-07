@@ -15,8 +15,8 @@ enum FormField: string {
         switch ($this) {
             case (self::TEXT):
                 return true;
-            case (self::DATE):
-                return true;
+                // case (self::DATE):
+                //     return true;
             case (self::HIDDEN):
                 return true;
             default:
@@ -30,8 +30,8 @@ enum FormField: string {
                 return ["autoComplete" => "off"];
             case (self::HIDDEN):
                 return ["hidden" => true];
-            case (self::DATE):
-                return ["dateFormat" => "yyyy-MM-dd"];
+                // case (self::DATE):
+                // return ["dateFormat" => "dd-MM-yyyy"];
             default:
                 return null;
         }

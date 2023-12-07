@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Error;
+use DateTime;
 use App\Entity\User;
 use DateTimeImmutable;
 use App\Enums\FormField;
@@ -47,7 +48,7 @@ class RegistrationController extends AbstractController {
         $user->setFirstName($data->firstName);
         $user->setLastName($data->lastName);
 
-        $birthDate = new DateTimeImmutable($data->birthDate);
+        $birthDate = new DateTimeImmutable(strtotime($data->birthDate));
         $birthDate->setTime(00, 00, 00);
         $user->setBirthDate($birthDate);
 
@@ -68,6 +69,7 @@ class RegistrationController extends AbstractController {
         if ($data->password !== $data->verifyPassword) {
             $errors->verifyPassword = "Passwords are not the same";
         }
+
         if (count((array) $errors)) {
             return new JsonResponse($errors, 422);
         }

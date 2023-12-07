@@ -1,11 +1,10 @@
 import { PermissionsType } from "../DefaultTypes";
 import { AppRoleType } from "./AppRoleType";
+import { DefaultType } from "./DefaultType";
 import { UserType } from "./UserType";
 
-export type AppType = {
-  id: string;
+export type AppType = DefaultType & {
   ownerId: string;
-  name: string;
   userPermissions: PermissionsType;
   defaultRoleId: string;
   statistics: {

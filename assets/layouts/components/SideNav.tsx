@@ -108,8 +108,6 @@ export default function SideNav({ activePage }: { activePage: string }) {
 
   useEffect(() => {}, [appData]);
 
-  console.log(appData.currentUser.currentAppRole);
-
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(
       "Dashboard",
@@ -126,8 +124,8 @@ export default function SideNav({ activePage }: { activePage: string }) {
     new MenuDivider(),
     new PageLink("Sites", "/sites", <FontAwesomeIcon icon={faGlobe} />),
     new PageLink(
-      "Customers",
-      "/customers",
+      "Clients",
+      "/clients",
       <FontAwesomeIcon icon={faPeopleGroup} />
     ),
     // new PageLink('About', '/about'),

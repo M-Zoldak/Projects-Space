@@ -19,11 +19,15 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
     'app' => App::class,
     'app_role' => AppRole::class,
     'section_permissions' => SectionPermissions::class,
+    'client' => Client::class,
+    "address" => Address::class,
+    'site_options' => SiteOptions::class,
+    'user_notifications' => UserNotification::class,
+    'task' => Task::class,
     'project' => Project::class,
     'project_role' => ProjectRole::class,
-    'customer' => Customer::class,
-    'site_options' => SiteOptions::class,
-    'user_notifications' => UserNotification::class
+    "project_categories" => ProjectCategories::class,
+    "project_states" => ProjectStates::class
 ])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 abstract class Entity {

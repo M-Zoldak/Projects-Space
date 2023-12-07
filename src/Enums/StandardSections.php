@@ -6,5 +6,5 @@ enum StandardSections: string {
     case Apps = "Apps";
     case Projects = "Projects";
     case Websites = "Websites";
-    case Customers = "Customers";
+    case Clients = "Clients";
 }

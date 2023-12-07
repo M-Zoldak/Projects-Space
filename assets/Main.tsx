@@ -19,6 +19,8 @@ import ProjectsList from "./pages/Project/List";
 import AppsList from "./pages/App/List";
 import NotificationsProvider from "./contexts/NotificationsContext";
 import AppDataProvider from "./contexts/AppDataContext";
+import Project from "./pages/Project/Project";
+import Profile from "./pages/Profile";
 
 function Main() {
   return (
@@ -106,6 +108,24 @@ function Main() {
           element={
             <Protected>
               <ProjectsList />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/projects/:id"
+          element={
+            <Protected>
+              <Project />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <Protected>
+              <Profile />
             </Protected>
           }
         />

@@ -37,7 +37,7 @@ const TopNav = ({ expand, onChange }: TopNav) => {
 
   function showNotifications() {
     const renderActionButtons = (note: UserNotificationType) => {
-      note.actions.map((action) => {
+      return note.actions.map((action) => {
         switch (action) {
           case "Decline":
             return <Button></Button>;
@@ -57,11 +57,11 @@ const TopNav = ({ expand, onChange }: TopNav) => {
       <Popover>
         {appData?.currentUser?.notifications?.length ? (
           appData?.currentUser?.notifications?.map((note, index) => (
-            <>
+            <div key={index}>
               {index > 0 ? <Divider /> : ""}
               <p>{note.message}</p>
               {note.actions && renderActionButtons(note)}
-            </>
+            </div>
           ))
         ) : (
           <p>You don't have any notifications.</p>

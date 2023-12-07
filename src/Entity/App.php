@@ -18,9 +18,6 @@ class App extends Entity {
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps', cascade: ["persist"])]
     private Collection $users;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Customer::class, orphanRemoval: true)]
-    private Collection $customers;
-
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: Site::class, orphanRemoval: true)]
     private Collection $sites;
 
@@ -51,7 +48,6 @@ class App extends Entity {
     public function __construct() {
         parent::__construct();
         $this->users = new ArrayCollection();
-        $this->customers = new ArrayCollection();
         $this->sites = new ArrayCollection();
         $this->roles = new ArrayCollection();
         $this->projects = new ArrayCollection();
@@ -67,9 +63,7 @@ class App extends Entity {
             "statistics" => [
                 "usersCount" => $this->getUsers()->count()
             ],
-            "invitedUsers" => $this->getInvitedUsers()->toArray()
-            // "roles" => $this->getRoles(),
-            // "users" => $this->getUsers()
+            "invitedUsers" => $this->getInvitedUsers()->toArray(),
         ];
     }
 
@@ -113,33 +107,6 @@ class App extends Entity {
             $user->getId(),
             $usersIds
         );
-    }
-
-    /**
-     * @return Collection<int, Customer>
-     */
-    public function getCustomers(): Collection {
-        return $this->customers;
-    }
-
-    public function addCustomer(Customer $customer): static {
-        if (!$this->customers->contains($customer)) {
-            $this->customers->add($customer);
-            $customer->setApp($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCustomer(Customer $customer): static {
-        if ($this->customers->removeElement($customer)) {
-            // set the owning side to null (unless already changed)
-            if ($customer->getApp() === $this) {
-                $customer->setApp(null);
-            }
-        }
-
-        return $this;
     }
 
     /**

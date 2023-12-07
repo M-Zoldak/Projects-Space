@@ -11,7 +11,12 @@ class FormBuilder {
     public function add(string $fieldName, string $fieldLabel, FormField $fieldType, array $options = []): void {
         if (empty($fieldName)) return;
 
-        $field = (object) ["name" => $fieldName, "type" => $fieldType->value, "label" => $fieldLabel, "value" => ""];
+        $field = (object) [
+            "name" => $fieldName,
+            "type" => $fieldType->value,
+            "label" => $fieldLabel,
+            "value" => ""
+        ];
 
         $this->addDefaultOptions($fieldType, $field);
         $this->assignOptions($field, $options);
@@ -20,7 +25,6 @@ class FormBuilder {
     }
 
     public function getFormData(): array {
-        // dd((object) $this->fields);
         return $this->fields;
     }
 
@@ -39,7 +43,7 @@ class FormBuilder {
         }
     }
 
-    private function assignOptions(object $field, array $options) {
+    private function assignOptions(object &$field, array $options) {
         foreach ($options as $key => $val) {
             $field->$key = $val;
         };

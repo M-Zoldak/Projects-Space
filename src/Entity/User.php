@@ -79,11 +79,10 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     }
 
     public function getData(App $app = null): array {
-        $userPermissions = $app ? $this->getCurrentAppRole($app) : null;
         return [
             "id" => $this->getId(),
             "name" => $this->getFirstName() . " " . $this->getLastName(),
-            "appRole" => $userPermissions
+            "appRole" => $app ? $this->getCurrentAppRole($app) : null
         ];
     }
 

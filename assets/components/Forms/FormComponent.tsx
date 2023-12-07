@@ -94,13 +94,16 @@ export default function FormComponent<T>({
         return (
           <Form.Group controlId={field.name} key={key}>
             <Form.ControlLabel>Date of birth</Form.ControlLabel>
-            <Form.Control
+            <DatePicker
+              onChange={(value) => updateInput(value.toString(), field.name)}
               name={field.name}
-              accepter={DatePicker}
-              onChange={(value) => updateInput(value, field.name)}
-              oneTap
-              format="yyyy-MM-dd"
+              value={
+                field?.value ? new Date(field.value) : new Date("01.01.2020")
+              }
+              // format={field.dateFormat}
+              limitEndYear={new Date().getFullYear() - 3}
             />
+
             <FormError error={field.error} />
           </Form.Group>
         );

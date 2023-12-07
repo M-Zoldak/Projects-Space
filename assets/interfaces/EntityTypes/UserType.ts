@@ -1,4 +1,5 @@
 import { AppRoleType } from "./AppRoleType";
+import { DefaultType } from "./DefaultType";
 import { UserNotificationType } from "./UserNotificationType";
 
 export type UserOptionsType = {
@@ -6,16 +7,12 @@ export type UserOptionsType = {
 };
 
 export type CurrentUserType = {
-  id: number;
-  name: string;
   currentAppRole: AppRoleType;
   userOptions: UserOptionsType;
   notifications: UserNotificationType[];
   userOwnedAppsIds: Array<number>;
-};
+} & DefaultType;
 
-export type UserType = {
-  id: number;
-  name: string;
+export type UserType = DefaultType & {
   appRole: AppRoleType;
 };

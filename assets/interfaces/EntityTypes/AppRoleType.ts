@@ -1,8 +1,7 @@
 import { DynamicallyFilledObject, PermissionsType } from "../DefaultTypes";
+import { DefaultType } from "./DefaultType";
 
-export type AppRoleType = {
-  id: string;
-  name: string;
+export type AppRoleType = DefaultType & {
   isOwnerRole: boolean;
   permissions: UserStandardPermissions;
 };
