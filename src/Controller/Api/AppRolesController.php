@@ -83,9 +83,9 @@ class AppRolesController extends AbstractController {
 
         $permissions = $appRole->getSectionPermissions()->toArray();
         array_walk($permissions, function (SectionPermissions $permissions) use ($data) {
-            $permissions->setDestroy($data->permissions->{$permissions->getSectionName()}->deleteable);
-            $permissions->setReview($data->permissions->{$permissions->getSectionName()}->hasView);
-            $permissions->setEdit($data->permissions->{$permissions->getSectionName()}->hasOptions);
+            $permissions->setDestroy($data->permissions->{lcfirst($permissions->getSectionName())}->deleteable);
+            $permissions->setReview($data->permissions->{lcfirst($permissions->getSectionName())}->hasView);
+            $permissions->setEdit($data->permissions->{lcfirst($permissions->getSectionName())}->hasOptions);
             $this->sectionPermissionsRepository->save($permissions);
         });
 

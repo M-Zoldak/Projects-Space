@@ -10,12 +10,14 @@ type SimpleCreateModalProps<T> = {
   title: string;
   entity: string;
   onSuccess: ({}: T) => void;
+  prependQuery?: string;
 };
 
 export default function SimpleCreateModal<T>({
   entity,
   onSuccess,
   title,
+  prependQuery = "",
 }: SimpleCreateModalProps<T>) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -36,6 +38,7 @@ export default function SimpleCreateModal<T>({
         <Modal.Body>
           {/* <ContentLoader loaded={loaded}> */}
           <FormComponent<T>
+            prependQuery={prependQuery}
             onSuccess={(data) => {
               setModalOpen(false);
               onSuccess(data);

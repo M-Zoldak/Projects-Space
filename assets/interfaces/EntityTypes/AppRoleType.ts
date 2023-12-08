@@ -9,6 +9,6 @@ export type AppRoleType = DefaultType & {
 export type UserStandardPermissions = {
   projects?: PermissionsType;
   websites?: PermissionsType;
-  customers?: PermissionsType;
+  clients?: PermissionsType;
   apps: PermissionsType;
 } & DynamicallyFilledObject<PermissionsType | any>;

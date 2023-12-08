@@ -43,6 +43,7 @@ export default function Project() {
       <h3>{project && project.name}</h3>
       {tasks && (
         <CommonList<TaskType>
+          label={(task) => task.name}
           entity="tasks"
           items={tasks}
           onDelete={() => {}}

@@ -14,13 +14,17 @@ import RegistrationConfirmation from "./pages/Login/RegistrationConfirmation";
 import GuestsOnly from "./components/Protection/GuestsOnly";
 import CreateApp from "./pages/App/Create";
 import OptionsApp from "./pages/App/Options";
-import OptionsAppRole from "./pages/AppRole/Options";
+import AppRoleOptions from "./pages/AppRole/Options";
 import ProjectsList from "./pages/Project/List";
 import AppsList from "./pages/App/List";
 import NotificationsProvider from "./contexts/NotificationsContext";
 import AppDataProvider from "./contexts/AppDataContext";
 import Project from "./pages/Project/Project";
 import Profile from "./pages/Profile";
+import ClientsList from "./pages/Client/List";
+import ClientOptions from "./pages/Client/Options";
+import ContactOptions from "./pages/Client/Contact/Options";
+import AddressOptions from "./pages/Client/Address/Options";
 
 function Main() {
   return (
@@ -95,10 +99,10 @@ function Main() {
         />
 
         <Route
-          path="app-roles/:roleId/options"
+          path="app-roles/:id/options"
           element={
             <Protected>
-              <OptionsAppRole />
+              <AppRoleOptions />
             </Protected>
           }
         />
@@ -117,6 +121,42 @@ function Main() {
           element={
             <Protected>
               <Project />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/clients"
+          element={
+            <Protected>
+              <ClientsList />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/clients/:id/options"
+          element={
+            <Protected>
+              <ClientOptions />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/clients/:id/addresses/:addressId/options"
+          element={
+            <Protected>
+              <AddressOptions />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/clients/:id/contacts/:contactId/options"
+          element={
+            <Protected>
+              <ContactOptions />
             </Protected>
           }
         />

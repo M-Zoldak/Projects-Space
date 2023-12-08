@@ -45,7 +45,7 @@ class FormBuilder {
 
     private function assignOptions(object &$field, array $options) {
         foreach ($options as $key => $val) {
-            $field->$key = $val;
+            if (!empty($val)) $field->$key = $val;
         };
     }
 }

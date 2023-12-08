@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\SiteOptions;
+use App\Entity\WebsiteOptions;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @extends ServiceEntityRepository<SiteOptions>
+ * @extends ServiceEntityRepository<WebsiteOptions>
  *
- * @method SiteOptions|null find($id, $lockMode = null, $lockVersion = null)
- * @method SiteOptions|null findOneBy(array $criteria, array $orderBy = null)
- * @method SiteOptions[]    findAll()
- * @method SiteOptions[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method WebsiteOptions|null find($id, $lockMode = null, $lockVersion = null)
+ * @method WebsiteOptions|null findOneBy(array $criteria, array $orderBy = null)
+ * @method WebsiteOptions[]    findAll()
+ * @method WebsiteOptions[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class SiteOptionsRepository extends EntityRepository {
+class WebsiteOptionsRepository extends EntityRepository {
     public function __construct(ManagerRegistry $registry) {
-        parent::__construct($registry, SiteOptions::class);
+        parent::__construct($registry, WebsiteOptions::class);
     }
 
     //    /**
-    //     * @return SiteOptions[] Returns an array of SiteOptions objects
+    //     * @return WebsiteOptions[] Returns an array of WebsiteOptions objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -34,7 +34,7 @@ class SiteOptionsRepository extends EntityRepository {
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?SiteOptions
+    //    public function findOneBySomeField($value): ?WebsiteOptions
     //    {
     //        return $this->createQueryBuilder('s')
     //            ->andWhere('s.exampleField = :val')

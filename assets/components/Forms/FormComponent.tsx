@@ -10,19 +10,35 @@ import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
 type FormComponentProps<T> = {
   onSuccess: (data: T) => void;
   entity: string;
+  updatePath?: {
+    id?: string | number;
+  };
+  prependQuery?: string;
 };
 
 export default function FormComponent<T>({
   onSuccess,
   entity,
+  updatePath,
+  prependQuery = "",
 }: FormComponentProps<T>) {
   const { appData } = useAppDataContext();
   const [formFields, setFormFields] = useState<FormDataType[]>([]);
   const [loaded, setLoaded] = useState(true);
 
+  if (prependQuery.endsWith("/")) {
+    prependQuery = prependQuery.slice(0, prependQuery.length - 1);
+  }
+
+  var loadFormPath = updatePath?.id ? `${updatePath?.id}/options` : "create";
+  var sendDataPath = updatePath?.id ? `/${updatePath.id}/update` : "";
+
   useEffect(() => {
     http_methods
-      .fetchAll<FormDataType>(appData.token, `/${entity}/create`)
+      .fetchAll<FormDataType>(
+        appData.token,
+        `${prependQuery}/${entity}/${loadFormPath}`
+      )
       .then((data) => {
         data = data.map((field) => {
           if (field.name == "appId") {
@@ -34,7 +50,7 @@ export default function FormComponent<T>({
       });
   }, []);
 
-  const validateData = () => {
+  const validateData = async () => {
     setLoaded(false);
     let formValues = formFields.reduce(
       (data: DynamicallyFilledObject<string>, field: FormDataType) => {
@@ -44,13 +60,15 @@ export default function FormComponent<T>({
       {}
     );
 
-    http_methods
-      .post<T>(`/${entity}`, formValues, appData.token)
+    await http_methods
+      .post<T>(
+        `${prependQuery}/${entity}${sendDataPath}`,
+        formValues,
+        appData.token
+      )
       .then((data) => onSuccess(data))
       .catch((err: Error) => {
         let errors = JSON.parse(err.message);
-        console.log(formFields);
-        console.log(errors);
         let updatedFormFields;
         Object.keys(errors).forEach((key: string) => {
           updatedFormFields = formFields.map((field: FormDataType) => {

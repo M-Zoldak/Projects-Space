@@ -15,7 +15,7 @@ import Submit from "../../components/Buttons/Submit";
 import InputButtonGroup from "../../components/Forms/InputButtonGroup";
 import { Input } from "rsuite";
 
-export default function OptionsAppRole() {
+export default function AppRoleOptions() {
   const params = useParams();
   const { state } = useLocation();
   const { appData } = useAppDataContext();
@@ -28,7 +28,7 @@ export default function OptionsAppRole() {
 
   useEffect(() => {
     http_methods
-      .fetch<AppRoleType>(appData.token, `/app-roles/${params.roleId}/options`)
+      .fetch<AppRoleType>(appData.token, `/app-roles/${params.id}/options`)
       .then((data) => {
         setLoaded(true);
         setAppRole(data);

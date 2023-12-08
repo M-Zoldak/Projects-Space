@@ -18,11 +18,11 @@ class App extends Entity {
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps', cascade: ["persist"])]
     private Collection $users;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Site::class, orphanRemoval: true)]
-    private Collection $sites;
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Website::class, orphanRemoval: true)]
+    private Collection $websites;
 
     #[ORM\OneToOne(mappedBy: 'app', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private ?SiteOptions $siteOptions = null;
+    private ?WebsiteOptions $websiteOptions = null;
 
     #[ORM\OneToMany(mappedBy: 'app', cascade: ['persist', 'remove'], targetEntity: AppRole::class, orphanRemoval: true)]
     private Collection $roles;
@@ -45,13 +45,17 @@ class App extends Entity {
     #[ORM\JoinColumn(nullable: true)]
     private ?User $owner = null;
 
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Client::class, cascade: ["persist"], orphanRemoval: true)]
+    private Collection $clients;
+
     public function __construct() {
         parent::__construct();
         $this->users = new ArrayCollection();
-        $this->sites = new ArrayCollection();
+        $this->websites = new ArrayCollection();
         $this->roles = new ArrayCollection();
         $this->projects = new ArrayCollection();
         $this->invitedUsers = new ArrayCollection();
+        $this->clients = new ArrayCollection();
     }
 
     public function getData(): array {
@@ -110,23 +114,23 @@ class App extends Entity {
     }
 
     /**
-     * @return Collection<int, Site>
+     * @return Collection<int, Website>
      */
-    public function getSites(): Collection {
-        return $this->sites;
+    public function getWebsites(): Collection {
+        return $this->websites;
     }
 
-    public function addSite(Site $site): static {
-        if (!$this->sites->contains($site)) {
-            $this->sites->add($site);
+    public function addWebsite(Website $site): static {
+        if (!$this->websites->contains($site)) {
+            $this->websites->add($site);
             $site->setApp($this);
         }
 
         return $this;
     }
 
-    public function removeSite(Site $site): static {
-        if ($this->sites->removeElement($site)) {
+    public function removeWebsite(Website $site): static {
+        if ($this->websites->removeElement($site)) {
             // set the owning side to null (unless already changed)
             if ($site->getApp() === $this) {
                 $site->setApp(null);
@@ -136,22 +140,22 @@ class App extends Entity {
         return $this;
     }
 
-    public function getSiteOptions(): ?SiteOptions {
-        return $this->siteOptions;
+    public function getWebsiteOptions(): ?WebsiteOptions {
+        return $this->websiteOptions;
     }
 
-    public function setSiteOptions(?SiteOptions $siteOptions): static {
+    public function setWebsiteOptions(?WebsiteOptions $websiteOptions): static {
         // unset the owning side of the relation if necessary
-        if ($siteOptions === null && $this->siteOptions !== null) {
-            $this->siteOptions->setApp(null);
+        if ($websiteOptions === null && $this->websiteOptions !== null) {
+            $this->websiteOptions->setApp(null);
         }
 
         // set the owning side of the relation if necessary
-        if ($siteOptions !== null && $siteOptions->getApp() !== $this) {
-            $siteOptions->setApp($this);
+        if ($websiteOptions !== null && $websiteOptions->getApp() !== $this) {
+            $websiteOptions->setApp($this);
         }
 
-        $this->siteOptions = $siteOptions;
+        $this->websiteOptions = $websiteOptions;
 
         return $this;
     }
@@ -255,6 +259,33 @@ class App extends Entity {
 
     public function setOwner(?User $owner): static {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Client>
+     */
+    public function getClients(): Collection {
+        return $this->clients;
+    }
+
+    public function addClient(Client $client): static {
+        if (!$this->clients->contains($client)) {
+            $this->clients->add($client);
+            $client->setApp($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClient(Client $client): static {
+        if ($this->clients->removeElement($client)) {
+            // set the owning side to null (unless already changed)
+            if ($client->getApp() === $this) {
+                $client->setApp(null);
+            }
+        }
 
         return $this;
     }

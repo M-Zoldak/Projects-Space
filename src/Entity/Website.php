@@ -3,22 +3,36 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\SiteOptionsRepository;
+use App\Repository\WebsiteRepository;
 
-#[ORM\Entity(repositoryClass: SiteOptionsRepository::class)]
-class SiteOptions extends Entity {
+#[ORM\Entity(repositoryClass: WebsiteRepository::class)]
+class Website extends Entity {
+
+    #[ORM\Column(length: 255)]
+    private ?string $domain = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $hosting = null;
 
-    #[ORM\OneToOne(inversedBy: 'siteOptions', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'websites')]
     private ?App $app = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?array $hostingsList = null;
+    public function getDomain(): ?string {
+        return $this->domain;
+    }
+
+    public function setDomain(string $domain): static {
+        $this->domain = $domain;
+
+        return $this;
+    }
 
     public function getData(): array {
-        return [];
+        return [
+            "id" => $this->getId(),
+            "domain" => $this->getDomain(),
+            "hosting" => $this->getHosting()
+        ];
     }
 
     public function getHosting(): ?string {
@@ -37,16 +51,6 @@ class SiteOptions extends Entity {
 
     public function setApp(?App $app): static {
         $this->app = $app;
-
-        return $this;
-    }
-
-    public function getHostingsList(): ?array {
-        return $this->hostingsList;
-    }
-
-    public function setHostingsList(?array $hostingsList): static {
-        $this->hostingsList = $hostingsList;
 
         return $this;
     }

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Utils\EntityCollectionUtil;
 use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -24,8 +25,29 @@ class Client extends Entity {
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Address::class, cascade: ["persist"], orphanRemoval: true)]
     private Collection $addresses;
 
+    #[ORM\OneToMany(mappedBy: 'ownerCompany', targetEntity: ContactPerson::class, cascade: ["persist"], orphanRemoval: true)]
+    private Collection $employees;
+
+    #[ORM\ManyToOne(inversedBy: 'clients')]
+    private ?App $app = null;
+
     public function __construct() {
+        parent::__construct();
         $this->addresses = new ArrayCollection();
+        $this->employees = new ArrayCollection();
+    }
+
+    public function getData(): array {
+        return [
+            "id" => $this->getId(),
+            "appId" => $this->getApp()?->getId(),
+            "name" => $this->getName(),
+            "mobile" => $this->getMobile(),
+            "phone" => $this->getPhone(),
+            "fax" => $this->getFax(),
+            "addresses" => EntityCollectionUtil::createCollectionData($this->getAddresses()),
+            "employees" => EntityCollectionUtil::createCollectionData($this->getEmployees()),
+        ];
     }
 
     public function getName(): ?string {
@@ -89,6 +111,43 @@ class Client extends Entity {
             // set the owning side to null (unless already changed)
             if ($address->getClient() === $this) {
                 $address->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getApp(): ?App {
+        return $this->app;
+    }
+
+    public function setApp(?App $app): static {
+        $this->app = $app;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ContactPerson>
+     */
+    public function getEmployees(): Collection {
+        return $this->employees;
+    }
+
+    public function addEmployee(ContactPerson $employee): static {
+        if (!$this->employees->contains($employee)) {
+            $this->employees->add($employee);
+            $employee->setOwnerCompany($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmployee(ContactPerson $employee): static {
+        if ($this->employees->removeElement($employee)) {
+            // set the owning side to null (unless already changed)
+            if ($employee->getOwnerCompany() === $this) {
+                $employee->setOwnerCompany(null);
             }
         }
 

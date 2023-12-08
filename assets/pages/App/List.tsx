@@ -94,6 +94,7 @@ export default function AppsList() {
         {appData?.apps?.length ? (
           <CommonList<AppType>
             items={appData.apps}
+            label={(app) => app.name}
             entity="apps"
             onDelete={handleDelete}
             buttons={{
@@ -118,6 +119,7 @@ export default function AppsList() {
             <CommonList<AppType>
               items={appsInvitations}
               entity="apps"
+              label={(app) => app.name}
               onDelete={handleDelete}
               // buttons={{ hasView: false, deleteable: true, hasOptions: true }}
               ownButtons={(item: AppType) => (

@@ -7,11 +7,6 @@ use App\Repository\AddressRepository;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
 class Address extends Entity {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
     #[ORM\Column(length: 255)]
     private ?string $street = null;
 
@@ -28,8 +23,19 @@ class Address extends Entity {
     #[ORM\JoinColumn(nullable: false)]
     private ?Client $client = null;
 
-    public function getId(): ?int {
-        return $this->id;
+    public function __construct() {
+        parent::__construct();
+    }
+
+    public function getData() {
+        return [
+            "id" => $this->getId(),
+            "clientId" => $this->getClient()->getId(),
+            "country" => $this->getCountry(),
+            "city" => $this->getCity(),
+            "street" => $this->getStreet(),
+            "postal" => $this->getPostal(),
+        ];
     }
 
     public function getStreet(): ?string {

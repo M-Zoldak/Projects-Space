@@ -27,13 +27,6 @@ export type CommonListItemProps = {
   props?: ListItemProps;
 };
 
-type AdditionalInfoProps = {
-  icon?: typeof FontAwesomeIcon;
-  label: string;
-  description: string;
-  data: string;
-};
-
 type CommonListProps<T> = {
   items: Array<CommonListItemProps>;
   entity: string;
@@ -43,6 +36,7 @@ type CommonListProps<T> = {
   additionalInfo?: (item: T) => ReactElement;
   linkPrepend?: string;
   ownButtons?: (item: T) => ReactNode;
+  label: (item: T) => string;
 };
 
 export default function CommonList<T>({
@@ -58,6 +52,7 @@ export default function CommonList<T>({
   inViewBacklink,
   additionalInfo,
   ownButtons,
+  label,
 }: CommonListProps<T>) {
   const { appData } = useAppDataContext();
   const { addNotification } = useNotificationsContext();
@@ -143,7 +138,7 @@ export default function CommonList<T>({
           <List.Item key={item.id.toString()}>
             <FlexboxGrid align="middle" justify="space-between">
               <FlexboxGridItem as={Col} colspan={24} md={9}>
-                <h5>{item.name}</h5>
+                <h5>{label(item as T)}</h5>
               </FlexboxGridItem>
               {additionalInfo && (
                 <FlexboxGridItem as={Col} style={{ flexGrow: 1 }}>

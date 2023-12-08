@@ -28,8 +28,6 @@ export default function ProjectsList() {
       });
   }, [appData]);
 
-  console.log(appData.currentUser);
-
   return (
     <StandardLayout title="Projects overview" activePage="Projects">
       <FlexboxGrid className="buttons_container">
@@ -56,6 +54,7 @@ export default function ProjectsList() {
         {projects?.length ? (
           <CommonList<ProjectType>
             items={projects}
+            label={(project) => project.name}
             entity="projects"
             onDelete={(item) => {
               let newProjects = projects.filter(

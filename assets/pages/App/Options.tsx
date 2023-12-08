@@ -251,11 +251,12 @@ export default function Options() {
         <h3>Users</h3>
         <CommonList<UserType>
           entity="user"
+          label={(user) => user.name}
           items={[...users, ...invitedUsers]}
           inViewBacklink={`/apps/${params.id}/options`}
           linkPrepend={`/apps/${params.id}`}
           buttons={{
-            deleteable: (item: UserType) => !item?.appRole?.isOwnerRole,
+            deleteable: (item: UserType) => app.ownerId != item.id,
             hasOptions: (item: UserType) =>
               !invitedUsers.find((u) => u.id == item.id),
             hasView: false,
@@ -295,6 +296,7 @@ export default function Options() {
         <CommonList<AppRoleType>
           entity="app-roles"
           items={appRolesList}
+          label={(appRole) => appRole.name}
           inViewBacklink={`/apps/${params.id}/options`}
           buttons={{
             deleteable: (item: AppRoleType) => !item.isOwnerRole,
