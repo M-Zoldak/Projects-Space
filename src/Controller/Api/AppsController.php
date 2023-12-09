@@ -110,7 +110,8 @@ class AppsController extends AbstractController {
                 "roles" => $appRoles,
                 "users" => $appUsers,
                 "invitedUsers" => $appInvitedUsers ?? [],
-                "form" => $formBuilder->getFormData()
+                "websitesOptions" => $app->getWebsiteOptions()->getData(),
+                "form" => $formBuilder->getFormData(),
             ]);
         }
 

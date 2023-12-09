@@ -122,7 +122,7 @@ export default function SideNav({ activePage }: { activePage: string }) {
         <FontAwesomeIcon icon={faProjectDiagram} />
       ),
     new MenuDivider(),
-    new PageLink("Sites", "/sites", <FontAwesomeIcon icon={faGlobe} />),
+    new PageLink("Websites", "/websites", <FontAwesomeIcon icon={faGlobe} />),
     new PageLink(
       "Clients",
       "/clients",

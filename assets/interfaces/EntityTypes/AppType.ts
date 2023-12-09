@@ -2,6 +2,7 @@ import { PermissionsType } from "../DefaultTypes";
 import { AppRoleType } from "./AppRoleType";
 import { DefaultType } from "./DefaultType";
 import { UserType } from "./UserType";
+import { WebsiteOptionsType } from "./WebsiteOptionsType";
 
 export type AppType = DefaultType & {
   ownerId: string;
@@ -10,6 +11,7 @@ export type AppType = DefaultType & {
   statistics: {
     usersCount: number;
   };
+  websiteOptions: WebsiteOptionsType;
 };
 
 export type AppOptionsType = {
@@ -17,5 +19,6 @@ export type AppOptionsType = {
   roles: Array<AppRoleType>;
   users: Array<UserType>;
   invitedUsers: Array<UserType>;
+  websiteOptions: WebsiteOptionsType;
   form: any;
 };

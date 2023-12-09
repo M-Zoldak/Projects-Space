@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
+  Badge,
   Button,
   Divider,
   Nav,
@@ -15,6 +16,7 @@ import {
   faBell,
 } from "@fortawesome/free-solid-svg-icons";
 import { UserNotificationType } from "../../interfaces/EntityTypes/UserNotificationType";
+import { http_methods } from "../../Functions/Fetch";
 
 type TopNav = {
   expand: boolean;
@@ -35,7 +37,15 @@ const TopNav = ({ expand, onChange }: TopNav) => {
     return navigate("/login");
   }
 
-  function showNotifications() {
+  const showNotifications = () => {
+    const changeIsSeenOnHover = (note: UserNotificationType) => {
+      http_methods.post(
+        `/user/${appData.currentUser.id}/changeIsSeen/${note.id}`,
+        {},
+        appData.token
+      );
+    };
+
     const renderActionButtons = (note: UserNotificationType) => {
       return note.actions.map((action) => {
         switch (action) {
@@ -57,7 +67,7 @@ const TopNav = ({ expand, onChange }: TopNav) => {
       <Popover>
         {appData?.currentUser?.notifications?.length ? (
           appData?.currentUser?.notifications?.map((note, index) => (
-            <div key={index}>
+            <div key={index} onBlur={() => changeIsSeenOnHover(note)}>
               {index > 0 ? <Divider /> : ""}
               <p>{note.message}</p>
               {note.actions && renderActionButtons(note)}
@@ -68,7 +78,14 @@ const TopNav = ({ expand, onChange }: TopNav) => {
         )}
       </Popover>
     );
-  }
+  };
+
+  const userHasUnreadNotifications = () => {
+    return appData.currentUser.notifications.filter((note) => !note.isSeen)
+      .length;
+  };
+
+  console.log(userHasUnreadNotifications());
 
   return (
     <Navbar appearance="subtle" className="nav-toggle">
@@ -87,9 +104,17 @@ const TopNav = ({ expand, onChange }: TopNav) => {
           placement={"bottomEnd"}
           speaker={showNotifications()}
         >
-          <Nav.Item>
-            <FontAwesomeIcon icon={faBell} title="Notifications" />
-          </Nav.Item>
+          {userHasUnreadNotifications() ? (
+            <Badge>
+              <Nav.Item>
+                <FontAwesomeIcon icon={faBell} title="Notifications" />
+              </Nav.Item>
+            </Badge>
+          ) : (
+            <Nav.Item>
+              <FontAwesomeIcon icon={faBell} title="Notifications" />
+            </Nav.Item>
+          )}
         </Whisper>
         <Nav.Item onClick={handleLogout}>
           <FontAwesomeIcon icon={faArrowRightToBracket} title="Logout" />

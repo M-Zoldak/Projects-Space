@@ -10,6 +10,7 @@ enum FormField: string {
     case RADIO = "radio";
     case LIST = "list";
     case HIDDEN = "hidden";
+    case SELECT = "select";
 
     public function hasDefaultValues(): bool {
         switch ($this) {

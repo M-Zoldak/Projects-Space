@@ -20,7 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[OA\Tag(name: 'Clients')]
 #[Route("")]
-class ClientController extends AbstractController {
+class ClientsController extends AbstractController {
     public function __construct(
         private ClientRepository $clientRepository,
         private AppRepository $appRepository,

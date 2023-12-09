@@ -7,7 +7,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @extends ServiceEntityRepository<SectionPermissions>
+ * @extends EntityRepository<SectionPermissions>
  *
  * @method SectionPermissions|null find($id, $lockMode = null, $lockVersion = null)
  * @method SectionPermissions|null findOneBy(array $criteria, array $orderBy = null)

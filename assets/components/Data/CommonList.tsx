@@ -36,7 +36,7 @@ type CommonListProps<T> = {
   additionalInfo?: (item: T) => ReactElement;
   linkPrepend?: string;
   ownButtons?: (item: T) => ReactNode;
-  label: (item: T) => string;
+  label: (item: T) => string | ReactNode;
 };
 
 export default function CommonList<T>({

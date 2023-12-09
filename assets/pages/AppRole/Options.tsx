@@ -14,6 +14,7 @@ import { PermissionsType } from "../../interfaces/DefaultTypes";
 import Submit from "../../components/Buttons/Submit";
 import InputButtonGroup from "../../components/Forms/InputButtonGroup";
 import { Input } from "rsuite";
+import { AppType } from "../../interfaces/EntityTypes/AppType";
 
 export default function AppRoleOptions() {
   const params = useParams();
@@ -21,6 +22,7 @@ export default function AppRoleOptions() {
   const { appData } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
   const [appRole, setAppRole] = useState<AppRoleType>();
+  const [app, setApp] = useState<AppType>();
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   const [roleName, setRoleName] = useState<string>("");
 
@@ -30,9 +32,10 @@ export default function AppRoleOptions() {
     http_methods
       .fetch<AppRoleType>(appData.token, `/app-roles/${params.id}/options`)
       .then((data) => {
-        setLoaded(true);
+        setApp(data.ownerApp);
         setAppRole(data);
         setRoleName(data.name);
+        setLoaded(true);
       })
       .catch((err: Error) => {
         addNotification({ text: "test" });
@@ -46,7 +49,7 @@ export default function AppRoleOptions() {
   ) => {
     Object.values(appRole.permissions).forEach((permissions) => {
       if (permissions.id == item.id) {
-        appRole.permissions[item.name][updatedKey] = !value;
+        appRole.permissions[item.name.toLowerCase()][updatedKey] = !value;
         setAppRole({ ...appRole });
       }
     });
@@ -66,7 +69,7 @@ export default function AppRoleOptions() {
       });
   };
 
-  const updateName = () => {
+  const updateName = (roleName: string) => {
     http_methods
       .put<AppRoleType>(
         `/app-roles/${appRole.id}/updateName`,
@@ -81,6 +84,10 @@ export default function AppRoleOptions() {
         });
       });
   };
+  // TODO Check user role
+  // const userRole = () => {
+  //   return findAppUserRole(appRole.ownerApp, appData.currentUser);
+  // };
 
   return (
     <StandardLayout title="Role options" activePage="My Apps">
@@ -93,9 +100,6 @@ export default function AppRoleOptions() {
             <InputButtonGroup
               label="Role name: "
               buttonText="Update"
-              onChange={(val) => {
-                setRoleName(val);
-              }}
               onSubmit={updateName}
               value={roleName}
             />

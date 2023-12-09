@@ -11,11 +11,14 @@ class Website extends Entity {
     #[ORM\Column(length: 255)]
     private ?string $domain = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $hosting = null;
-
     #[ORM\ManyToOne(inversedBy: 'websites')]
     private ?App $app = null;
+
+    #[ORM\ManyToOne(inversedBy: 'websites')]
+    private ?Client $client = null;
+
+    #[ORM\ManyToOne(inversedBy: 'websites')]
+    private ?WebsiteHosting $hosting = null;
 
     public function getDomain(): ?string {
         return $this->domain;
@@ -31,18 +34,9 @@ class Website extends Entity {
         return [
             "id" => $this->getId(),
             "domain" => $this->getDomain(),
-            "hosting" => $this->getHosting()
+            "hosting" => $this->getHosting()->getData(),
+            "client" => $this->getClient()->getData()
         ];
-    }
-
-    public function getHosting(): ?string {
-        return $this->hosting;
-    }
-
-    public function setHosting(?string $hosting): static {
-        $this->hosting = $hosting;
-
-        return $this;
     }
 
     public function getApp(): ?App {
@@ -51,6 +45,26 @@ class Website extends Entity {
 
     public function setApp(?App $app): static {
         $this->app = $app;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): static {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    public function getHosting(): ?WebsiteHosting {
+        return $this->hosting;
+    }
+
+    public function setHosting(?WebsiteHosting $hosting): static {
+        $this->hosting = $hosting;
 
         return $this;
     }

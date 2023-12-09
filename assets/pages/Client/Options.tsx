@@ -40,7 +40,7 @@ export default function ClientOptions() {
     setLoaded(true);
   }, []);
 
-  const updateClientName = () => {
+  const updateClientName = (clientName: string) => {
     http_methods
       .put<ClientType>(
         `/clients/${client.id}`,
@@ -113,7 +113,6 @@ export default function ClientOptions() {
         <InputButtonGroup
           buttonText="Update client name"
           label="Client name: "
-          onChange={(val) => setClientName(val)}
           value={clientName}
           onSubmit={updateClientName}
         />

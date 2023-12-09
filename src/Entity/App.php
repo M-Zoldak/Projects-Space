@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AppRepository;
+use App\Utils\EntityCollectionUtil;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -18,7 +19,7 @@ class App extends Entity {
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps', cascade: ["persist"])]
     private Collection $users;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Website::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', cascade: ["persist", "remove"], targetEntity: Website::class, orphanRemoval: true)]
     private Collection $websites;
 
     #[ORM\OneToOne(mappedBy: 'app', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -56,18 +57,21 @@ class App extends Entity {
         $this->projects = new ArrayCollection();
         $this->invitedUsers = new ArrayCollection();
         $this->clients = new ArrayCollection();
+        $this->websiteOptions = new WebsiteOptions();
     }
 
     public function getData(): array {
         return [
             "id" => $this->getId(),
             "ownerId" => $this->getOwner()->getId(),
+            "websiteOptions" => $this->getWebsiteOptions()?->getData(),
             "name" => $this->getName(),
             "defaultRoleId" => $this->getDefaultRole()?->getId(),
             "statistics" => [
                 "usersCount" => $this->getUsers()->count()
             ],
             "invitedUsers" => $this->getInvitedUsers()->toArray(),
+            "users" => EntityCollectionUtil::createCollectionData($this->getUsers())
         ];
     }
 
@@ -120,20 +124,20 @@ class App extends Entity {
         return $this->websites;
     }
 
-    public function addWebsite(Website $site): static {
-        if (!$this->websites->contains($site)) {
-            $this->websites->add($site);
-            $site->setApp($this);
+    public function addWebsite(Website $website): static {
+        if (!$this->websites->contains($website)) {
+            $this->websites->add($website);
+            $website->setApp($this);
         }
 
         return $this;
     }
 
-    public function removeWebsite(Website $site): static {
-        if ($this->websites->removeElement($site)) {
+    public function removeWebsite(Website $website): static {
+        if ($this->websites->removeElement($website)) {
             // set the owning side to null (unless already changed)
-            if ($site->getApp() === $this) {
-                $site->setApp(null);
+            if ($website->getApp() === $this) {
+                $website->setApp(null);
             }
         }
 
@@ -141,6 +145,7 @@ class App extends Entity {
     }
 
     public function getWebsiteOptions(): ?WebsiteOptions {
+        if (!$this->websiteOptions) $this->setWebsiteOptions(new WebsiteOptions());
         return $this->websiteOptions;
     }
 

@@ -5,7 +5,6 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Home from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
-import Sites from "./pages/Sites";
 import { CustomProvider } from "rsuite";
 import Login from "./pages/Login/Login";
 import Registration from "./pages/Login/Registration";
@@ -25,6 +24,7 @@ import ClientsList from "./pages/Client/List";
 import ClientOptions from "./pages/Client/Options";
 import ContactOptions from "./pages/Client/Contact/Options";
 import AddressOptions from "./pages/Client/Address/Options";
+import WebsitesList from "./pages/Website/List";
 
 function Main() {
   return (
@@ -65,10 +65,10 @@ function Main() {
           }
         />
         <Route
-          path="/sites"
+          path="/websites"
           element={
             <Protected>
-              <Sites />
+              <WebsitesList />
             </Protected>
           }
         />

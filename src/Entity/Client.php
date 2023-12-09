@@ -31,10 +31,14 @@ class Client extends Entity {
     #[ORM\ManyToOne(inversedBy: 'clients')]
     private ?App $app = null;
 
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Website::class)]
+    private Collection $websites;
+
     public function __construct() {
         parent::__construct();
         $this->addresses = new ArrayCollection();
         $this->employees = new ArrayCollection();
+        $this->websites = new ArrayCollection();
     }
 
     public function getData(): array {
@@ -148,6 +152,36 @@ class Client extends Entity {
             // set the owning side to null (unless already changed)
             if ($employee->getOwnerCompany() === $this) {
                 $employee->setOwnerCompany(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Website>
+     */
+    public function getWebsites(): Collection
+    {
+        return $this->websites;
+    }
+
+    public function addWebsite(Website $website): static
+    {
+        if (!$this->websites->contains($website)) {
+            $this->websites->add($website);
+            $website->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWebsite(Website $website): static
+    {
+        if ($this->websites->removeElement($website)) {
+            // set the owning side to null (unless already changed)
+            if ($website->getClient() === $this) {
+                $website->setClient(null);
             }
         }
 

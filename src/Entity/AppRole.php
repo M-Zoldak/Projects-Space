@@ -61,6 +61,7 @@ class AppRole extends Entity {
     public function getData(): array {
         return [
             "id" => $this->getId(),
+            "ownerApp" => $this->getApp()->getData(),
             "name" => $this->getName(),
             "isOwnerRole" => $this->isOwnerRole(),
             "permissions" => EntityCollectionUtil::createNamedCollectionData($this->getSectionPermissions(), "sectionName")

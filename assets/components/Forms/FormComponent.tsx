@@ -1,5 +1,13 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Button, ButtonToolbar, DatePicker, Form, Input, Loader } from "rsuite";
+import {
+  Button,
+  ButtonToolbar,
+  DatePicker,
+  Form,
+  Input,
+  Loader,
+  SelectPicker,
+} from "rsuite";
 import TextField from "./TextField";
 import { http_methods } from "../../Functions/Fetch";
 import { useAppDataContext } from "../../contexts/AppDataContext";
@@ -108,6 +116,17 @@ export default function FormComponent<T>({
       case "hidden": {
         return <Input key={key} value={field.value} type="hidden" />;
       }
+      case "select": {
+        return (
+          <Form.Group controlId={field.name} key={key}>
+            <Form.ControlLabel>{field.label} </Form.ControlLabel>
+            <SelectPicker
+              data={field.options}
+              onChange={(v) => updateInput(v.toString(), field.name)}
+            />
+          </Form.Group>
+        );
+      }
       case "date": {
         return (
           <Form.Group controlId={field.name} key={key}>
@@ -158,7 +177,7 @@ export default function FormComponent<T>({
           onClick={validateData}
           onSubmit={validateData}
         >
-          {loaded ? "Submit" : <Loader center />}
+          {loaded ? "Submit" : <Loader backdrop />}
         </Button>
       </ButtonToolbar>
     </Form>

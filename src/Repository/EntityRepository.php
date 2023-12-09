@@ -9,6 +9,16 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
+/** 
+ * @template T
+ * @extends ServiceEntityRepository<T>
+ * 
+ * @method T|null find($id, $lockMode = null, $lockVersion = null)
+ * @method T|null findOneBy(array $criteria, array $orderBy = null)
+ * @method T|null findOneById(int $id)
+ * @method T[]    findAll()
+ * @method T[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
 abstract class EntityRepository extends ServiceEntityRepository {
     private EntityManager $entityManager;
 

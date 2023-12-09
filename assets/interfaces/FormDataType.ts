@@ -7,4 +7,5 @@ export type FormDataType = {
   label: string;
   error: string;
   value?: string;
+  options: Array<{ value: number; label: string }>;
 } & DynamicallyFilledObject<string>;

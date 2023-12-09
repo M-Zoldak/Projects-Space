@@ -8,7 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @extends ServiceEntityRepository<ProjectRole>
+ * @extends EntityRepository<ProjectRole>
  *
  * @method ProjectRole|null find($id, $lockMode = null, $lockVersion = null)
  * @method ProjectRole|null findOneBy(array $criteria, array $orderBy = null)

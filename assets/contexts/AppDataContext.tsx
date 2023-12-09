@@ -67,6 +67,7 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
         id: null,
         name: null,
         isOwnerRole: true,
+        ownerApp: null,
         permissions: {
           apps: {
             name: "apps",

@@ -7,7 +7,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @extends ServiceEntityRepository<Client>
+ * @extends EntityRepository<Client>
  *
  * @method Client|null find($id, $lockMode = null, $lockVersion = null)
  * @method Client|null findOneBy(array $criteria, array $orderBy = null)

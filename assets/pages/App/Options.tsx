@@ -26,6 +26,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClockFour, faUserTie } from "@fortawesome/free-solid-svg-icons";
 import { faCreativeCommonsBy } from "@fortawesome/free-brands-svg-icons";
 import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
+import EastAddRemoveList from "../../components/Data/EasyAddRemoveList";
+import EasyAddRemoveList from "../../components/Data/EasyAddRemoveList";
+import { HostingType } from "../../interfaces/EntityTypes/WebsiteOptionsType";
 
 export default function Options() {
   const { appData } = useAppDataContext();
@@ -44,7 +47,8 @@ export default function Options() {
     message: string;
     show: boolean;
   }>();
-
+  const [hostingsList, setHostingsList] = useState<HostingType[]>([]);
+  const [newHosting, setNewHosting] = useState<string>("");
   useEffect(() => {
     http_methods
       .fetch<AppOptionsType>(appData.token, `/apps/${params.id}/options`)
@@ -53,6 +57,7 @@ export default function Options() {
         setUsers(data.users);
         setInvitedUsers(data.invitedUsers);
         setApp(data.app);
+        setHostingsList(data.app.websiteOptions.hostings);
         setDefaultRoleId(data.app.defaultRoleId);
         setAppName(data.app.name);
         setLoaded(true);
@@ -230,6 +235,19 @@ export default function Options() {
     );
   };
 
+  const addHosting = (name: string) => {
+    http_methods
+      .post<HostingType>(
+        "/websites/hostings",
+        {
+          name,
+          appId: app.id,
+        },
+        appData.token
+      )
+      .then((hoster) => setHostingsList([...hostingsList, hoster]));
+  };
+
   return (
     <StandardLayout
       title={app?.name ? `App overview` : "Loading..."}
@@ -243,7 +261,6 @@ export default function Options() {
         <InputButtonGroup
           buttonText="Update app name"
           label="App name: "
-          onChange={(val) => setAppName(val)}
           value={appName}
           onSubmit={updateAppName}
         />
@@ -285,7 +302,6 @@ export default function Options() {
           <InputButtonGroup
             label="Invite user: "
             value={newUser}
-            onChange={(val: string) => setNewUser(val)}
             buttonText="Send Invitation"
             onSubmit={sendInvitation}
           />
@@ -314,11 +330,24 @@ export default function Options() {
           <InputButtonGroup
             buttonText="Create new"
             label="New role name: "
-            onChange={(val) => setNewRole(val)}
             onSubmit={createNewRole}
             value={newRole}
           />
         )}
+
+        <h3>Webite options</h3>
+        <p>Possible hostings inside app space:</p>
+        <EasyAddRemoveList<HostingType>
+          emptyCollectiontext="There are no hostings specified for websites"
+          itemsList={hostingsList}
+          label={(item) => item.name}
+          inputButtonGroup={{
+            buttonText: "Add",
+            label: "New hosting name",
+            onSubmit: addHosting,
+            value: newHosting,
+          }}
+        />
       </ContentLoader>
     </StandardLayout>
   );

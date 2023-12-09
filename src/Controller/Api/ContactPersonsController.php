@@ -22,7 +22,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[OA\Tag(name: 'ContactPersons')]
 #[Route("")]
-class ContactPersonController extends AbstractController {
+class ContactPersonsController extends AbstractController {
     public function __construct(
         private ClientRepository $clientRepository,
         private AppRepository $appRepository,

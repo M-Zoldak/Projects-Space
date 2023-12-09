@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
- * @extends ServiceEntityRepository<User>
+ * @extends EntityRepository<User>
  *
  * @implements PasswordUpgraderInterface<User>
  *

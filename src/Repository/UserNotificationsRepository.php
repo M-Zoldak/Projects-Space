@@ -7,7 +7,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @extends ServiceEntityRepository<UserNotification>
+ * @extends EntityRepository<UserNotification>
  *
  * @method UserNotification|null find($id, $lockMode = null, $lockVersion = null)
  * @method UserNotification|null findOneBy(array $criteria, array $orderBy = null)
