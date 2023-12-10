@@ -34,11 +34,15 @@ class Client extends Entity {
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Website::class)]
     private Collection $websites;
 
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Project::class)]
+    private Collection $projects;
+
     public function __construct() {
         parent::__construct();
         $this->addresses = new ArrayCollection();
         $this->employees = new ArrayCollection();
         $this->websites = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
     public function getData(): array {
@@ -182,6 +186,36 @@ class Client extends Entity {
             // set the owning side to null (unless already changed)
             if ($website->getClient() === $this) {
                 $website->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function getProjects(): Collection
+    {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): static
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+            $project->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Project $project): static
+    {
+        if ($this->projects->removeElement($project)) {
+            // set the owning side to null (unless already changed)
+            if ($project->getClient() === $this) {
+                $project->setClient(null);
             }
         }
 

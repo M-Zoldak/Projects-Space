@@ -1,19 +1,23 @@
 <?php
 
-function array_any(array $array, callable $fn) {
-    foreach ($array as $value) {
-        if ($fn($value)) {
-            return true;
-        }
-    }
-    return false;
-}
+namespace App\Utils;
 
-function array_every(array $array, callable $fn) {
-    foreach ($array as $value) {
-        if (!$fn($value)) {
-            return false;
+class ArrayUtil {
+    public static function array_any(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if ($fn($value)) {
+                return true;
+            }
         }
+        return false;
     }
-    return true;
+
+    public static function array_every(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if (!$fn($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

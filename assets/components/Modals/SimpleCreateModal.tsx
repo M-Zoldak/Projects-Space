@@ -11,12 +11,14 @@ type SimpleCreateModalProps<T> = {
   entity: string;
   onSuccess: ({}: T) => void;
   prependQuery?: string;
+  buttonText?: string;
 };
 
 export default function SimpleCreateModal<T>({
   entity,
   onSuccess,
   title,
+  buttonText = "Create new",
   prependQuery = "",
 }: SimpleCreateModalProps<T>) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -28,7 +30,7 @@ export default function SimpleCreateModal<T>({
         color="green"
         appearance="ghost"
       >
-        Create New
+        {buttonText}
       </Button>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(!modalOpen)}>

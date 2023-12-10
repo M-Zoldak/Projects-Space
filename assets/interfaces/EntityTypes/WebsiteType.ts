@@ -1,10 +1,10 @@
 import { PermissionsType } from "../DefaultTypes";
 import { ClientType } from "./ClientType";
 import { DefaultType } from "./DefaultType";
+import { HostingType } from "./WebsiteOptionsType";
 
 export type WebsiteType = DefaultType & {
-  id: string | number;
-  hosting: string;
+  hosting: HostingType;
   domain: string;
   client: ClientType;
 } & PermissionsType;

@@ -95,25 +95,23 @@ class AppsController extends AbstractController {
     }
 
     #[Route('/apps/{id}/options', name: 'app_options', methods: ["GET"])]
-    public function options(string $id, Request $request): JsonResponse {
-        $method = $request->getMethod();
+    public function options(string $id, #[CurrentUser] ?User $user): JsonResponse {
+        $app = $this->appRepository->findOneById($id);
+        $appUsers = EntityCollectionUtil::createCollectionData($app->getUsers(), [$app]);
+        $appInvitedUsers = EntityCollectionUtil::createCollectionData($app->getInvitedUsers());
+        $appRoles = EntityCollectionUtil::createCollectionData($app->getRoles());
+        $formBuilder = $this->addAndEditForm($app);
 
-        if ($method == "GET") {
-            $app = $this->appRepository->findOneById($id);
-            $appUsers = EntityCollectionUtil::createCollectionData($app->getUsers(), [$app]);
-            $appInvitedUsers = EntityCollectionUtil::createCollectionData($app->getInvitedUsers());
-            $appRoles = EntityCollectionUtil::createCollectionData($app->getRoles());
-            $formBuilder = $this->addAndEditForm($app);
+        return new JsonResponse([
+            "app" => $app->getData($user),
+            "roles" => $appRoles,
+            "users" => $appUsers,
+            "invitedUsers" => $appInvitedUsers ?? [],
+            "websitesOptions" => $app->getWebsiteOptions()->getData(),
+            "projectStates" =>  EntityCollectionUtil::createCollectionData($app->getProjectStates()),
+            "form" => $formBuilder->getFormData(),
+        ]);
 
-            return new JsonResponse([
-                "app" => $app->getData(),
-                "roles" => $appRoles,
-                "users" => $appUsers,
-                "invitedUsers" => $appInvitedUsers ?? [],
-                "websitesOptions" => $app->getWebsiteOptions()->getData(),
-                "form" => $formBuilder->getFormData(),
-            ]);
-        }
 
         return new JsonResponse([""]);
     }
@@ -206,6 +204,22 @@ class AppsController extends AbstractController {
 
         if ($emailSent) return new JsonResponse(["message" => "E-mail to $data->userEmail was sent succesfully"]);
         else return new JsonResponse(["message" => "Something went wrong. E-mail could not be sent. Please try again later"], 503);
+    }
+
+    #[Route('/apps/{id}/updateUserRole', name: 'app_update_default_role', methods: ["PUT"])]
+    public function updateUserRole(string $id, Request $request): JsonResponse {
+        $data = (object) json_decode($request->getContent());
+        $app = $this->appRepository->findOneById($id);
+        $user = $this->userRepository->findOneById($data->userId);
+        $appRole = $this->appRoleRepository->findOneById($data->appRoleId);
+        $currentAppRole = $user->getAppRoles()->findFirst(fn ($i, AppRole $appRole) => $appRole->getApp()->getId() == $app->getId());
+
+        $user->removeAppRole($currentAppRole);
+        $user->addAppRole($appRole);
+
+        $this->userRepository->save($user);
+
+        return new JsonResponse($user->getData($app));
     }
 
     #[Route('/apps/{appId}/user/{userId}', name: 'app_revoku_user_invitation', methods: ["DELETE"])]

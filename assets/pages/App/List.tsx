@@ -2,7 +2,9 @@ import { Button, FlexboxGrid, SelectPicker } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import CommonList from "../../components/Data/CommonList";
+import CommonList, {
+  CommonListItemProps,
+} from "../../components/Data/CommonList";
 import { http_methods } from "../../Functions/Fetch";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
@@ -91,8 +93,10 @@ export default function AppsList() {
 
       <ContentLoader loaded={loaded}>
         <h3>Active Spaces</h3>
-        {appData?.apps?.length ? (
+        {appData?.apps && (
           <CommonList<AppType>
+            onEmpty="You don't have any apps yet. Create one now or join someones other
+            space!"
             items={appData.apps}
             label={(app) => app.name}
             entity="apps"
@@ -106,17 +110,13 @@ export default function AppsList() {
             }}
             additionalInfo={appAdditionalInfo}
           />
-        ) : (
-          <p>
-            You don't have any apps yet. Create one now or join someones other
-            space!
-          </p>
         )}
 
         {appsInvitations && (
           <>
             <h3>Invitations to spaces</h3>
             <CommonList<AppType>
+              onEmpty="Currently there are no invitations"
               items={appsInvitations}
               entity="apps"
               label={(app) => app.name}

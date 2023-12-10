@@ -7,4 +7,5 @@ enum StandardSections: string {
     case Projects = "Projects";
     case Websites = "Websites";
     case Clients = "Clients";
+    // case Tasks = "Tasks";
 }

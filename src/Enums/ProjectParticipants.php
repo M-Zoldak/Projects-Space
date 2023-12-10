@@ -2,7 +2,8 @@
 
 namespace App\Enums;
 
-enum ProjectRoles {
+enum ProjectParticipants {
     case Manager;
     case Laborer;
+    case ClientContact;
 }

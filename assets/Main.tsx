@@ -25,6 +25,7 @@ import ClientOptions from "./pages/Client/Options";
 import ContactOptions from "./pages/Client/Contact/Options";
 import AddressOptions from "./pages/Client/Address/Options";
 import WebsitesList from "./pages/Website/List";
+import WebsiteOptions from "./pages/Website/Options";
 
 function Main() {
   return (
@@ -69,6 +70,14 @@ function Main() {
           element={
             <Protected>
               <WebsitesList />
+            </Protected>
+          }
+        />
+        <Route
+          path="/websites/:id/options"
+          element={
+            <Protected>
+              <WebsiteOptions />
             </Protected>
           }
         />

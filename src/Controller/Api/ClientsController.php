@@ -75,7 +75,21 @@ class ClientsController extends AbstractController {
         return new JsonResponse($formBuilder->getFormData());
     }
 
-    #[Route('/clients/{id}/update', name: 'client_update', methods: ["POST"])]
+    #[Route('/clients/{id}/updateName', name: 'client_name_update', methods: ["PUT"])]
+    public function updateClientName(int $id, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        /** @var Client $client */
+        $client = $this->clientRepository->findOneById($id);
+
+        $client->setName($data->name);
+
+        $this->clientRepository->save($client);
+
+        return new JsonResponse($client->getData());
+    }
+
+    #[Route('/clients/{id}', name: 'client_update', methods: ["PUT"])]
     public function updateClient(int $id, Request $request): JsonResponse {
         $data = json_decode($request->getContent());
 

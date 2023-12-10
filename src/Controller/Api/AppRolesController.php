@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\App;
 use App\Entity\User;
 use App\Entity\AppRole;
+use App\Utils\ArrayUtil;
 use OpenApi\Attributes as OA;
 use App\Repository\AppRepository;
 use App\Entity\SectionPermissions;
@@ -110,7 +111,7 @@ class AppRolesController extends AbstractController {
     }
 
     private function roleNameExistsInApp(App $app, $roleName) {
-        return array_any($app->getRoles()->toArray(), function (AppRole $role) use ($roleName) {
+        return ArrayUtil::array_any($app->getRoles()->toArray(), function (AppRole $role) use ($roleName) {
             return strtolower($role->getName()) == strtolower($roleName);
         });
     }

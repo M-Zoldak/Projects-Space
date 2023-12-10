@@ -5,6 +5,7 @@ import {
   Input,
   Modal,
   Radio,
+  SelectPicker,
 } from "rsuite";
 import StandardLayout from "../../layouts/StandardLayout";
 import { useEffect, useState } from "react";
@@ -26,12 +27,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClockFour, faUserTie } from "@fortawesome/free-solid-svg-icons";
 import { faCreativeCommonsBy } from "@fortawesome/free-brands-svg-icons";
 import { DynamicallyFilledObject } from "../../interfaces/DefaultTypes";
-import EastAddRemoveList from "../../components/Data/EasyAddRemoveList";
-import EasyAddRemoveList from "../../components/Data/EasyAddRemoveList";
 import { HostingType } from "../../interfaces/EntityTypes/WebsiteOptionsType";
+import { ProjectStateType } from "../../interfaces/EntityTypes/ProjectStateType";
+import FluidText from "../../components/Text/FluidText";
 
 export default function Options() {
-  const { appData } = useAppDataContext();
+  const { appData, refreshAppData } = useAppDataContext();
   const { addNotification } = useNotificationsContext();
   const params = useParams();
   const [loaded, setLoaded] = useState(false);
@@ -49,6 +50,11 @@ export default function Options() {
   }>();
   const [hostingsList, setHostingsList] = useState<HostingType[]>([]);
   const [newHosting, setNewHosting] = useState<string>("");
+  const [projectStatesList, setProjectStatesList] = useState<
+    ProjectStateType[]
+  >([]);
+  const [newProjectState, setNewProjectState] = useState<string>("");
+
   useEffect(() => {
     http_methods
       .fetch<AppOptionsType>(appData.token, `/apps/${params.id}/options`)
@@ -59,6 +65,11 @@ export default function Options() {
         setApp(data.app);
         setHostingsList(data.app.websiteOptions.hostings);
         setDefaultRoleId(data.app.defaultRoleId);
+        setProjectStatesList(
+          data.app.projectStates.sort((i1, i2) =>
+            i1.position > i2.position ? 1 : 0
+          )
+        );
         setAppName(data.app.name);
         setLoaded(true);
       })
@@ -179,11 +190,28 @@ export default function Options() {
     );
   };
 
-  const updateAppName = () => {
+  const updateAppName = (newAppName: string) => {
     http_methods
-      .put<AppType>(`/apps/${app.id}`, { name: appName }, appData.token)
+      .put<AppType>(`/apps/${app.id}`, { name: newAppName }, appData.token)
       .then((appData) => {
         setApp(appData);
+        refreshAppData();
+      });
+  };
+
+  const updateUserAppRole = (appRoleId: number, user: UserType) => {
+    http_methods
+      .put<UserType>(
+        `/apps/${params.id}/updateUserRole`,
+        {
+          appRoleId: appRoleId.toString(),
+          userId: user.id,
+        },
+        appData.token
+      )
+      .then((user) => {
+        let newUsers = users.filter((u) => u.id != user.id);
+        setUsers([...newUsers, user]);
       });
   };
 
@@ -194,9 +222,22 @@ export default function Options() {
       <FlexboxGrid>
         <FlexboxGridItem>
           {userIsActive ? (
-            <HoverTooltip text="User role">
-              <FontAwesomeIcon icon={faUserTie} /> {user.appRole.name}
-            </HoverTooltip>
+            <SelectPicker
+              size="sm"
+              searchable={false}
+              value={user.appRole.id}
+              cleanable={false}
+              data={appRolesList.map((appRole) => {
+                return { value: appRole.id, label: appRole.name };
+              })}
+              disabled={user.appRole.isOwnerRole && user.id == app.ownerId}
+              label={
+                <>
+                  <FontAwesomeIcon icon={faUserTie} /> User role
+                </>
+              }
+              onChange={(val) => updateUserAppRole(val, user)}
+            />
           ) : (
             <>
               <FontAwesomeIcon icon={faClockFour} /> Pending...
@@ -248,6 +289,46 @@ export default function Options() {
       .then((hoster) => setHostingsList([...hostingsList, hoster]));
   };
 
+  const addProjectState = (name: string) => {
+    http_methods
+      .post<ProjectStateType>(
+        `/apps/${app.id}/projectState`,
+        {
+          name,
+        },
+        appData.token
+      )
+      .then((projectState) => {
+        setProjectStatesList([...projectStatesList, projectState]);
+      });
+  };
+
+  const updateProjectStatePositions = () => {
+    http_methods.put(
+      `/apps/${app.id}/updateProjectStatesPosition`,
+      projectStatesList.map((el, index) => ({ ...el, position: index })),
+      appData.token
+    );
+  };
+
+  const handleSortEnd = ({
+    oldIndex,
+    newIndex,
+  }: {
+    oldIndex: number;
+    newIndex: number;
+  }) =>
+    setProjectStatesList((prvData) => {
+      const moveData = prvData.splice(oldIndex, 1);
+      const newData = [...prvData];
+      // moveData[0].position = newIndex;
+      newData.splice(newIndex, 0, moveData[0]);
+      // console.log(newData);
+      return newData;
+    });
+
+  console.log(projectStatesList);
+
   return (
     <StandardLayout
       title={app?.name ? `App overview` : "Loading..."}
@@ -257,17 +338,22 @@ export default function Options() {
 
       <ContentLoader loaded={loaded}>
         <h2>{app?.name} options</h2>
-
         <InputButtonGroup
           buttonText="Update app name"
           label="App name: "
           value={appName}
           onSubmit={updateAppName}
+          onChange={setAppName}
         />
-
         <h3>Users</h3>
         <CommonList<UserType>
           entity="user"
+          onEmpty=""
+          sortingItems={[
+            { label: "Name", value: "name" },
+            { label: "Role", value: ["appRole", "name"] },
+          ]}
+          sortingDefaults={{ field: "name" }}
           label={(user) => user.name}
           items={[...users, ...invitedUsers]}
           inViewBacklink={`/apps/${params.id}/options`}
@@ -297,21 +383,21 @@ export default function Options() {
           }}
           additionalInfo={userAdditionalInfo}
         />
-
         {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
           <InputButtonGroup
             label="Invite user: "
             value={newUser}
             buttonText="Send Invitation"
             onSubmit={sendInvitation}
+            onChange={setNewUser}
           />
         )}
         {emailInvitationPopup?.show && renderInvitationModal()}
-
         <h3>Roles</h3>
         <CommonList<AppRoleType>
           entity="app-roles"
           items={appRolesList}
+          onEmpty=""
           label={(appRole) => appRole.name}
           inViewBacklink={`/apps/${params.id}/options`}
           buttons={{
@@ -325,28 +411,94 @@ export default function Options() {
           }}
           additionalInfo={appRoleAdditionalInfo}
         />
-
         {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
           <InputButtonGroup
             buttonText="Create new"
             label="New role name: "
             onSubmit={createNewRole}
             value={newRole}
+            onChange={setNewRole}
           />
         )}
 
         <h3>Webite options</h3>
-        <p>Possible hostings inside app space:</p>
-        <EasyAddRemoveList<HostingType>
-          emptyCollectiontext="There are no hostings specified for websites"
-          itemsList={hostingsList}
-          label={(item) => item.name}
-          inputButtonGroup={{
-            buttonText: "Add",
-            label: "New hosting name",
-            onSubmit: addHosting,
-            value: newHosting,
+        <FluidText>Possible hostings for websites:</FluidText>
+        <CommonList<HostingType>
+          // emptyCollectiontext="There are no hostings specified for websites"
+          // itemsList={hostingsList}
+          onEmpty="There are no hostings, you can add one."
+          onDelete={(hosting) => {
+            let newPS = projectStatesList.filter((h) => h.id != hosting.id);
+            addNotification({
+              text: `Project state ${hosting.name} was deleted.`,
+              notificationProps: {
+                type: "success",
+              },
+            });
+            setProjectStatesList(newPS);
           }}
+          entity="hostings"
+          editableLabel
+          linkPrepend={`/apps/${app?.id}/`}
+          items={hostingsList}
+          label={(item) => item.name}
+          buttons={{
+            hasView: false,
+            hasOptions: false,
+            deleteable: app?.currentUserRole?.permissions.apps.deleteable,
+          }}
+        />
+        <InputButtonGroup
+          buttonText="Add"
+          label="New hosting name"
+          onSubmit={addHosting}
+          value={newHosting}
+          onChange={setNewHosting}
+        />
+
+        <h3>Project options</h3>
+        <FluidText>Project states:</FluidText>
+        <CommonList<ProjectStateType>
+          sortable
+          onSort={handleSortEnd}
+          onEmpty="There are no project states yet. Create one."
+          editableLabel
+          onDelete={(projectState) => {
+            let newPS = projectStatesList.filter(
+              (ps) => ps.id != projectState.id
+            );
+            addNotification({
+              text: `Project state ${projectState.name} was deleted.`,
+              notificationProps: {
+                type: "success",
+              },
+            });
+            setProjectStatesList(newPS);
+          }}
+          entity="projectStates"
+          linkPrepend={`/apps/${app?.id}/`}
+          items={projectStatesList}
+          label={(item) => item.name}
+          buttons={{
+            hasView: false,
+            hasOptions: false,
+            deleteable: app?.currentUserRole?.permissions.apps.deleteable,
+          }}
+        />
+        {projectStatesList && (
+          <Button
+            onClick={updateProjectStatePositions}
+            disabled={projectStatesList.length == 0}
+          >
+            Update positions
+          </Button>
+        )}
+        <InputButtonGroup
+          buttonText="Add"
+          label="New project state"
+          onSubmit={addProjectState}
+          value={newProjectState}
+          onChange={setNewProjectState}
         />
       </ContentLoader>
     </StandardLayout>

@@ -51,9 +51,6 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
     private Collection $appRoles;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ProjectRole::class)]
-    private Collection $projectRoles;
-
     #[ORM\OneToOne(mappedBy: 'user', cascade: ["persist"])]
     private ?UserOptions $userOptions = null;
 
@@ -71,7 +68,6 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         parent::__construct();
         $this->apps = new ArrayCollection();
         $this->appRoles = new ArrayCollection();
-        $this->projectRoles = new ArrayCollection();
         $this->setUserOptions(new UserOptions());
         $this->appInvitations = new ArrayCollection();
         $this->notifications = new ArrayCollection();
@@ -252,33 +248,6 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     public function removeAppRole(AppRole $appRole): static {
         if ($this->appRoles->removeElement($appRole)) {
             $appRole->removeUser($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, ProjectRole>
-     */
-    public function getProjectRoles(): Collection {
-        return $this->projectRoles;
-    }
-
-    public function addProjectRole(ProjectRole $projectRole): static {
-        if (!$this->projectRoles->contains($projectRole)) {
-            $this->projectRoles->add($projectRole);
-            $projectRole->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProjectRole(ProjectRole $projectRole): static {
-        if ($this->projectRoles->removeElement($projectRole)) {
-            // set the owning side to null (unless already changed)
-            if ($projectRole->getUser() === $this) {
-                $projectRole->setUser(null);
-            }
         }
 
         return $this;

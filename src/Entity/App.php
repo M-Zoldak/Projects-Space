@@ -49,6 +49,9 @@ class App extends Entity {
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: Client::class, cascade: ["persist"], orphanRemoval: true)]
     private Collection $clients;
 
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: ProjectState::class, cascade: ["persist", "remove"], orphanRemoval: true)]
+    private Collection $projectState;
+
     public function __construct() {
         parent::__construct();
         $this->users = new ArrayCollection();
@@ -58,20 +61,22 @@ class App extends Entity {
         $this->invitedUsers = new ArrayCollection();
         $this->clients = new ArrayCollection();
         $this->websiteOptions = new WebsiteOptions();
+        $this->projectState = new ArrayCollection();
     }
 
-    public function getData(): array {
+    public function getData(?User $user = null): array {
         return [
             "id" => $this->getId(),
             "ownerId" => $this->getOwner()->getId(),
-            "websiteOptions" => $this->getWebsiteOptions()?->getData(),
-            "name" => $this->getName(),
             "defaultRoleId" => $this->getDefaultRole()?->getId(),
+            "name" => $this->getName(),
+            "websiteOptions" => $this->getWebsiteOptions()?->getData(),
             "statistics" => [
                 "usersCount" => $this->getUsers()->count()
             ],
-            "invitedUsers" => $this->getInvitedUsers()->toArray(),
-            "users" => EntityCollectionUtil::createCollectionData($this->getUsers())
+            "users" => EntityCollectionUtil::createCollectionData($this->getUsers()),
+            "currentUserRole" => $user?->getCurrentAppRole($this),
+            "projectStates" => EntityCollectionUtil::createCollectionData($this->getProjectStates())
         ];
     }
 
@@ -289,6 +294,33 @@ class App extends Entity {
             // set the owning side to null (unless already changed)
             if ($client->getApp() === $this) {
                 $client->setApp(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProjectState>
+     */
+    public function getProjectStates(): Collection {
+        return $this->projectState;
+    }
+
+    public function addProjectState(ProjectState $projectState): static {
+        if (!$this->projectState->contains($projectState)) {
+            $this->projectState->add($projectState);
+            $projectState->setApp($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectState(ProjectState $projectState): static {
+        if ($this->projectState->removeElement($projectState)) {
+            // set the owning side to null (unless already changed)
+            if ($projectState->getApp() === $this) {
+                $projectState->setApp(null);
             }
         }
 

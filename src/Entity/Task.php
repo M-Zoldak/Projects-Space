@@ -8,11 +8,6 @@ use App\Repository\TaskRepository;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 class Task extends Entity {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -25,8 +20,22 @@ class Task extends Entity {
     #[ORM\Column(length: 255)]
     private ?string $category = null;
 
-    public function getId(): ?int {
-        return $this->id;
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    private ?Project $project = null;
+
+    public function __construct() {
+        parent::__construct();
+    }
+
+    public function getData(): array {
+        return [
+            "id" => $this->getId(),
+            "projectId" => $this->getProject()->getId(),
+            "name" => $this->getName(),
+            "startDate" => $this->getStartDate(),
+            "endDate" => $this->getEndDate(),
+            "taskCategory" => $this->getCategory()
+        ];
     }
 
     public function getName(): ?string {
@@ -65,6 +74,16 @@ class Task extends Entity {
 
     public function setCategory(string $category): static {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getProject(): ?Project {
+        return $this->project;
+    }
+
+    public function setProject(?Project $project): static {
+        $this->project = $project;
 
         return $this;
     }

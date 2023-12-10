@@ -18,3 +18,8 @@ export type PermissionsType = {
   name?: string;
 } & ActionButtonsType &
   DynamicallyFilledObject<any>;
+
+export type SelectDataType = {
+  value: string;
+  label: string;
+};

@@ -45,7 +45,7 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
         .then(async (data: { user: CurrentUserType; apps: AppType[] }) => {
           appData.currentUser = setCurrentUserData(data.user);
           appData.token = token ?? appData.token;
-          appData.apps = data.apps;
+          appData.apps = data.apps ?? [];
           setLocalItem("appData", { ...appData });
           setAppData({ ...appData });
         })

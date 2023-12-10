@@ -1,17 +1,19 @@
 import { PermissionsType } from "../DefaultTypes";
 import { AppRoleType } from "./AppRoleType";
 import { DefaultType } from "./DefaultType";
+import { ProjectStateType } from "./ProjectStateType";
 import { UserType } from "./UserType";
 import { WebsiteOptionsType } from "./WebsiteOptionsType";
 
 export type AppType = DefaultType & {
   ownerId: string;
-  userPermissions: PermissionsType;
   defaultRoleId: string;
   statistics: {
     usersCount: number;
   };
   websiteOptions: WebsiteOptionsType;
+  currentUserRole: AppRoleType;
+  projectStates: ProjectStateType[];
 };
 
 export type AppOptionsType = {

@@ -25,10 +25,12 @@ export default function ClientOptions() {
   const [clientName, setClientName] = useState("");
   const [contacts, setContacts] = useState<ContactPersonType[]>([]);
   const [addresses, setAddresses] = useState<AddressType[]>([]);
+
   useEffect(() => {
     http_methods
       .fetch<ClientType>(appData.token, `/clients/${params.id}`)
       .then((data) => {
+        console.log(data);
         setClient(data);
         setClientName(data.name);
         setAddresses(data.addresses);
@@ -43,7 +45,7 @@ export default function ClientOptions() {
   const updateClientName = (clientName: string) => {
     http_methods
       .put<ClientType>(
-        `/clients/${client.id}`,
+        `/clients/${client.id}/updateName`,
         { name: clientName },
         appData.token
       )
@@ -51,54 +53,6 @@ export default function ClientOptions() {
         setClient(clientData);
       });
   };
-
-  // const userAdditionalInfo = (user: UserType) => {
-  //   const userIsActive = users.find((i) => i.id == user.id) ? true : false;
-
-  //   return (
-  //     <FlexboxGrid>
-  //       <FlexboxGridItem>
-  //         {userIsActive ? (
-  //           <HoverTooltip text="User role">
-  //             <FontAwesomeIcon icon={faUserTie} /> {user.clientRole.name}
-  //           </HoverTooltip>
-  //         ) : (
-  //           <>
-  //             <FontAwesomeIcon icon={faClockFour} /> Pending...
-  //           </>
-  //         )}
-  //       </FlexboxGridItem>
-  //     </FlexboxGrid>
-  //   );
-  // };
-
-  // const clientRoleAdditionalInfo = (item: ClientRoleType) => {
-  //   return (
-  //     <FlexboxGrid align="middle">
-  //       <FlexboxGridItem>
-  //         <HoverTooltip text="Check to set as default role for new users">
-  //           <FontAwesomeIcon icon={faCreativeCommonsBy} />{" "}
-  //           <Radio
-  //             checked={item.id == defaultRoleId}
-  //             onClick={() => {
-  //               http_methods
-  //                 .put<ClientType>(
-  //                   `/clients/${params.id}/updateDefaultRole`,
-  //                   {
-  //                     defaultRoleId: item.id,
-  //                   },
-  //                   clientData.token
-  //                 )
-  //                 .then((data) => {
-  //                   setDefaultRoleId(data.defaultRoleId);
-  //                 });
-  //             }}
-  //           />
-  //         </HoverTooltip>
-  //       </FlexboxGridItem>
-  //     </FlexboxGrid>
-  //   );
-  // };
 
   return (
     <StandardLayout
@@ -113,6 +67,7 @@ export default function ClientOptions() {
         <InputButtonGroup
           buttonText="Update client name"
           label="Client name: "
+          onChange={setClientName}
           value={clientName}
           onSubmit={updateClientName}
         />
@@ -153,6 +108,7 @@ export default function ClientOptions() {
           inViewBacklink={`/clients/${params.id}/options`}
           linkPrepend={`/clients/${params.id}`}
           label={(contact) => `${contact.firstName} ${contact.lastName}`}
+          onEmpty="You don't have any contacts yet"
           buttons={{
             deleteable:
               appData.currentUser.currentAppRole.permissions.clients.deleteable,
@@ -195,6 +151,7 @@ export default function ClientOptions() {
         <CommonList<AddressType>
           entity="addresses"
           items={addresses}
+          onEmpty="Client does not have any address."
           inViewBacklink={`/clients/${params.id}/options`}
           linkPrepend={`/clients/${params.id}`}
           label={(address) =>

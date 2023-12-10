@@ -18,8 +18,8 @@ export default function EasyAddRemoveList<T>({
     <>
       {itemsList.length > 0 ? (
         <List bordered>
-          {itemsList.map((item) => (
-            <List.Item>{label(item)}</List.Item>
+          {itemsList.map((item, index) => (
+            <List.Item key={index}>{label(item)}</List.Item>
           ))}
         </List>
       ) : (

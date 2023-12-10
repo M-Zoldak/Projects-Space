@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\WebsiteRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: WebsiteRepository::class)]
 class Website extends Entity {
@@ -20,6 +22,14 @@ class Website extends Entity {
     #[ORM\ManyToOne(inversedBy: 'websites')]
     private ?WebsiteHosting $hosting = null;
 
+    #[ORM\OneToMany(mappedBy: 'website', targetEntity: Project::class)]
+    private Collection $projects;
+
+    public function __construct() {
+        parent::__construct();
+        $this->projects = new ArrayCollection();
+    }
+
     public function getDomain(): ?string {
         return $this->domain;
     }
@@ -34,8 +44,8 @@ class Website extends Entity {
         return [
             "id" => $this->getId(),
             "domain" => $this->getDomain(),
-            "hosting" => $this->getHosting()->getData(),
-            "client" => $this->getClient()->getData()
+            "hosting" => $this->getHosting()?->getData(),
+            "client" => $this->getClient()?->getData()
         ];
     }
 
@@ -65,6 +75,33 @@ class Website extends Entity {
 
     public function setHosting(?WebsiteHosting $hosting): static {
         $this->hosting = $hosting;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function getProjects(): Collection {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): static {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+            $project->setWebsite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Project $project): static {
+        if ($this->projects->removeElement($project)) {
+            // set the owning side to null (unless already changed)
+            if ($project->getWebsite() === $this) {
+                $project->setWebsite(null);
+            }
+        }
 
         return $this;
     }

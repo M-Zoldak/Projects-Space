@@ -24,21 +24,18 @@ export default function WebsiteOptions() {
   }, []);
 
   return (
-    <StandardLayout title="Website overview" activePage="Websites">
+    <StandardLayout title="Website options" activePage="Websites">
       <ButtonToolbar>
-        <Backlink link="/Websites" />
+        <Backlink link="/websites" />
       </ButtonToolbar>
-      <MainTitle>
-        {website &&
-          `[${website.postal}] ${website.city} ${website.street} options`}
-      </MainTitle>
+      <MainTitle>{website && `${website.domain} settings`}</MainTitle>
       <FormComponent<WebsiteType>
-        entity="websitees"
+        entity="websites"
         updatePath={{ id: params.id }}
         onSuccess={(website) => {
           setWebsite(website);
           addNotification({
-            text: `Address was succesfully updated.`,
+            text: `Website was succesfully updated.`,
             notificationProps: { type: "success" },
           });
         }}

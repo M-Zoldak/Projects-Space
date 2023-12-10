@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\ProjectCategories;
+use App\Entity\ProjectCategory;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
- * @extends EntityRepository<ProjectCategories>
+ * @extends EntityRepository<ProjectCategory>
  *
- * @method ProjectCategories|null find($id, $lockMode = null, $lockVersion = null)
- * @method ProjectCategories|null findOneBy(array $criteria, array $orderBy = null)
- * @method ProjectCategories[]    findAll()
- * @method ProjectCategories[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method ProjectCategory|null find($id, $lockMode = null, $lockVersion = null)
+ * @method ProjectCategory|null findOneBy(array $criteria, array $orderBy = null)
+ * @method ProjectCategory[]    findAll()
+ * @method ProjectCategory[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ProjectCategoriesRepository extends EntityRepository {
+class ProjectCategoryRepository extends EntityRepository {
     public function __construct(ManagerRegistry $registry) {
-        parent::__construct($registry, ProjectCategories::class);
+        parent::__construct($registry, ProjectCategory::class);
     }
 
     //    /**
-    //     * @return ProjectCategories[] Returns an array of ProjectCategories objects
+    //     * @return ProjectCategory[] Returns an array of ProjectCategory objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -34,7 +34,7 @@ class ProjectCategoriesRepository extends EntityRepository {
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?ProjectCategories
+    //    public function findOneBySomeField($value): ?ProjectCategory
     //    {
     //        return $this->createQueryBuilder('p')
     //            ->andWhere('p.exampleField = :val')

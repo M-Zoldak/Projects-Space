@@ -8,12 +8,15 @@ import SimpleCreateModal from "../../components/Modals/SimpleCreateModal";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { ProjectType } from "../../interfaces/EntityTypes/ProjectType";
 import { useAppDataContext } from "../../contexts/AppDataContext";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBarsProgress, faPerson } from "@fortawesome/free-solid-svg-icons";
 
 export default function ProjectsList() {
   const { appData } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
-  const [projects, setProjects] = useState<Array<any>>([]);
+  const [projects, setProjects] = useState<Array<ProjectType>>([]);
 
   useEffect(() => {
     setLoaded(false);
@@ -27,6 +30,22 @@ export default function ProjectsList() {
         addNotification({ text: err.message });
       });
   }, [appData]);
+
+  const projectAdditionalInfo = (project: ProjectType) => {
+    return (
+      <FlexboxGrid style={{ gap: "1rem" }}>
+        <FlexboxGridItem>
+          <FontAwesomeIcon icon={faBarsProgress} /> State:{" "}
+          {project?.projectState?.name ?? "Planning"}
+        </FlexboxGridItem>
+        {project?.client?.name && (
+          <FlexboxGridItem>
+            <FontAwesomeIcon icon={faPerson} /> Client: {project?.client?.name}
+          </FlexboxGridItem>
+        )}
+      </FlexboxGrid>
+    );
+  };
 
   return (
     <StandardLayout title="Projects overview" activePage="Projects">
@@ -51,8 +70,9 @@ export default function ProjectsList() {
 
       <ContentLoader loaded={loaded}>
         <h3>Active projects</h3>
-        {projects?.length ? (
+        {projects && (
           <CommonList<ProjectType>
+            onEmpty="You don't have any projects yet. Create one now!"
             items={projects}
             label={(project) => project.name}
             entity="projects"
@@ -70,20 +90,17 @@ export default function ProjectsList() {
               deleteable:
                 appData.currentUser.currentAppRole.permissions?.projects
                   .deleteable,
-              hasOptions:
-                appData.currentUser.currentAppRole.permissions?.projects
-                  .hasOptions,
+              hasOptions: false,
               hasView:
                 appData.currentUser.currentAppRole.permissions?.projects
                   .hasView,
             }}
+            additionalInfo={projectAdditionalInfo}
           />
-        ) : (
-          <p>You don't have any projects yet. Create one now!</p>
         )}
-        <h3>Projects to delete</h3>
+        {/* <h3>Projects to delete</h3> */}
 
-        <h3>Archivized projects</h3>
+        {/* <h3>Archivized projects</h3> */}
       </ContentLoader>
     </StandardLayout>
   );

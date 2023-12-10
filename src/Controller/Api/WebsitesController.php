@@ -72,6 +72,33 @@ class WebsitesController extends AbstractController {
         return new JsonResponse($website->getData());
     }
 
+
+    #[Route('/websites/{id}/options', name: 'websites_options_form', methods: ["GET"])]
+    public function edit(int $id): JsonResponse {
+        $website = $this->websiteRepository->findOneById($id);
+        $formBuilder = $this->addAndEditForm($website->getApp(), $website);
+        return new JsonResponse($formBuilder->getFormData());
+    }
+
+    #[Route('/websites/{id}', name: 'websites_update', methods: ["PUT"])]
+    public function update(int $id, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        $app = $this->appRepository->findOneById($data->appId);
+        $client = $this->clientRepository->findOneById($data->client);
+        $websiteHosting = $app->getWebsiteOptions()->getHostings()->findFirst(fn (int $index, WebsiteHosting $h) => $h->getId() == $data->hosting);
+
+        $website = $this->websiteRepository->findOneById($id);
+
+        $website->setHosting($websiteHosting);
+        $website->setDomain($data->domain);
+        $website->setClient($client);
+
+        $this->websiteRepository->save($website);
+
+        return new JsonResponse($website->getData());
+    }
+
     #[Route('/websites/{id}', name: 'websites_delete', methods: ["DELETE"])]
     public function delete(string $id, Request $request): JsonResponse {
         $website = $this->websiteRepository->findOneById($id);
@@ -81,33 +108,11 @@ class WebsitesController extends AbstractController {
         return new JsonResponse($websiteData);
     }
 
-
-    // #[Route('/websites/addHosting', name: 'websites_hostings_list', methods: ["DELETE"])]
-    // public function hostsList(Request $request): JsonResponse {
-    //     $data = json_decode($request->getContent());
-    //     $app = $this->appRepository->findOneById($data->appId);
-    //     $hostingsList = $app->getWebsiteOptions()->getHostingsList();
-
-    //     return new JsonResponse($hostingsList);
-    // }
-
-    // #[Route('/websites/hostings', name: 'websites_add_hosting', methods: ["POST"])]
-    // public function addHosting(Request $request): JsonResponse {
-    //     $data = json_decode($request->getContent());
-    //     $app = $this->appRepository->findOneById($data->appId);
-    //     $hostingsList = $app->getWebsiteOptions()->getHostingsList();
-    //     array_push($hostingsList, $data->name);
-    //     $app->getWebsiteOptions()->setHostingsList($hostingsList);
-
-    //     $this->appRepository->save($app);
-    //     return new JsonResponse($hostingsList);
-    // }
-
     private function addAndEditForm(App $app, ?Website $website = null): FormBuilder {
         $formBuilder = new FormBuilder();
         $formBuilder->add("domain", "Domain", FormField::TEXT, ["value" => $website?->getDomain() ?? ""]);
-        $formBuilder->add("client", "Client", FormField::SELECT, ["value" => $website?->getClient()->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getClients(), "name")]);
-        $formBuilder->add("hosting", "Hosting platform", FormField::SELECT, ["value" => $website?->getHosting()->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getWebsiteOptions()->getHostings(), "name")]);
+        $formBuilder->add("client", "Client", FormField::SELECT, ["value" => $website?->getClient()?->getId() ?? null, "options" => EntityCollectionUtil::convertToSelectable($app->getClients(), "name")]);
+        $formBuilder->add("hosting", "Hosting platform", FormField::SELECT, ["value" => $website?->getHosting()?->getId() ?? null, "options" => EntityCollectionUtil::convertToSelectable($app->getWebsiteOptions()->getHostings(), "name")]);
         $formBuilder->createAppIdField();
         return $formBuilder;
     }

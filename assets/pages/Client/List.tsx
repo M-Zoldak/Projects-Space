@@ -13,7 +13,7 @@ export default function ClientsList() {
   const { appData } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
-  const [clients, setClients] = useState<ClientType[]>();
+  const [clients, setClients] = useState<ClientType[]>([]);
 
   useEffect(() => {
     setLoaded(false);
@@ -53,8 +53,9 @@ export default function ClientsList() {
 
       <ContentLoader loaded={loaded}>
         <h3>Active clients</h3>
-        {clients?.length ? (
+        {clients && (
           <CommonList<ClientType>
+            onEmpty="You don't have any clients yet. Create one now!"
             items={clients}
             label={(client) => client.name}
             entity="clients"
@@ -73,12 +74,9 @@ export default function ClientsList() {
               hasOptions:
                 appData.currentUser.currentAppRole.permissions?.clients
                   .hasOptions,
-              hasView:
-                appData.currentUser.currentAppRole.permissions?.clients.hasView,
+              hasView: false,
             }}
           />
-        ) : (
-          <p>You don't have any clients yet. Create one now!</p>
         )}
       </ContentLoader>
     </StandardLayout>

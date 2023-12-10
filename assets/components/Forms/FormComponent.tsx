@@ -39,7 +39,7 @@ export default function FormComponent<T>({
   }
 
   var loadFormPath = updatePath?.id ? `${updatePath?.id}/options` : "create";
-  var sendDataPath = updatePath?.id ? `/${updatePath.id}/update` : "";
+  var sendDataPath = updatePath?.id ? `/${updatePath.id}` : "";
 
   useEffect(() => {
     http_methods
@@ -68,24 +68,43 @@ export default function FormComponent<T>({
       {}
     );
 
-    await http_methods
-      .post<T>(
-        `${prependQuery}/${entity}${sendDataPath}`,
-        formValues,
-        appData.token
-      )
-      .then((data) => onSuccess(data))
-      .catch((err: Error) => {
-        let errors = JSON.parse(err.message);
-        let updatedFormFields;
-        Object.keys(errors).forEach((key: string) => {
-          updatedFormFields = formFields.map((field: FormDataType) => {
-            if (field.name == key) field.error = errors[key];
-            return field;
+    updatePath?.id
+      ? await http_methods
+          .put<T>(
+            `${prependQuery}/${entity}${sendDataPath}`,
+            formValues,
+            appData.token
+          )
+          .then((data) => onSuccess(data))
+          .catch((err: Error) => {
+            let errors = JSON.parse(err.message);
+            let updatedFormFields;
+            Object.keys(errors).forEach((key: string) => {
+              updatedFormFields = formFields.map((field: FormDataType) => {
+                if (field.name == key) field.error = errors[key];
+                return field;
+              });
+            });
+            setFormFields(updatedFormFields);
+          })
+      : await http_methods
+          .post<T>(
+            `${prependQuery}/${entity}${sendDataPath}`,
+            formValues,
+            appData.token
+          )
+          .then((data) => onSuccess(data))
+          .catch((err: Error) => {
+            let errors = JSON.parse(err.message);
+            let updatedFormFields;
+            Object.keys(errors).forEach((key: string) => {
+              updatedFormFields = formFields.map((field: FormDataType) => {
+                if (field.name == key) field.error = errors[key];
+                return field;
+              });
+            });
+            setFormFields(updatedFormFields);
           });
-        });
-        setFormFields(updatedFormFields);
-      });
     setLoaded(true);
   };
 
@@ -121,8 +140,10 @@ export default function FormComponent<T>({
           <Form.Group controlId={field.name} key={key}>
             <Form.ControlLabel>{field.label} </Form.ControlLabel>
             <SelectPicker
+              searchable={false}
               data={field.options}
-              onChange={(v) => updateInput(v.toString(), field.name)}
+              onChange={(v) => updateInput(v?.toString() ?? "", field.name)}
+              value={Number.parseInt(field.value)}
             />
           </Form.Group>
         );
@@ -130,15 +151,12 @@ export default function FormComponent<T>({
       case "date": {
         return (
           <Form.Group controlId={field.name} key={key}>
-            <Form.ControlLabel>Date of birth</Form.ControlLabel>
+            <Form.ControlLabel>{field.label}</Form.ControlLabel>
             <DatePicker
               onChange={(value) => updateInput(value.toString(), field.name)}
               name={field.name}
-              value={
-                field?.value ? new Date(field.value) : new Date("01.01.2020")
-              }
-              // format={field.dateFormat}
-              limitEndYear={new Date().getFullYear() - 3}
+              value={field?.value ? new Date(field.value) : new Date()}
+              // limitEndYear={new Date().getFullYear() - 3}
             />
 
             <FormError error={field.error} />

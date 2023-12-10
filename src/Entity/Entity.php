@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use DateTime;
 use DateTimeImmutable;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\EntityRepository;
 use Doctrine\ORM\Mapping\InheritanceType;
@@ -28,9 +29,9 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
     "address" => Address::class,
     'task' => Task::class,
     'project' => Project::class,
-    'project_role' => ProjectRole::class,
-    "project_categories" => ProjectCategories::class,
-    "project_states" => ProjectStates::class
+    "project_category" => ProjectCategory::class,
+    "project_state" => ProjectState::class,
+    "notes" => Notes::class
 ])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 abstract class Entity {

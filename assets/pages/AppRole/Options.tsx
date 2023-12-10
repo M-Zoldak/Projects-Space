@@ -101,6 +101,7 @@ export default function AppRoleOptions() {
               label="Role name: "
               buttonText="Update"
               onSubmit={updateName}
+              onChange={setRoleName}
               value={roleName}
             />
             <h3>Permissions</h3>

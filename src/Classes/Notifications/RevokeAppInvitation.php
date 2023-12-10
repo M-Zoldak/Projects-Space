@@ -6,7 +6,7 @@ use App\Entity\App;
 use App\Entity\User;
 use App\Enums\NotificationActions;
 
-class NewAppNotification extends DefaultNotification {
+class RevokeAppInvitation extends DefaultNotification {
 
     public function __construct(User $user, App $app) {
         parent::__construct(

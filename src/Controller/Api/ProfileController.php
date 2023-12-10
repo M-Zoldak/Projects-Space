@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use DateHelper;
 use App\Entity\User;
 use DateTimeImmutable;
 use App\Enums\FormField;
@@ -51,9 +52,7 @@ class ProfileController extends AbstractController {
         $user->setFirstName($data->firstName);
         $user->setLastName($data->lastName);
 
-        $birthDate = new DateTimeImmutable(strtotime($data->birthDate));
-        $birthDate->setTime(00, 00, 00);
-        $user->setBirthDate($birthDate);
+        $user->setBirthDate(DateHelper::convertToDate($data->birthDate));
 
         $errors = ValidatorHelper::validateObject($user, $validator);
 
