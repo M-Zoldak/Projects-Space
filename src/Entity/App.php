@@ -28,7 +28,7 @@ class App extends Entity {
     #[ORM\OneToMany(mappedBy: 'app', cascade: ['persist', 'remove'], targetEntity: AppRole::class, orphanRemoval: true)]
     private Collection $roles;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     private Collection $projects;
 
     #[ORM\OneToMany(mappedBy: 'selectedApp', targetEntity: UserOptions::class, orphanRemoval: true)]
@@ -43,10 +43,10 @@ class App extends Entity {
     private Collection $invitedUsers;
 
     #[ORM\ManyToOne(inversedBy: 'ownedApps', cascade: ['persist'])]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $owner = null;
 
-    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Client::class, cascade: ["persist"], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: Client::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     private Collection $clients;
 
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: ProjectState::class, cascade: ["persist", "remove"], orphanRemoval: true)]

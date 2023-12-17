@@ -31,15 +31,16 @@ function Login() {
   const { initializeAppData } = useAppDataContext();
   const [errorMsg, setErrorMsg] = useState("");
 
-  const login = () => {
-    http_methods
+  const login = async () => {
+    await http_methods
       .notTokenizedpost<any>("/login", formValue)
       .then((data) => {
         Cookies.set("token", data.token, { expires: 0.01, secure: true });
         setAccessControl("app");
         initializeAppData(data.appData.apps, data.appData.user);
-        redirectDocument("/dashboard");
+        console.log(Cookies.get("token"));
       })
+      .then(() => navigate("/dashboard"))
       .catch((err: Error) => setErrorMsg("Invalid email or password."));
   };
 

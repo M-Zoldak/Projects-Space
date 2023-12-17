@@ -4,14 +4,13 @@ namespace App\Entity;
 
 use App\Enums\StandardSections;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\RoleRepository;
 use App\Utils\EntityCollectionUtil;
+use App\Repository\AppRoleRepository;
 use Doctrine\Common\Collections\Collection;
 use App\Repository\SectionPermissionsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: RoleRepository::class)]
+#[ORM\Entity(repositoryClass: AppRoleRepository::class)]
 class AppRole extends Entity {
 
     #[ORM\Column(length: 255)]

@@ -20,7 +20,7 @@ class Task extends Entity {
     #[ORM\Column(length: 255)]
     private ?string $category = null;
 
-    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\ManyToOne(inversedBy: 'tasks', cascade: ["persist"])]
     private ?Project $project = null;
 
     public function __construct() {

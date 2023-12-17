@@ -20,7 +20,7 @@ class Project extends Entity {
     #[ORM\ManyToOne(inversedBy: 'projects')]
     private ?App $app = null;
 
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Task::class, cascade: ["persist"])]
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Task::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     private Collection $tasks;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
@@ -41,7 +41,7 @@ class Project extends Entity {
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $endDate = null;
 
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Note::class)]
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Note::class, cascade: ["persist", "remove"])]
     private Collection $note;
 
     public function __construct(App $app, string $name) {

@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRocket } from "@fortawesome/free-solid-svg-icons";
 import PortalSideNav from "./components/PortalSideNav";
 import { useAppDataContext } from "../contexts/AppDataContext";
+import { useAccessControlContext } from "../contexts/PlaceContext";
 
 type PortalLayoutProps = PropsWithChildren<{
   title: string;
@@ -26,6 +27,10 @@ export default function PortalLayout({
   activePage,
   withContainer = true,
 }: PortalLayoutProps) {
+  const { setAccessControl } = useAccessControlContext();
+
+  setAccessControl("portal");
+
   return (
     <div className="portal">
       {/* <Container> */}

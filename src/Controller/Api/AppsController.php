@@ -126,6 +126,9 @@ class AppsController extends AbstractController {
         $deletedAppData = $app->getData();
         try {
             $app->setDefaultRole(null);
+            $owner = $app->getOwner();
+            $app->getOwner()->removeOwnedApp($app);
+            $this->userRepository->save($owner);
             $app->getRoles()->forAll(fn ($roleKey, $role) => $this->appRoleRepository->delete($role));
             $this->appRepository->delete($app);
         } catch (CycleDetectedException $exc) {
