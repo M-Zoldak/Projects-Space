@@ -2,13 +2,13 @@ import Cookies from "js-cookie";
 import AppLayout from "../../layouts/AppLayout";
 import PortalLayout from "../../layouts/PortalLayout";
 import ErrorPage from "../../components/ErrorPage/ErrorPage";
-import { useAccessControlContext } from "../../contexts/PlaceContext";
+import { useCookies } from "react-cookie";
 
 function NotFound() {
-  const { accessControl } = useAccessControlContext();
-  const token = Cookies.get("token");
+  const [cookies] = useCookies();
+  const token = cookies.token;
 
-  return accessControl == "app" ? (
+  return token ? (
     <AppLayout activePage="404" title="Page Not Found">
       <ErrorPage code={404}>Unfortunately, this site doesn't exist.</ErrorPage>
     </AppLayout>

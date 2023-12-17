@@ -11,6 +11,7 @@ use Mpdf\MpdfException;
 use App\Enums\FormField;
 use App\Helpers\DateHelper;
 use App\Classes\FormBuilder;
+use App\Entity\ProjectState;
 use OpenApi\Attributes as OA;
 use App\Repository\AppRepository;
 use App\Repository\NoteRepository;
@@ -67,6 +68,10 @@ class ProjectsController extends AbstractController {
 
         $project->setStartDate(DateHelper::convertToDate($data->startDate));
         $project->setEndDate(DateHelper::convertToDate($data->endDate));
+        $projectStates = $project->getApp()->getProjectStates();
+        if ($projectStates) {
+            $project->setProjectState($projectStates->findFirst(fn ($index, ProjectState $state) => $state->getPosition() == 0));
+        }
 
         $this->projectRepository->save($project);
 

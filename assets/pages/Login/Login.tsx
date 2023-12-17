@@ -5,6 +5,7 @@ import {
   Button,
   Form,
   Divider,
+  SelectPicker,
 } from "rsuite";
 import Cookies from "js-cookie";
 import {
@@ -19,11 +20,11 @@ import FormError from "../../components/Forms/FormError";
 import PortalLayout from "../../layouts/PortalLayout";
 import { http_methods } from "../../Functions/HTTPMethods";
 import { useAppDataContext } from "../../contexts/AppDataContext";
-import { useAccessControlContext } from "../../contexts/PlaceContext";
+import { useCookies } from "react-cookie";
 
 function Login() {
+  const [cookies, setCookie] = useCookies();
   const navigate = useNavigate();
-  const { setAccessControl } = useAccessControlContext();
   const [formValue, setFormValue] = useState({
     username: "",
     password: "",
@@ -35,24 +36,39 @@ function Login() {
     await http_methods
       .notTokenizedpost<any>("/login", formValue)
       .then((data) => {
-        Cookies.set("token", data.token, { expires: 0.01, secure: true });
-        setAccessControl("app");
+        setCookie("token", data.token, { maxAge: 300, secure: true });
         initializeAppData(data.appData.apps, data.appData.user);
-        console.log(Cookies.get("token"));
       })
-      .then(() => navigate("/dashboard"))
+      .then(() => navigate("/dashboard", { unstable_flushSync: true }))
       .catch((err: Error) => setErrorMsg("Invalid email or password."));
+  };
+
+  const setFakeAccount = (email: string) => {
+    setFormValue({ username: email, password: "a123456789." });
   };
 
   return (
     <PortalLayout activePage="login" title="Login" withContainer={false}>
       <FlexboxGrid justify="center" style={{ paddingBlock: "2rem" }}>
         <FlexboxGrid.Item colspan={12}>
+          <SelectPicker
+            style={{ position: "absolute", right: "1rem", top: "1rem" }}
+            label="Choose fake account"
+            searchable={false}
+            data={[
+              { label: "Fake user 1", value: "fakeemail1@fake.com" },
+              { label: "Fake user 2", value: "fakeemail2@fake.com" },
+              { label: "Fake user 3", value: "fakeemail3@fake.com" },
+              { label: "Fake user 4", value: "fakeemail4@fake.com" },
+            ]}
+            onChange={setFakeAccount}
+          />
           <Panel header={<h3>Login</h3>} bordered>
             <Form fluid>
               <TextField
                 name="username"
                 label="Email"
+                value={formValue.username}
                 onChange={(username: string) =>
                   setFormValue({ ...formValue, username })
                 }
@@ -62,6 +78,7 @@ function Login() {
                 name="password"
                 type="password"
                 autoComplete="off"
+                value={formValue.password}
                 onChange={(password: string) =>
                   setFormValue({ ...formValue, password })
                 }

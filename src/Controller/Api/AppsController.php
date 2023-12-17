@@ -3,14 +3,17 @@
 namespace App\Controller\Api;
 
 use App\Entity\App;
+use App\Entity\Note;
 use App\Entity\User;
 use App\Entity\AppRole;
+use App\Entity\Project;
 use App\Enums\FormField;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
 use App\Entity\UserNotification;
 use App\Helpers\ValidatorHelper;
 use App\Repository\AppRepository;
+use App\Repository\NoteRepository;
 use App\Repository\UserRepository;
 use App\Utils\EntityCollectionUtil;
 use App\Repository\AppRoleRepository;
@@ -33,7 +36,8 @@ class AppsController extends AbstractController {
         private AppRepository $appRepository,
         private UserRepository $userRepository,
         private AppRoleRepository $appRoleRepository,
-        private SectionPermissionsRepository $sectionPermissionsRepository
+        private SectionPermissionsRepository $sectionPermissionsRepository,
+        private NoteRepository $noteRepository
     ) {
     }
 
@@ -126,9 +130,11 @@ class AppsController extends AbstractController {
         $deletedAppData = $app->getData();
         try {
             $app->setDefaultRole(null);
-            $owner = $app->getOwner();
-            $app->getOwner()->removeOwnedApp($app);
-            $this->userRepository->save($owner);
+            $app->setOwner(null);
+            // $users = $app->getUsers();
+
+            // $users->forAll(function (int $uIndex, User $user) use ($app) {
+            // });
             $app->getRoles()->forAll(fn ($roleKey, $role) => $this->appRoleRepository->delete($role));
             $this->appRepository->delete($app);
         } catch (CycleDetectedException $exc) {
@@ -194,7 +200,7 @@ class AppsController extends AbstractController {
         $app->addUser($user);
         $app->removeInvitedUser($user);
         $this->appRepository->save($app);
-        return new JsonResponse($user->getData());
+        return new JsonResponse($app->getData());
     }
 
     #[Route('/apps/invite/email', name: 'app_cinvite_email', methods: ["POST"])]

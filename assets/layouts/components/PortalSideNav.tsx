@@ -18,7 +18,7 @@ import {
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { useAppDataContext } from "../../contexts/AppDataContext";
-import { useAccessControlContext } from "../../contexts/PlaceContext";
+import { useCookies } from "react-cookie";
 
 export interface PageLinkInterface {
   name: string;
@@ -55,12 +55,12 @@ class PageLink implements PageLinkInterface {
 }
 
 export default function PortalSideNav({ activePage }: { activePage: string }) {
-  const { accessControl } = useAccessControlContext();
   const { appData } = useAppDataContext();
+  const [cookies] = useCookies();
 
-  useEffect(() => {}, [accessControl, appData]);
+  useEffect(() => {}, [appData]);
 
-  let token = Cookies.get("token");
+  let token = cookies.token;
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink("Home", "/", <FontAwesomeIcon icon={faHome} />),
     new PageLink("About", "/about", <FontAwesomeIcon icon={faLightbulb} />),

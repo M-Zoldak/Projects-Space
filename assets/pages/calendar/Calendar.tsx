@@ -15,12 +15,10 @@ import AppLayout from "../../layouts/AppLayout";
 const Calendar = () => {
   const [editable, setEditable] = React.useState(false);
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    console.log(selectInfo);
     setEditable(true);
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
-    console.log(clickInfo);
     setEditable(true);
   };
 

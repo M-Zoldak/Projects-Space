@@ -276,7 +276,6 @@ export default function CommonList<T>({
                     i.hasOwnProperty(currentFilter) &&
                     i[currentFilter] == undefined
                   ) {
-                    console.log(i[currentFilter]);
                     if (!keys.includes("unset")) {
                       keys.push("unset");
                       return {
@@ -292,7 +291,6 @@ export default function CommonList<T>({
                     i[currentFilter] != null
                   ) {
                     if (!keys.includes(i[currentFilter]?.name)) {
-                      console.log(i[currentFilter]);
                       keys.push(i[currentFilter]?.name);
                       return {
                         label: i[currentFilter]?.name ?? ("" as string),

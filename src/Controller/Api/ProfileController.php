@@ -2,9 +2,7 @@
 
 namespace App\Controller\Api;
 
-use DateHelper;
 use App\Entity\User;
-use DateTimeImmutable;
 use App\Enums\FormField;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
@@ -13,6 +11,7 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Helpers\DateHelper as HelpersDateHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -52,7 +51,7 @@ class ProfileController extends AbstractController {
         $user->setFirstName($data->firstName);
         $user->setLastName($data->lastName);
 
-        $user->setBirthDate(DateHelper::convertToDate($data->birthDate));
+        $user->setBirthDate(HelpersDateHelper::convertToDate($data->birthDate));
 
         $errors = ValidatorHelper::validateObject($user, $validator);
 

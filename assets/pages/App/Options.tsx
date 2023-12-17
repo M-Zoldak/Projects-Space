@@ -213,7 +213,10 @@ export default function Options() {
               data={appRolesList.map((appRole) => {
                 return { value: appRole.id, label: appRole.name };
               })}
-              disabled={user.appRole.isOwnerRole && user.id == app.ownerId}
+              disabled={
+                (user.appRole.isOwnerRole && user.id == app?.ownerId) ||
+                !app?.currentUserRole.permissions.apps.hasOptions
+              }
               label={
                 <>
                   <FontAwesomeIcon icon={faUserTie} /> User role
@@ -239,14 +242,17 @@ export default function Options() {
             <FontAwesomeIcon icon={faCreativeCommonsBy} />{" "}
             <Radio
               checked={item.id == defaultRoleId}
+              disabled={!app?.currentUserRole?.permissions?.apps?.hasOptions}
               onClick={() => {
-                http_methods
-                  .put<AppType>(`/apps/${params.id}/updateDefaultRole`, {
-                    defaultRoleId: item.id,
-                  })
-                  .then((data) => {
-                    setDefaultRoleId(data.defaultRoleId);
-                  });
+                if (app?.currentUserRole?.permissions?.apps?.hasOptions) {
+                  http_methods
+                    .put<AppType>(`/apps/${params.id}/updateDefaultRole`, {
+                      defaultRoleId: item.id,
+                    })
+                    .then((data) => {
+                      setDefaultRoleId(data.defaultRoleId);
+                    });
+                }
               }}
             />
           </HoverTooltip>
@@ -257,7 +263,7 @@ export default function Options() {
 
   const addHosting = (name: string) => {
     http_methods
-      .post<HostingType>("/websites/hostings", {
+      .post<HostingType>(`/apps/hostings`, {
         name,
         appId: app.id,
       })
@@ -291,13 +297,9 @@ export default function Options() {
     setProjectStatesList((prvData) => {
       const moveData = prvData.splice(oldIndex, 1);
       const newData = [...prvData];
-      // moveData[0].position = newIndex;
       newData.splice(newIndex, 0, moveData[0]);
-      // console.log(newData);
       return newData;
     });
-
-  console.log(projectStatesList);
 
   return (
     <AppLayout
@@ -353,8 +355,7 @@ export default function Options() {
           }}
           additionalInfo={userAdditionalInfo}
         />
-        {appData?.currentUser?.currentAppRole?.permissions?.apps
-          ?.hasOptions && (
+        {app?.currentUserRole?.permissions?.apps?.hasOptions && (
           <InputButtonGroup
             label="Invite user: "
             value={newUser}
@@ -372,8 +373,13 @@ export default function Options() {
           label={(appRole) => appRole.name}
           inViewBacklink={`/apps/${params.id}/options`}
           buttons={{
-            deleteable: (item: AppRoleType) => !item.isOwnerRole,
-            hasOptions: true,
+            deleteable: (item: any) => {
+              return (
+                app?.currentUserRole?.permissions?.apps?.hasOptions &&
+                !item.isOwnerRole
+              );
+            },
+            hasOptions: app?.currentUserRole?.permissions?.apps?.hasOptions,
             hasView: false,
           }}
           onDelete={(item) => {
@@ -382,8 +388,7 @@ export default function Options() {
           }}
           additionalInfo={appRoleAdditionalInfo}
         />
-        {appData?.currentUser?.currentAppRole?.permissions?.apps
-          ?.hasOptions && (
+        {app?.currentUserRole?.permissions?.apps?.hasOptions && (
           <InputButtonGroup
             buttonText="Create new"
             label="New role name: "
@@ -420,18 +425,20 @@ export default function Options() {
             deleteable: app?.currentUserRole?.permissions.apps.deleteable,
           }}
         />
-        <InputButtonGroup
-          buttonText="Add"
-          label="New hosting name"
-          onSubmit={addHosting}
-          value={newHosting}
-          onChange={setNewHosting}
-        />
+        {app?.currentUserRole?.permissions?.apps?.hasOptions && (
+          <InputButtonGroup
+            buttonText="Add"
+            label="New hosting name"
+            onSubmit={addHosting}
+            value={newHosting}
+            onChange={setNewHosting}
+          />
+        )}
 
         <h3>Project options</h3>
         <FluidText>Project states:</FluidText>
         <CommonList<ProjectStateType>
-          sortable
+          sortable={!!app?.currentUserRole?.permissions?.apps?.hasOptions}
           onSort={handleSortEnd}
           onEmpty="There are no project states yet. Create one."
           editableLabel
@@ -457,21 +464,26 @@ export default function Options() {
             deleteable: app?.currentUserRole?.permissions.apps.deleteable,
           }}
         />
-        {projectStatesList && (
-          <Button
-            onClick={updateProjectStatePositions}
-            disabled={projectStatesList.length == 0}
-          >
-            Update positions
-          </Button>
+
+        {app?.currentUserRole?.permissions?.apps?.hasOptions && (
+          <>
+            {projectStatesList && (
+              <Button
+                onClick={updateProjectStatePositions}
+                disabled={projectStatesList.length == 0}
+              >
+                Update positions
+              </Button>
+            )}
+            <InputButtonGroup
+              buttonText="Add"
+              label="New project state"
+              onSubmit={addProjectState}
+              value={newProjectState}
+              onChange={setNewProjectState}
+            />
+          </>
         )}
-        <InputButtonGroup
-          buttonText="Add"
-          label="New project state"
-          onSubmit={addProjectState}
-          value={newProjectState}
-          onChange={setNewProjectState}
-        />
       </ContentLoader>
     </AppLayout>
   );

@@ -15,11 +15,11 @@ export default function Website() {
     http_methods.fetch<WebsiteType>(`/websites/${params.id}`).then(setWebsite);
   }, []);
 
-  console.log(website);
   return (
     <AppLayout activePage="Websites" title="Website overview">
       {website && (
         <StandardView
+          backlink="/websites"
           mainTitle={`${website.domain}`}
           items={[
             {

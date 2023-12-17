@@ -19,6 +19,7 @@ export default function Client() {
     <AppLayout activePage="Clients" title="Client overview">
       {client && (
         <StandardView
+          backlink="/clients"
           mainTitle={`${client.name}`}
           items={[
             {
@@ -40,21 +41,6 @@ export default function Client() {
               ],
             },
             {
-              items: client.addresses,
-              subtitle: "Client addresses",
-              textBlocks: [
-                {
-                  name: "Country",
-                  value: "country",
-                  dynamicProp: true,
-                  title: true,
-                },
-                { name: "City", value: "city", dynamicProp: true },
-                { name: "Postal code", value: "postal", dynamicProp: true },
-                { name: "Street", value: "street", dynamicProp: true },
-              ],
-            },
-            {
               items: client.employees,
               subtitle: "Client contacts",
               textBlocks: [
@@ -71,9 +57,25 @@ export default function Client() {
                   title: true,
                 },
                 { name: "Role", value: "role", dynamicProp: true },
+                { name: "Email", value: "email", dynamicProp: true },
                 { name: "Mobile number", value: "mobile", dynamicProp: true },
                 { name: "Phone number", value: "phone", dynamicProp: true },
                 { name: "Fax", value: "fax", dynamicProp: true },
+              ],
+            },
+            {
+              items: client.addresses,
+              subtitle: "Client addresses",
+              textBlocks: [
+                {
+                  name: "Country",
+                  value: "country",
+                  dynamicProp: true,
+                  title: true,
+                },
+                { name: "City", value: "city", dynamicProp: true },
+                { name: "Postal code", value: "postal", dynamicProp: true },
+                { name: "Street", value: "street", dynamicProp: true },
               ],
             },
           ]}

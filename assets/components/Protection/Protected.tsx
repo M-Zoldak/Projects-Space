@@ -1,13 +1,9 @@
 import { PropsWithChildren } from "react";
 import { Navigate } from "react-router-dom";
-import Cookies from "js-cookie";
-import { useAccessControlContext } from "../../contexts/PlaceContext";
+import { useCookies } from "react-cookie";
 
 export default function Protected({ children }: PropsWithChildren) {
-  const { accessControl, setAccessControl } = useAccessControlContext();
-  let token = Cookies.get("token");
+  const [cookies] = useCookies();
 
-  setAccessControl("app");
-
-  return token ? children : <Navigate to="/login" />;
+  return cookies.token ? children : <Navigate to="/login" />;
 }

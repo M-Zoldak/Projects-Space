@@ -18,7 +18,6 @@ import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { useEffect } from "react";
 import { http_methods } from "../../Functions/HTTPMethods";
 import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
-import { useAccessControlContext } from "../../contexts/PlaceContext";
 
 export interface PageLinkInterface {
   name: string;
@@ -65,7 +64,6 @@ function AppChooser(index: number) {
         appId: appId,
       })
       .then((res) => {
-        console.log(res);
         updateCurrentUser(res);
       })
       .catch((err) => err);
@@ -106,10 +104,9 @@ function AppChooser(index: number) {
 }
 
 export default function SideNav({ activePage }: { activePage: string }) {
-  const { accessControl } = useAccessControlContext();
   const { appData } = useAppDataContext();
 
-  useEffect(() => {}, [accessControl, appData]);
+  useEffect(() => {}, [appData]);
 
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(
@@ -144,7 +141,11 @@ export default function SideNav({ activePage }: { activePage: string }) {
       ),
     // new PageLink('About', '/about'),
     // new PageLink('Contact', '/contact'),
-    new MenuDivider(),
+    appData?.currentUser?.userOptions?.selectedAppId &&
+      appData?.currentUser?.currentAppRole?.permissions.clients?.hasView &&
+      appData?.currentUser?.userOptions?.selectedAppId &&
+      appData?.currentUser?.currentAppRole?.permissions.websites?.hasView &&
+      new MenuDivider(),
     "AppChooser",
     new PageLink("My Apps", "/apps", <FontAwesomeIcon icon={faBookAtlas} />),
     // new PageLink(
@@ -160,18 +161,20 @@ export default function SideNav({ activePage }: { activePage: string }) {
 
   const renderMenu = () => {
     if (!defaultPageLinks) return <></>;
-    return defaultPageLinks.map((menuItem, index) => {
-      if (menuItem == undefined) return;
-      if (menuItem == "AppChooser") {
-        return AppChooser(index);
-      } else if (menuItem instanceof MenuDivider) {
-        return menuItem.render(index);
-      } else if (menuItem.subsites) {
-        return renderSubsites(menuItem, index);
-      } else {
-        return renderSingleLink(menuItem, index);
-      }
-    });
+    return defaultPageLinks
+      .filter((e) => e)
+      .map((menuItem, index) => {
+        if (menuItem == undefined) return;
+        if (menuItem == "AppChooser") {
+          return AppChooser(index);
+        } else if (menuItem instanceof MenuDivider) {
+          return menuItem.render(index);
+        } else if (menuItem.subsites) {
+          return renderSubsites(menuItem, index);
+        } else {
+          return renderSingleLink(menuItem, index);
+        }
+      });
   };
 
   const renderSubsites = (

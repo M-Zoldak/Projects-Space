@@ -18,17 +18,19 @@ import {
 import { UserNotificationType } from "../../interfaces/EntityTypes/UserNotificationType";
 import { http_methods } from "../../Functions/HTTPMethods";
 import Cookies from "js-cookie";
+import { useCookies } from "react-cookie";
 
 const TopNav = () => {
+  const [cookies] = useCookies();
   const { appData, clear } = useAppDataContext();
   const navigate = useNavigate();
 
   async function handleLogout() {
-    let token = Cookies.get("token");
-    if (!token) return;
+    // let token = Cookies.get("token");
+    if (!cookies.token) return;
     await fetch("/api/logout", {
       method: "POST",
-      headers: { Authorization: "Bearer " + token },
+      headers: { Authorization: "Bearer " + cookies.token },
     })
       .then((res) => clear())
       .catch((err) => clear());

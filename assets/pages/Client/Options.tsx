@@ -30,7 +30,6 @@ export default function ClientOptions() {
     http_methods
       .fetch<ClientType>(`/clients/${params.id}`)
       .then((data) => {
-        console.log(data);
         setClient(data);
         setClientName(data.name);
         setAddresses(data.addresses);

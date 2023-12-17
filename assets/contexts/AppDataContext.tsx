@@ -5,6 +5,7 @@ import { CurrentUserType } from "../interfaces/EntityTypes/UserType";
 import { http_methods } from "../Functions/HTTPMethods";
 import { redirect } from "react-router-dom";
 import Cookies from "js-cookie";
+import { useCookies } from "react-cookie";
 
 interface AppDataType {
   currentUser?: CurrentUserType;
@@ -14,6 +15,7 @@ interface AppDataType {
 type AppDataContextType = {
   appData: AppDataType;
   initializeAppData: (apps: Array<AppType>, user: CurrentUserType) => void;
+  refreshAppData: () => void;
   updateApps: (apps: Array<AppType>) => void;
   updateCurrentUser: (user: CurrentUserType) => void;
   clear: () => void;
@@ -35,6 +37,7 @@ export const useAppDataContext = () =>
   useContext(AppDataContext) as AppDataContextType;
 
 export default function AppDataProvider({ children }: PropsWithChildren) {
+  const [cookies] = useCookies();
   const [appData, setAppData] = useState<AppDataType>(
     getLocalItem("appData") ??
       ({ apps: null, currentUser: null } as AppDataType)
@@ -65,6 +68,15 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
     Cookies.remove("token");
   };
 
+  const refreshAppData = async () => {
+    // let token = Cookies.get("token");
+    if (cookies.token) {
+      await http_methods.post<any>("/userData", {}).then((data) => {
+        initializeAppData(data.appData.apps, data.appData.user);
+      });
+    }
+  };
+
   return (
     <AppDataContext.Provider
       value={{
@@ -73,6 +85,7 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
         updateCurrentUser,
         updateApps,
         clear,
+        refreshAppData,
       }}
     >
       {children}

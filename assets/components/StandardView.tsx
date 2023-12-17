@@ -7,6 +7,7 @@ import Backlink from "./Buttons/Backlink";
 type StandardViewProps = {
   mainTitle: string;
   items: StandardViewBlockProps[];
+  backlink: string;
 };
 
 type StandardViewBlockProps = {
@@ -31,7 +32,9 @@ function StandardViewBlock({
 }: StandardViewBlockProps) {
   return (
     <>
-      {subtitle && <Subtitle>{subtitle}</Subtitle>}
+      {subtitle &&
+        ((Array.isArray(items) && items.length > 0) ||
+          !Array.isArray(items)) && <Subtitle>{subtitle}</Subtitle>}
       <Row>
         {Array.isArray(items) ? (
           items.map((item, index) => (
@@ -81,9 +84,15 @@ function TextBlock({
   );
 }
 
-export default function StandardView({ mainTitle, items }: StandardViewProps) {
+export default function StandardView({
+  mainTitle,
+  items,
+  backlink,
+}: StandardViewProps) {
   return (
     <div className="standardView">
+      <Backlink link={backlink} />
+      <br />
       <MainTitle>{mainTitle}</MainTitle>
       <Divider />
       {items &&

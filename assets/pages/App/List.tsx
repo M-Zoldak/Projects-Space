@@ -1,10 +1,8 @@
-import { Button, FlexboxGrid, SelectPicker } from "rsuite";
+import { Button, FlexboxGrid } from "rsuite";
 import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import CommonList, {
-  CommonListItemProps,
-} from "../../components/Data/CommonList";
+import CommonList from "../../components/Data/CommonList";
 import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
@@ -16,7 +14,7 @@ import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { HoverTooltip } from "../../components/Text/Tooltip";
 
 export default function AppsList() {
-  const { appData } = useAppDataContext();
+  const { appData, updateApps, refreshAppData } = useAppDataContext();
   const location = useLocation();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
@@ -41,6 +39,8 @@ export default function AppsList() {
       .catch((err: Error) => {
         addNotification({ text: err.message });
       });
+
+    refreshAppData();
   }, []);
 
   const handleDelete = (item: AppType) => {
@@ -48,6 +48,8 @@ export default function AppsList() {
       text: `App ${item.name} was deleted succesfully`,
       notificationProps: { type: "success" },
     });
+    let apps = appData.apps.filter((app) => app.id != item.id);
+    updateApps(apps);
   };
 
   const appAdditionalInfo = (item: AppType) => {
@@ -64,7 +66,7 @@ export default function AppsList() {
 
   const acceptInvitation = (item: AppType) => {
     http_methods
-      .post(`/apps/${item.id}/invite/accept`, null)
+      .post<AppType>(`/apps/${item.id}/invite/accept`, null)
       .then(async (res) => {
         addNotification({
           text: `You have joined ${item.name} space!`,
@@ -72,10 +74,9 @@ export default function AppsList() {
         });
 
         setAppsInvitations(appsInvitations.filter((inv) => inv.id != item.id));
+        updateApps([...appData.apps, res]);
       });
   };
-
-  console.log(appData?.currentUser?.userOwnedAppsIds);
 
   return (
     <AppLayout title="My apps" activePage="My Apps">
@@ -100,7 +101,6 @@ export default function AppsList() {
               deleteable: (item: AppType) =>
                 appData?.currentUser?.id.toString() == item.ownerId,
               hasOptions: true,
-              // appData?.currentUser?.currentAppRole.permissions.apps.hasOptions,
             }}
             additionalInfo={appAdditionalInfo}
           />

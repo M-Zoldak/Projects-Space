@@ -19,7 +19,9 @@ export default function ErrorPage({
         />
         <div className="text">
           <h1 className="error-page-code">{code}</h1>
-          <FluidText>{children}</FluidText>
+          <FluidText styles={{ textAlign: "center", margin: "auto" }}>
+            {children}
+          </FluidText>
         </div>
       </div>
     </div>

@@ -49,6 +49,7 @@
     "@types/js-cookie": "^3.0.6",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "react-cookie": "^6.1.1",
     "react-icons": "^4.11.0",
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.17.0",

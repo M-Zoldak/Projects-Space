@@ -19,7 +19,6 @@ async function post<T>(
   body: DynamicallyFilledObject<string> | Array<any>
 ): Promise<T> {
   let token = Cookies.get("token");
-  if (!token) return;
   return await fetch(`/api${path}`, {
     method: "POST",
     body: JSON.stringify(body),

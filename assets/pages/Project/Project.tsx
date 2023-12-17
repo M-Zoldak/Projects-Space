@@ -30,9 +30,11 @@ import FluidText from "../../components/Text/FluidText";
 import { Editor } from "@tinymce/tinymce-react";
 import ReactQuill, { Quill } from "react-quill";
 import Notes from "../../components/Data/Notes";
+import { useCookies } from "react-cookie";
 
 export default function Project() {
   const params = useParams();
+  const [cookies] = useCookies();
   const { appData } = useAppDataContext();
   const { addNotification } = useNotificationsContext();
   const [app, setApp] = useState<AppType>(null);
@@ -56,8 +58,6 @@ export default function Project() {
         setApp(app);
       });
   }, []);
-
-  console.log(project);
 
   const updateProjectClient = (clientId: string) => {
     http_methods
@@ -107,7 +107,7 @@ export default function Project() {
                 startIcon={<FontAwesomeIcon icon={faFilePdf} />}
                 style={{ marginLeft: "auto" }}
                 onClick={() => {
-                  let token = Cookies.get("token");
+                  let token = cookies.token;
                   if (!token) return;
                   fetch(`/api/projects/${params.id}/toPDF`, {
                     headers: {

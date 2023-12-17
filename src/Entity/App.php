@@ -67,7 +67,7 @@ class App extends Entity {
     public function getData(?User $user = null): array {
         return [
             "id" => $this->getId(),
-            "ownerId" => $this->getOwner()->getId(),
+            "ownerId" => $this->getOwner()?->getId(),
             "defaultRoleId" => $this->getDefaultRole()?->getId(),
             "name" => $this->getName(),
             "websiteOptions" => $this->getWebsiteOptions()?->getData(),

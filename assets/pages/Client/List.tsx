@@ -28,8 +28,6 @@ export default function ClientsList() {
       });
   }, [appData]);
 
-  console.log(appData?.currentUser);
-
   return (
     <AppLayout title="Clients overview" activePage="Clients">
       <FlexboxGrid className="buttons_container">

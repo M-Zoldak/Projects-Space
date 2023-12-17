@@ -1,4 +1,4 @@
-import React, { StrictMode, useEffect } from "react";
+import React, { StrictMode, createContext, useContext, useEffect } from "react";
 import "react-quill/dist/quill.snow.css";
 import { createRoot } from "react-dom/client";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
@@ -33,6 +33,7 @@ import Home from "./pages/Regular/Home";
 import Calendar from "./pages/calendar/Calendar";
 import AccessControlProvider from "./contexts/PlaceContext";
 import ProjectOptions from "./pages/Project/Options";
+import { CookiesProvider } from "react-cookie";
 
 function Main() {
   return (
@@ -237,15 +238,17 @@ if (document.getElementById("app")) {
 
   root.render(
     <StrictMode>
-      <AppDataProvider>
-        <AccessControlProvider>
+      <CookiesProvider>
+        <AppDataProvider>
+          {/* <AccessControlProvider> */}
           <CustomProvider theme="dark">
             <NotificationsProvider>
               <Main />
             </NotificationsProvider>
           </CustomProvider>
-        </AccessControlProvider>
-      </AppDataProvider>
+          {/* </AccessControlProvider> */}
+        </AppDataProvider>
+      </CookiesProvider>
     </StrictMode>
   );
 }
