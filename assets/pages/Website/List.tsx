@@ -1,8 +1,8 @@
 import { FlexboxGrid } from "rsuite";
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import CommonList from "../../components/Data/CommonList";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import SimpleCreateModal from "../../components/Modals/SimpleCreateModal";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
@@ -25,7 +25,7 @@ export default function WebsitesList() {
   useEffect(() => {
     setLoaded(false);
     http_methods
-      .fetchAll<WebsiteType>(appData.token, `/websites`)
+      .fetch<WebsiteType[]>(`/websites`)
       .then((data) => {
         setWebsites(data);
         setLoaded(true);
@@ -51,9 +51,9 @@ export default function WebsitesList() {
   };
 
   return (
-    <StandardLayout title="Websites overview" activePage="Websites">
+    <AppLayout title="Websites overview" activePage="Websites">
       <FlexboxGrid className="buttons_container">
-        {appData.currentUser.currentAppRole.permissions?.websites
+        {appData?.currentUser?.currentAppRole.permissions?.websites
           .hasOptions && (
           <SimpleCreateModal<WebsiteType>
             title="New website"
@@ -98,16 +98,18 @@ export default function WebsitesList() {
           }}
           buttons={{
             deleteable:
-              appData.currentUser.currentAppRole.permissions?.websites
+              appData?.currentUser?.currentAppRole.permissions?.websites
                 .deleteable,
             hasOptions:
-              appData.currentUser.currentAppRole.permissions?.websites
+              appData?.currentUser?.currentAppRole.permissions?.websites
                 .hasOptions,
-            hasView: false,
+            hasView:
+              appData?.currentUser?.currentAppRole.permissions?.websites
+                .hasView,
           }}
           additionalInfo={websiteAdditionalInfo}
         />
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

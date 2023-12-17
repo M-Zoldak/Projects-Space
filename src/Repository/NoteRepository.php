@@ -2,24 +2,24 @@
 
 namespace App\Repository;
 
-use App\Entity\Notes;
+use App\Entity\Note;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends EntityRepository<Notes>
+ * @extends EntityRepository<Note>
  *
- * @method Notes|null find($id, $lockMode = null, $lockVersion = null)
- * @method Notes|null findOneBy(array $criteria, array $orderBy = null)
- * @method Notes[]    findAll()
- * @method Notes[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Note|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Note|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Note[]    findAll()
+ * @method Note[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class NotesRepository extends EntityRepository {
+class NoteRepository extends EntityRepository {
     public function __construct(ManagerRegistry $registry) {
-        parent::__construct($registry, Notes::class);
+        parent::__construct($registry, Note::class);
     }
 
     //    /**
-    //     * @return Notes[] Returns an array of Notes objects
+    //     * @return Note[] Returns an array of Note objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -33,7 +33,7 @@ class NotesRepository extends EntityRepository {
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Notes
+    //    public function findOneBySomeField($value): ?Note
     //    {
     //        return $this->createQueryBuilder('n')
     //            ->andWhere('n.exampleField = :val')

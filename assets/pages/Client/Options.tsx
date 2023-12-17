@@ -1,7 +1,7 @@
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import Backlink from "../../components/Buttons/Backlink";
@@ -28,7 +28,7 @@ export default function ClientOptions() {
 
   useEffect(() => {
     http_methods
-      .fetch<ClientType>(appData.token, `/clients/${params.id}`)
+      .fetch<ClientType>(`/clients/${params.id}`)
       .then((data) => {
         console.log(data);
         setClient(data);
@@ -44,18 +44,14 @@ export default function ClientOptions() {
 
   const updateClientName = (clientName: string) => {
     http_methods
-      .put<ClientType>(
-        `/clients/${client.id}/updateName`,
-        { name: clientName },
-        appData.token
-      )
+      .put<ClientType>(`/clients/${client.id}/updateName`, { name: clientName })
       .then((clientData) => {
         setClient(clientData);
       });
   };
 
   return (
-    <StandardLayout
+    <AppLayout
       title={client?.name ? `Client options` : "Loading..."}
       activePage="Clients"
     >
@@ -82,7 +78,7 @@ export default function ClientOptions() {
 
         <h3>Contacts</h3>
 
-        {appData.currentUser.currentAppRole.permissions?.clients.hasOptions &&
+        {appData?.currentUser?.currentAppRole.permissions?.clients.hasOptions &&
           contacts && (
             <ButtonToolbar>
               <SimpleCreateModal<ContactPersonType>
@@ -111,9 +107,11 @@ export default function ClientOptions() {
           onEmpty="You don't have any contacts yet"
           buttons={{
             deleteable:
-              appData.currentUser.currentAppRole.permissions.clients.deleteable,
+              appData?.currentUser?.currentAppRole.permissions.clients
+                .deleteable,
             hasOptions:
-              appData.currentUser.currentAppRole.permissions.clients.hasOptions,
+              appData?.currentUser?.currentAppRole.permissions.clients
+                .hasOptions,
             hasView: false,
           }}
           onDelete={(contact) => {
@@ -128,7 +126,7 @@ export default function ClientOptions() {
 
         <h3>Addresses</h3>
 
-        {appData.currentUser.currentAppRole.permissions?.clients.hasOptions &&
+        {appData?.currentUser?.currentAppRole.permissions?.clients.hasOptions &&
           addresses && (
             <ButtonToolbar>
               <SimpleCreateModal<AddressType>
@@ -159,9 +157,11 @@ export default function ClientOptions() {
           }
           buttons={{
             deleteable:
-              appData.currentUser.currentAppRole.permissions.clients.deleteable,
+              appData?.currentUser?.currentAppRole.permissions.clients
+                .deleteable,
             hasOptions:
-              appData.currentUser.currentAppRole.permissions.clients.hasOptions,
+              appData?.currentUser?.currentAppRole.permissions.clients
+                .hasOptions,
             hasView: false,
           }}
           onDelete={(address) => {
@@ -174,6 +174,6 @@ export default function ClientOptions() {
           }}
         />
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

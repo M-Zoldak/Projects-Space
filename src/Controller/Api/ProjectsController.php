@@ -2,22 +2,30 @@
 
 namespace App\Controller\Api;
 
+use Mpdf\Mpdf;
 use App\Entity\App;
+use App\Entity\Note;
 use App\Entity\User;
 use App\Entity\Project;
+use Mpdf\MpdfException;
 use App\Enums\FormField;
+use App\Helpers\DateHelper;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
 use App\Repository\AppRepository;
+use App\Repository\NoteRepository;
 use App\Utils\EntityCollectionUtil;
 use App\Repository\ClientRepository;
 use App\Repository\AppRoleRepository;
 use App\Repository\ProjectRepository;
 use App\Repository\WebsiteRepository;
+use Mpdf\PsrHttpMessageShim\Response;
 use App\Repository\ProjectStateRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -30,7 +38,8 @@ class ProjectsController extends AbstractController {
         private AppRoleRepository $appRoleRepository,
         private ClientRepository $clientRepository,
         private WebsiteRepository $websiteRepository,
-        private ProjectStateRepository $projectStateRepository
+        private ProjectStateRepository $projectStateRepository,
+        private NoteRepository $noteRepository
     ) {
     }
 
@@ -55,6 +64,9 @@ class ProjectsController extends AbstractController {
 
         $website = $this->websiteRepository->findOneById($data->website);
         if ($website) $project->setWebsite($website);
+
+        $project->setStartDate(DateHelper::convertToDate($data->startDate));
+        $project->setEndDate(DateHelper::convertToDate($data->endDate));
 
         $this->projectRepository->save($project);
 
@@ -86,6 +98,40 @@ class ProjectsController extends AbstractController {
                 "websitesSelect" => EntityCollectionUtil::convertToSelectable($app->getWebsites(), "domain")
             ]
         );
+    }
+
+    #[Route('/projects/{id}/options', name: 'projects_options', methods: ["GET"])]
+    public function getOptionsForm(int $id): JsonResponse {
+        $project = $this->projectRepository->findOneById($id);
+        /** @var User $user */
+        $user = $this->getUser();
+        $app = $user->getUserOptions()->getSelectedApp();
+        $formBuilder = $this->addAndEditForm($app, $project);
+        return new JsonResponse($formBuilder->getFormData());
+    }
+
+    #[Route('/projects/{id}', name: 'project_update', methods: ["PUT"])]
+    public function update(int $id, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+        $app = $this->appRepository->findOneById($data->appId);
+
+        $project = $this->projectRepository->findOneById($id);
+
+        $client = $this->clientRepository->findOneById($data->client);
+        if ($client) $project->setClient($client);
+
+        $website = $this->websiteRepository->findOneById($data->website);
+        if ($website) $project->setWebsite($website);
+
+        $project->setStartDate(DateHelper::convertToDate($data->startDate));
+        $project->setEndDate(DateHelper::convertToDate($data->endDate));
+
+        $this->projectRepository->save($project);
+
+        $app->addProject($project);
+        $this->appRepository->save($app);
+
+        return new JsonResponse($project->getData());
     }
 
     #[Route('/projects/{id}', name: 'projects_delete', methods: ["DELETE"])]
@@ -130,9 +176,75 @@ class ProjectsController extends AbstractController {
         return new JsonResponse($project->getData());
     }
 
+    #[Route('/projects/{id}/addNote', name: 'add_project_note', methods: ["POST"])]
+    public function addNote(int $id, Request $request, #[CurrentUser] ?User $user): JsonResponse {
+        $data = json_decode($request->getContent());
+
+        $project = $this->projectRepository->findOneById($id);
+
+        $note = new Note();
+        $note->setText($data->text);
+        $note->setProject($project);
+        $note->setUser($user);
+
+        $this->noteRepository->save($note);
+
+        return new JsonResponse($note->getData());
+    }
+
+
+    #[Route('/projects/{id}/toPDF', name: 'projects_update_website', methods: ["GET"])]
+    public function downloadPDF(int $id, Request $request): JsonResponse {
+        $project = $this->projectRepository->findOneById($id);
+        $client = $project->getClient();
+        $website = $project->getWebsite();
+        $tasks = $project->getTasks();
+
+        try {
+            $mpdf = new Mpdf([
+                "mode" => 'utf-8',
+                'format' => 'A4'
+            ]);
+
+            $mpdf->SetFont("FreeSans");
+            $mpdf->SetStyles("font-family: FreeSans");
+
+            $mpdf->SetHTMLHeader('
+            <div style="text-align: right; font-weight: bold;">
+                Projects space
+            </div>');
+            $mpdf->SetHTMLFooter('
+            <table width="100%">
+                <tr>
+                    <td width="33%">{DATE j-m-Y}</td>
+                    <td width="33%" align="center">{PAGENO}/{nbpg}</td>
+                    <td width="33%" style="text-align: right;">My document</td>
+                </tr>
+            </table>');
+
+            $mpdf->AddPage();
+            $mpdf->setFooter('{PAGENO}');
+
+            foreach ($project->getTasks() as $task) {
+                $mpdf->WriteHTML($task->getName());
+                $mpdf->WriteHTML($task->getStartDate());
+                $mpdf->WriteHTML($task->getEndDate());
+            }
+
+
+            return $mpdf->Output("t", "D");
+        } catch (MpdfException $e) {
+            dump($e->getMessage());
+        }
+
+        return new JsonResponse($project->getData());
+    }
+
     private function addAndEditForm(App $app, ?Project $project = null): FormBuilder {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "Project name", FormField::TEXT, ["value" => $project?->getName() ?? ""]);
+        $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $project?->getStartDate()?->format("Y-m-d")  ?? ""]);
+        $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $project?->getEndDate()?->format("Y-m-d") ?? ""]);
         $formBuilder->add("client", "Client", FormField::SELECT, ["value" => $project?->getClient()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getClients(), "name")]);
         $formBuilder->add("website", "Website", FormField::SELECT, ["value" => $project?->getWebsite()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getWebsites(), "domain")]);
 

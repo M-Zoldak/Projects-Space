@@ -16,20 +16,19 @@ import {
   faBell,
 } from "@fortawesome/free-solid-svg-icons";
 import { UserNotificationType } from "../../interfaces/EntityTypes/UserNotificationType";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
+import Cookies from "js-cookie";
 
-type TopNav = {
-  expand: boolean;
-  onChange: () => void;
-};
-
-const TopNav = ({ expand, onChange }: TopNav) => {
+const TopNav = () => {
   const { appData, clear } = useAppDataContext();
   const navigate = useNavigate();
 
   async function handleLogout() {
+    let token = Cookies.get("token");
+    if (!token) return;
     await fetch("/api/logout", {
-      headers: { Authorization: "Bearer " + appData.token },
+      method: "POST",
+      headers: { Authorization: "Bearer " + token },
     })
       .then((res) => clear())
       .catch((err) => clear());
@@ -40,9 +39,8 @@ const TopNav = ({ expand, onChange }: TopNav) => {
   const showNotifications = () => {
     const changeIsSeenOnHover = (note: UserNotificationType) => {
       http_methods.post(
-        `/user/${appData.currentUser.id}/changeIsSeen/${note.id}`,
-        {},
-        appData.token
+        `/user/${appData?.currentUser?.id}/changeIsSeen/${note.id}`,
+        {}
       );
     };
 
@@ -81,11 +79,9 @@ const TopNav = ({ expand, onChange }: TopNav) => {
   };
 
   const userHasUnreadNotifications = () => {
-    return appData.currentUser.notifications.filter((note) => !note.isSeen)
+    return appData?.currentUser?.notifications?.filter((note) => !note.isSeen)
       .length;
   };
-
-  console.log(userHasUnreadNotifications());
 
   return (
     <Navbar appearance="subtle" className="nav-toggle">

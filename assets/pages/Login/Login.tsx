@@ -6,47 +6,64 @@ import {
   Form,
   Divider,
 } from "rsuite";
-import LoginLayout from "../../layouts/LoginLayout";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import {
+  Link,
+  redirect,
+  redirectDocument,
+  useNavigate,
+} from "react-router-dom";
 import { useState } from "react";
 import TextField from "../../components/Forms/TextField";
-import { useAppDataContext } from "../../contexts/AppDataContext";
-import { http_methods } from "../../Functions/Fetch";
-import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
-import { AppType } from "../../interfaces/EntityTypes/AppType";
-import FormComponent from "../../components/Forms/FormComponent";
 import FormError from "../../components/Forms/FormError";
+import PortalLayout from "../../layouts/PortalLayout";
+import { http_methods } from "../../Functions/HTTPMethods";
+import { useAppDataContext } from "../../contexts/AppDataContext";
+import { useAccessControlContext } from "../../contexts/PlaceContext";
 
 function Login() {
   const navigate = useNavigate();
-  const { initializeAppData } = useAppDataContext();
+  const { setAccessControl } = useAccessControlContext();
   const [formValue, setFormValue] = useState({
     username: "",
     password: "",
   });
+  const { initializeAppData } = useAppDataContext();
   const [errorMsg, setErrorMsg] = useState("");
 
   const login = () => {
     http_methods
-      .post<any>("/login", formValue)
-      .then((data) => data.token)
-      .then((token) => initializeAppData(token))
-      .then(() => navigate("/dashboard"))
+      .notTokenizedpost<any>("/login", formValue)
+      .then((data) => {
+        Cookies.set("token", data.token, { expires: 0.01, secure: true });
+        setAccessControl("app");
+        initializeAppData(data.appData.apps, data.appData.user);
+        redirectDocument("/dashboard");
+      })
       .catch((err: Error) => setErrorMsg("Invalid email or password."));
   };
 
   return (
-    <LoginLayout>
-      <FlexboxGrid justify="center">
+    <PortalLayout activePage="login" title="Login" withContainer={false}>
+      <FlexboxGrid justify="center" style={{ paddingBlock: "2rem" }}>
         <FlexboxGrid.Item colspan={12}>
           <Panel header={<h3>Login</h3>} bordered>
-            <Form fluid onChange={setFormValue}>
-              <TextField name="username" label="Email" />
+            <Form fluid>
+              <TextField
+                name="username"
+                label="Email"
+                onChange={(username: string) =>
+                  setFormValue({ ...formValue, username })
+                }
+              />
               <TextField
                 label="Password"
                 name="password"
                 type="password"
                 autoComplete="off"
+                onChange={(password: string) =>
+                  setFormValue({ ...formValue, password })
+                }
               />
               {errorMsg && (
                 <>
@@ -75,7 +92,7 @@ function Login() {
           </Panel>
         </FlexboxGrid.Item>
       </FlexboxGrid>
-    </LoginLayout>
+    </PortalLayout>
   );
 }
 

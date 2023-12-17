@@ -1,10 +1,9 @@
-import { PropsWithChildren, useEffect } from "react";
-
-import { redirect } from "react-router-dom";
-import { useAppDataContext } from "../../contexts/AppDataContext";
+import { PropsWithChildren } from "react";
+import { Navigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 export default function GuestsOnly({ children }: PropsWithChildren) {
-  const { appData } = useAppDataContext();
+  let token = Cookies.get("token");
 
-  return appData.token ? <>{redirect("/dashboard")}</> : children;
+  return token ? <Navigate to="/" /> : children;
 }

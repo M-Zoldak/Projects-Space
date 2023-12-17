@@ -1,7 +1,7 @@
 import { Button, Modal } from "rsuite";
 import { useEffect, useState } from "react";
 import FormComponent from "../../components/Forms/FormComponent";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";

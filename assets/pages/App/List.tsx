@@ -1,11 +1,11 @@
 import { Button, FlexboxGrid, SelectPicker } from "rsuite";
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CommonList, {
   CommonListItemProps,
 } from "../../components/Data/CommonList";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
@@ -16,7 +16,7 @@ import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { HoverTooltip } from "../../components/Text/Tooltip";
 
 export default function AppsList() {
-  const { appData, refreshAppData } = useAppDataContext();
+  const { appData } = useAppDataContext();
   const location = useLocation();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
@@ -31,12 +31,8 @@ export default function AppsList() {
     }
 
     http_methods
-      .fetch<{ apps: AppType[]; appsInvitations: AppType[] }>(
-        appData.token,
-        "/apps"
-      )
+      .fetch<{ apps: AppType[]; appsInvitations: AppType[] }>("/apps")
       .then(async (data) => {
-        await refreshAppData();
         setLoaded(true);
         setAppsInvitations(
           data.appsInvitations.length ? data.appsInvitations : null
@@ -52,7 +48,6 @@ export default function AppsList() {
       text: `App ${item.name} was deleted succesfully`,
       notificationProps: { type: "success" },
     });
-    refreshAppData();
   };
 
   const appAdditionalInfo = (item: AppType) => {
@@ -69,7 +64,7 @@ export default function AppsList() {
 
   const acceptInvitation = (item: AppType) => {
     http_methods
-      .post(`/apps/${item.id}/invite/accept`, null, appData.token)
+      .post(`/apps/${item.id}/invite/accept`, null)
       .then(async (res) => {
         addNotification({
           text: `You have joined ${item.name} space!`,
@@ -77,14 +72,13 @@ export default function AppsList() {
         });
 
         setAppsInvitations(appsInvitations.filter((inv) => inv.id != item.id));
-        await refreshAppData();
       });
   };
 
-  console.log(appData.currentUser.userOwnedAppsIds);
+  console.log(appData?.currentUser?.userOwnedAppsIds);
 
   return (
-    <StandardLayout title="My apps" activePage="My Apps">
+    <AppLayout title="My apps" activePage="My Apps">
       <FlexboxGrid className="buttons_container">
         <Button color="green" appearance="ghost" as={Link} to={"/apps/create"}>
           Create new Space
@@ -104,9 +98,9 @@ export default function AppsList() {
             buttons={{
               hasView: false,
               deleteable: (item: AppType) =>
-                appData.currentUser.id.toString() == item.ownerId,
+                appData?.currentUser?.id.toString() == item.ownerId,
               hasOptions: true,
-              // appData.currentUser.currentAppRole.permissions.apps.hasOptions,
+              // appData?.currentUser?.currentAppRole.permissions.apps.hasOptions,
             }}
             additionalInfo={appAdditionalInfo}
           />
@@ -137,6 +131,6 @@ export default function AppsList() {
           </>
         )}
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

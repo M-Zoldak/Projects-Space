@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { WebsiteType } from "../../interfaces/EntityTypes/WebsiteType";
 import Backlink from "../../components/Buttons/Backlink";
@@ -18,13 +18,11 @@ export default function WebsiteOptions() {
   // const [tasks, setTasks] = useState<TaskType[]>(null);
 
   useEffect(() => {
-    http_methods
-      .fetch<WebsiteType>(appData.token, `/websites/${params.id}`)
-      .then(setWebsite);
+    http_methods.fetch<WebsiteType>(`/websites/${params.id}`).then(setWebsite);
   }, []);
 
   return (
-    <StandardLayout title="Website options" activePage="Websites">
+    <AppLayout title="Website options" activePage="Websites">
       <ButtonToolbar>
         <Backlink link="/websites" />
       </ButtonToolbar>
@@ -40,6 +38,6 @@ export default function WebsiteOptions() {
           });
         }}
       />
-    </StandardLayout>
+    </AppLayout>
   );
 }

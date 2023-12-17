@@ -1,3 +1,5 @@
+$main-color: #116588;
+
 body {
   min-height: 100vh;
   display: flex;
@@ -29,7 +31,7 @@ body {
     }
   }
 
-  .rs-dropdown .rs-navbar-item {
+  .rs-navbar .rs-navbar-item {
     height: 46px;
   }
 
@@ -110,13 +112,105 @@ body {
   }
 }
 
-// .rs-message-container .rs-btn-close {
-//   right: 28px;
-//   .rs-icon {
-//     top: 0;
-//   }
-// }
-
 .rs-row {
   margin-bottom: 20px;
+}
+
+#app > .portal {
+  min-height: 100vh;
+  > .rs-container {
+    min-height: 100vh;
+  }
+  .rs-footer {
+    width: 100%;
+    background-color: var(--rs-sidenav-default-bg);
+    padding: 0.5rem 1rem;
+  }
+
+  .rs-header {
+    background-color: $main-color;
+  }
+
+  .rs-content {
+    background-color: var(--rs-bg-card);
+    margin: 1.5rem;
+    padding: 1.5rem;
+    height: auto;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+  }
+
+  .rs-header {
+    a {
+      font-weight: 700;
+      transition: 0.3s;
+      width: 100%;
+      display: inline-flex;
+      font-size: 20px;
+      line-height: 50px;
+      padding: 0.5rem 1rem;
+      // background-color: ;
+      color: #fff;
+      align-items: center;
+      &:hover {
+        text-decoration: none;
+        background-color: var(--rs-sidenav-default-hover-bg);
+      }
+    }
+  }
+
+  .rs-sidebar {
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .rs-sidenav {
+    .rs-icon,
+    .rs-sidenav-item-icon {
+      font-size: 16px;
+      height: 16px;
+      left: 20px;
+      line-height: 1.25;
+      margin-right: 20px;
+      position: absolute;
+      top: 17px;
+    }
+  }
+  .rs-navbar-item {
+    height: 46px;
+  }
+
+  .startpage {
+    text-align: center;
+  }
+}
+
+// Quill
+
+.quill {
+  .ql-editor {
+    min-height: 120px;
+    resize: vertical;
+    max-height: 450px;
+  }
+  .ql-toolbar.ql-snow {
+    background: #111;
+    border: 1px solid #444;
+    span {
+      color: white;
+    }
+  }
+  .ql-container.ql-snow {
+    border: 1px solid #444;
+    background: #222;
+  }
+}
+
+h3 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
 }

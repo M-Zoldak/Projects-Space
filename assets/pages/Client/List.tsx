@@ -1,8 +1,8 @@
 import { FlexboxGrid } from "rsuite";
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import CommonList from "../../components/Data/CommonList";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import SimpleCreateModal from "../../components/Modals/SimpleCreateModal";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
@@ -18,7 +18,7 @@ export default function ClientsList() {
   useEffect(() => {
     setLoaded(false);
     http_methods
-      .fetchAll<ClientType>(appData.token, `/clients`)
+      .fetch<ClientType[]>(`/clients`)
       .then((data) => {
         setClients(data);
         setLoaded(true);
@@ -28,12 +28,13 @@ export default function ClientsList() {
       });
   }, [appData]);
 
-  console.log(appData.currentUser);
+  console.log(appData?.currentUser);
 
   return (
-    <StandardLayout title="Clients overview" activePage="Clients">
+    <AppLayout title="Clients overview" activePage="Clients">
       <FlexboxGrid className="buttons_container">
-        {appData.currentUser.currentAppRole.permissions?.clients.hasOptions &&
+        {appData?.currentUser?.currentAppRole?.permissions?.clients
+          ?.hasOptions &&
           clients && (
             <SimpleCreateModal<ClientType>
               title="New client"
@@ -69,16 +70,18 @@ export default function ClientsList() {
             }}
             buttons={{
               deleteable:
-                appData.currentUser.currentAppRole.permissions?.clients
-                  .deleteable,
+                appData?.currentUser?.currentAppRole?.permissions?.clients
+                  ?.deleteable,
               hasOptions:
-                appData.currentUser.currentAppRole.permissions?.clients
-                  .hasOptions,
-              hasView: false,
+                appData?.currentUser?.currentAppRole?.permissions?.clients
+                  ?.hasOptions,
+              hasView:
+                appData?.currentUser?.currentAppRole?.permissions?.clients
+                  ?.hasView,
             }}
           />
         )}
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

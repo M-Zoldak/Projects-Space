@@ -31,7 +31,7 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
     'project' => Project::class,
     "project_category" => ProjectCategory::class,
     "project_state" => ProjectState::class,
-    "notes" => Notes::class
+    "note" => Note::class
 ])]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 abstract class Entity {

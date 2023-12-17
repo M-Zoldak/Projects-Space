@@ -64,6 +64,9 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: App::class)]
     private Collection $ownedApps;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Note::class)]
+    private Collection $notes;
+
     public function __construct() {
         parent::__construct();
         $this->apps = new ArrayCollection();
@@ -72,6 +75,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         $this->appInvitations = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->ownedApps = new ArrayCollection();
+        $this->notes = new ArrayCollection();
     }
 
     public function getData(App $app = null): array {
@@ -352,6 +356,36 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
             // set the owning side to null (unless already changed)
             if ($getOwnedApp->getOwner() === $this) {
                 $getOwnedApp->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Note>
+     */
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    public function addNote(Note $note): static
+    {
+        if (!$this->notes->contains($note)) {
+            $this->notes->add($note);
+            $note->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNote(Note $note): static
+    {
+        if ($this->notes->removeElement($note)) {
+            // set the owning side to null (unless already changed)
+            if ($note->getUser() === $this) {
+                $note->setUser(null);
             }
         }
 

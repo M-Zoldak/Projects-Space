@@ -9,7 +9,7 @@ import {
   SelectPicker,
 } from "rsuite";
 import TextField from "./TextField";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { FormDataType } from "../../interfaces/FormDataType";
 import FormError from "./FormError";
@@ -43,14 +43,15 @@ export default function FormComponent<T>({
 
   useEffect(() => {
     http_methods
-      .fetchAll<FormDataType>(
-        appData.token,
-        `${prependQuery}/${entity}/${loadFormPath}`
-      )
+      .fetch<FormDataType[]>(`${prependQuery}/${entity}/${loadFormPath}`)
       .then((data) => {
         data = data.map((field) => {
           if (field.name == "appId") {
             field.value = appData.currentUser.userOptions.selectedAppId;
+          }
+          if (field.type == "date") {
+            console.log(field.value);
+            // field.value =
           }
           return field;
         });
@@ -70,11 +71,7 @@ export default function FormComponent<T>({
 
     updatePath?.id
       ? await http_methods
-          .put<T>(
-            `${prependQuery}/${entity}${sendDataPath}`,
-            formValues,
-            appData.token
-          )
+          .put<T>(`${prependQuery}/${entity}${sendDataPath}`, formValues)
           .then((data) => onSuccess(data))
           .catch((err: Error) => {
             let errors = JSON.parse(err.message);
@@ -88,11 +85,7 @@ export default function FormComponent<T>({
             setFormFields(updatedFormFields);
           })
       : await http_methods
-          .post<T>(
-            `${prependQuery}/${entity}${sendDataPath}`,
-            formValues,
-            appData.token
-          )
+          .post<T>(`${prependQuery}/${entity}${sendDataPath}`, formValues)
           .then((data) => onSuccess(data))
           .catch((err: Error) => {
             let errors = JSON.parse(err.message);
@@ -133,7 +126,7 @@ export default function FormComponent<T>({
         );
       }
       case "hidden": {
-        return <Input key={key} value={field.value} type="hidden" />;
+        return <Input key={key} value={field.value as string} type="hidden" />;
       }
       case "select": {
         return (
@@ -143,7 +136,7 @@ export default function FormComponent<T>({
               searchable={false}
               data={field.options}
               onChange={(v) => updateInput(v?.toString() ?? "", field.name)}
-              value={Number.parseInt(field.value)}
+              value={Number.parseInt(field.value as string)}
             />
           </Form.Group>
         );

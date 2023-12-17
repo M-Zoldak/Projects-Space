@@ -2,10 +2,10 @@
 
 namespace App\Controller\Api;
 
-use DateHelper;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Enums\FormField;
+use App\Helpers\DateHelper;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
 use App\Repository\AppRepository;
@@ -80,8 +80,8 @@ class TasksController extends AbstractController {
     private function addAndEditForm(?Task $task = null): FormBuilder {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "Task name", FormField::TEXT, ["value" => $task?->getName()]);
-        $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $task?->getStartDate()]);
-        $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $task?->getEndDate()]);
+        $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $task?->getStartDate()?->format("Y-m-d")]);
+        $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $task?->getEndDate()?->format("Y-m-d")]);
         $formBuilder->createAppIdField();
         return $formBuilder;
     }

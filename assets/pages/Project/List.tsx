@@ -1,8 +1,8 @@
 import { FlexboxGrid } from "rsuite";
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import CommonList from "../../components/Data/CommonList";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import SimpleCreateModal from "../../components/Modals/SimpleCreateModal";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
@@ -21,7 +21,7 @@ export default function ProjectsList() {
   useEffect(() => {
     setLoaded(false);
     http_methods
-      .fetchAll<ProjectType>(appData.token, `/projects`)
+      .fetch<ProjectType[]>(`/projects`)
       .then((data) => {
         setProjects(data);
         setLoaded(true);
@@ -36,7 +36,7 @@ export default function ProjectsList() {
       <FlexboxGrid style={{ gap: "1rem" }}>
         <FlexboxGridItem>
           <FontAwesomeIcon icon={faBarsProgress} /> State:{" "}
-          {project?.projectState?.name ?? "Planning"}
+          {project?.projectState?.name ?? "Unset"}
         </FlexboxGridItem>
         {project?.client?.name && (
           <FlexboxGridItem>
@@ -48,9 +48,9 @@ export default function ProjectsList() {
   };
 
   return (
-    <StandardLayout title="Projects overview" activePage="Projects">
+    <AppLayout title="Projects overview" activePage="Projects">
       <FlexboxGrid className="buttons_container">
-        {appData.currentUser.currentAppRole.permissions?.projects
+        {appData?.currentUser?.currentAppRole.permissions?.projects
           .hasOptions && (
           <SimpleCreateModal<ProjectType>
             title="New project"
@@ -69,13 +69,22 @@ export default function ProjectsList() {
       </FlexboxGrid>
 
       <ContentLoader loaded={loaded}>
-        <h3>Active projects</h3>
+        <h3>Projects</h3>
         {projects && (
           <CommonList<ProjectType>
             onEmpty="You don't have any projects yet. Create one now!"
             items={projects}
             label={(project) => project.name}
             entity="projects"
+            sortingItems={[
+              { label: "Project name", value: "name" },
+              { label: "Project state", value: ["projectState", "position"] },
+              { label: "Client", value: ["client", "name"] },
+            ]}
+            sortingDefaults={{
+              direction: "asc",
+              field: "name",
+            }}
             onDelete={(item) => {
               let newProjects = projects.filter(
                 (project) => project.id != item.id
@@ -88,13 +97,19 @@ export default function ProjectsList() {
             }}
             buttons={{
               deleteable:
-                appData.currentUser.currentAppRole.permissions?.projects
+                appData?.currentUser?.currentAppRole.permissions?.projects
                   .deleteable,
-              hasOptions: false,
+              hasOptions:
+                appData?.currentUser?.currentAppRole.permissions?.projects
+                  .hasOptions,
               hasView:
-                appData.currentUser.currentAppRole.permissions?.projects
+                appData?.currentUser?.currentAppRole.permissions?.projects
                   .hasView,
             }}
+            filters={[
+              { label: "Project state", value: "projectState" },
+              { label: "Client", value: "client" },
+            ]}
             additionalInfo={projectAdditionalInfo}
           />
         )}
@@ -102,6 +117,6 @@ export default function ProjectsList() {
 
         {/* <h3>Archivized projects</h3> */}
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

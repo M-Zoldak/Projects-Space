@@ -1,13 +1,13 @@
 import { FlexboxGrid, Panel } from "rsuite";
-import LoginLayout from "../../layouts/LoginLayout";
 import FluidText from "../../components/Text/FluidText";
 import { Link } from "react-router-dom";
+import PortalLayout from "../../layouts/PortalLayout";
 
 function RegistrationConfirmation() {
   const username = localStorage.getItem("spa_app_username");
 
   return (
-    <LoginLayout>
+    <PortalLayout activePage="register" title="Register">
       <FlexboxGrid justify="center">
         <FlexboxGrid.Item colspan={12}>
           <Panel header={<h3>Congratulations!</h3>} bordered>
@@ -19,7 +19,7 @@ function RegistrationConfirmation() {
           </Panel>
         </FlexboxGrid.Item>
       </FlexboxGrid>
-    </LoginLayout>
+    </PortalLayout>
   );
 }
 

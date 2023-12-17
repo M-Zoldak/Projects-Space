@@ -1,11 +1,11 @@
 import { ButtonToolbar } from "rsuite";
-import { http_methods } from "../../../Functions/Fetch";
+import { http_methods } from "../../../Functions/HTTPMethods";
 import { ContactPersonType } from "../../../interfaces/EntityTypes/ContactPersonType";
 import { useEffect, useState } from "react";
 import { useAppDataContext } from "../../../contexts/AppDataContext";
 import { useNotificationsContext } from "../../../contexts/NotificationsContext";
 import { useParams } from "react-router-dom";
-import StandardLayout from "../../../layouts/StandardLayout";
+import AppLayout from "../../../layouts/AppLayout";
 import Backlink from "../../../components/Buttons/Backlink";
 import ContentLoader from "../../../components/Loader";
 import InputButtonGroup from "../../../components/Forms/InputButtonGroup";
@@ -23,7 +23,6 @@ export default function ContactOptions() {
   useEffect(() => {
     http_methods
       .fetch<ContactPersonType>(
-        appData.token,
         `/clients/${params.id}/contacts/${params.contactId}`
       )
       .then((data) => {
@@ -39,8 +38,7 @@ export default function ContactOptions() {
   // http_methods
   //   .put<ContactPersonType>(
   //     `/clients/${client.id}`,
-  //     { name: clientName },
-  //     appData.token
+  //     { name: clientName }
   //   )
   //   .then((clientData) => {
   //     setClient(clientData);
@@ -96,7 +94,7 @@ export default function ContactOptions() {
   // };
 
   return (
-    <StandardLayout
+    <AppLayout
       title={contact ? `Contact options` : "Loading..."}
       activePage="Clients"
     >
@@ -120,6 +118,6 @@ export default function ContactOptions() {
           }}
         />
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

@@ -6,13 +6,11 @@ export default function Backlink({
   children,
   link,
 }: PropsWithChildren<{ link?: string }>) {
-  return link ? (
+  return (
     <ButtonToolbar className="buttons_container">
-      <Button appearance="ghost" as={Link} to={link}>
+      <Button appearance="ghost" as={Link} to={link ?? document.referrer}>
         {children ?? "Back"}
       </Button>
     </ButtonToolbar>
-  ) : (
-    ""
   );
 }

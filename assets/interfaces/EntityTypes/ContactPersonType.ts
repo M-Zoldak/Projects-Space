@@ -10,4 +10,4 @@ export type ContactPersonType = DefaultType & {
   fax: string;
   phone: string;
   mobile: string;
-} & PermissionsType;
+} & DefaultType;

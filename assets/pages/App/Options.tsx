@@ -7,10 +7,10 @@ import {
   Radio,
   SelectPicker,
 } from "rsuite";
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { AppOptionsType, AppType } from "../../interfaces/EntityTypes/AppType";
@@ -32,7 +32,7 @@ import { ProjectStateType } from "../../interfaces/EntityTypes/ProjectStateType"
 import FluidText from "../../components/Text/FluidText";
 
 export default function Options() {
-  const { appData, refreshAppData } = useAppDataContext();
+  const { appData } = useAppDataContext();
   const { addNotification } = useNotificationsContext();
   const params = useParams();
   const [loaded, setLoaded] = useState(false);
@@ -57,7 +57,7 @@ export default function Options() {
 
   useEffect(() => {
     http_methods
-      .fetch<AppOptionsType>(appData.token, `/apps/${params.id}/options`)
+      .fetch<AppOptionsType>(`/apps/${params.id}/options`)
       .then((data) => {
         setAppRolesList(data.roles);
         setUsers(data.users);
@@ -80,14 +80,10 @@ export default function Options() {
 
   const createNewRole = () => {
     http_methods
-      .post<AppRoleType>(
-        `/app-roles`,
-        {
-          name: newRole,
-          appId: params.id,
-        },
-        appData.token
-      )
+      .post<AppRoleType>(`/app-roles`, {
+        name: newRole,
+        appId: params.id,
+      })
       .then((role) => {
         setAppRolesList([...appRolesList, role]);
         setNewRole("");
@@ -99,13 +95,9 @@ export default function Options() {
 
   const sendInvitation = async () => {
     await http_methods
-      .post<DynamicallyFilledObject<string>>(
-        `/apps/${params.id}/invite`,
-        {
-          userEmail: newUser,
-        },
-        appData.token
-      )
+      .post<DynamicallyFilledObject<string>>(`/apps/${params.id}/invite`, {
+        userEmail: newUser,
+      })
       .then((res) => {
         addNotification({
           text: res.message,
@@ -149,15 +141,11 @@ export default function Options() {
               color="green"
               onClick={() =>
                 http_methods
-                  .post<any>(
-                    "/apps/invite/email",
-                    {
-                      userEmail: newUser,
-                      message:
-                        "I want to collaborate with you on my Project at Projects Space!",
-                    },
-                    appData.token
-                  )
+                  .post<any>("/apps/invite/email", {
+                    userEmail: newUser,
+                    message:
+                      "I want to collaborate with you on my Project at Projects Space!",
+                  })
                   .then((res) => {
                     setEmailInvitationPopup({
                       ...emailInvitationPopup,
@@ -192,23 +180,18 @@ export default function Options() {
 
   const updateAppName = (newAppName: string) => {
     http_methods
-      .put<AppType>(`/apps/${app.id}`, { name: newAppName }, appData.token)
+      .put<AppType>(`/apps/${app.id}`, { name: newAppName })
       .then((appData) => {
         setApp(appData);
-        refreshAppData();
       });
   };
 
   const updateUserAppRole = (appRoleId: number, user: UserType) => {
     http_methods
-      .put<UserType>(
-        `/apps/${params.id}/updateUserRole`,
-        {
-          appRoleId: appRoleId.toString(),
-          userId: user.id,
-        },
-        appData.token
-      )
+      .put<UserType>(`/apps/${params.id}/updateUserRole`, {
+        appRoleId: appRoleId.toString(),
+        userId: user.id,
+      })
       .then((user) => {
         let newUsers = users.filter((u) => u.id != user.id);
         setUsers([...newUsers, user]);
@@ -258,13 +241,9 @@ export default function Options() {
               checked={item.id == defaultRoleId}
               onClick={() => {
                 http_methods
-                  .put<AppType>(
-                    `/apps/${params.id}/updateDefaultRole`,
-                    {
-                      defaultRoleId: item.id,
-                    },
-                    appData.token
-                  )
+                  .put<AppType>(`/apps/${params.id}/updateDefaultRole`, {
+                    defaultRoleId: item.id,
+                  })
                   .then((data) => {
                     setDefaultRoleId(data.defaultRoleId);
                   });
@@ -278,26 +257,18 @@ export default function Options() {
 
   const addHosting = (name: string) => {
     http_methods
-      .post<HostingType>(
-        "/websites/hostings",
-        {
-          name,
-          appId: app.id,
-        },
-        appData.token
-      )
+      .post<HostingType>("/websites/hostings", {
+        name,
+        appId: app.id,
+      })
       .then((hoster) => setHostingsList([...hostingsList, hoster]));
   };
 
   const addProjectState = (name: string) => {
     http_methods
-      .post<ProjectStateType>(
-        `/apps/${app.id}/projectState`,
-        {
-          name,
-        },
-        appData.token
-      )
+      .post<ProjectStateType>(`/apps/${app.id}/projectState`, {
+        name,
+      })
       .then((projectState) => {
         setProjectStatesList([...projectStatesList, projectState]);
       });
@@ -306,8 +277,7 @@ export default function Options() {
   const updateProjectStatePositions = () => {
     http_methods.put(
       `/apps/${app.id}/updateProjectStatesPosition`,
-      projectStatesList.map((el, index) => ({ ...el, position: index })),
-      appData.token
+      projectStatesList.map((el, index) => ({ ...el, position: index }))
     );
   };
 
@@ -330,7 +300,7 @@ export default function Options() {
   console.log(projectStatesList);
 
   return (
-    <StandardLayout
+    <AppLayout
       title={app?.name ? `App overview` : "Loading..."}
       activePage="My Apps"
     >
@@ -383,7 +353,8 @@ export default function Options() {
           }}
           additionalInfo={userAdditionalInfo}
         />
-        {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
+        {appData?.currentUser?.currentAppRole?.permissions?.apps
+          ?.hasOptions && (
           <InputButtonGroup
             label="Invite user: "
             value={newUser}
@@ -411,7 +382,8 @@ export default function Options() {
           }}
           additionalInfo={appRoleAdditionalInfo}
         />
-        {appData.currentUser.currentAppRole.permissions.apps.hasOptions && (
+        {appData?.currentUser?.currentAppRole?.permissions?.apps
+          ?.hasOptions && (
           <InputButtonGroup
             buttonText="Create new"
             label="New role name: "
@@ -501,6 +473,6 @@ export default function Options() {
           onChange={setNewProjectState}
         />
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

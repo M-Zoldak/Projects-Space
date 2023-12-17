@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
-import StandardLayout from "../../layouts/StandardLayout";
-import { MouseEventHandler, SyntheticEvent, useEffect, useState } from "react";
-import { http_methods } from "../../Functions/Fetch";
+import AppLayout from "../../layouts/AppLayout";
+import { useEffect, useState } from "react";
+import { http_methods } from "../../Functions/HTTPMethods";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { ProjectType } from "../../interfaces/EntityTypes/ProjectType";
 import Backlink from "../../components/Buttons/Backlink";
@@ -23,6 +23,13 @@ import { SelectDataType } from "../../interfaces/DefaultTypes";
 import Subtitle from "../../components/Text/Subtitle";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { isButtonElement } from "react-router-dom/dist/dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import Cookies from "js-cookie";
+import FluidText from "../../components/Text/FluidText";
+import { Editor } from "@tinymce/tinymce-react";
+import ReactQuill, { Quill } from "react-quill";
+import Notes from "../../components/Data/Notes";
 
 export default function Project() {
   const params = useParams();
@@ -37,7 +44,7 @@ export default function Project() {
 
   useEffect(() => {
     http_methods
-      .fetch<ProjectType>(appData.token, `/projects/${params.id}`)
+      .fetch<ProjectType>(`/projects/${params.id}`)
       .then(({ project, clientsSelect, websitesSelect }) => {
         setProject(project);
         setTasks(project.tasks);
@@ -50,48 +57,35 @@ export default function Project() {
       });
   }, []);
 
+  console.log(project);
+
   const updateProjectClient = (clientId: string) => {
     http_methods
-      .put<ProjectType>(
-        `/projects/${project.id}/updateClient`,
-        {
-          clientId,
-        },
-        appData.token
-      )
+      .put<ProjectType>(`/projects/${project.id}/updateClient`, {
+        clientId,
+      })
       .then((proj) => setProject({ ...proj }));
   };
 
   const updateProjectWebsite = (websiteId: string) => {
     http_methods
-      .put<ProjectType>(
-        `/projects/${project.id}/updateWebsite`,
-        {
-          websiteId,
-        },
-        appData.token
-      )
+      .put<ProjectType>(`/projects/${project.id}/updateWebsite`, {
+        websiteId,
+      })
       .then((proj) => setProject({ ...proj }));
   };
 
   const setProjectState = (id: string) => {
     http_methods
-      .put<ProjectType>(
-        `/projects/${project.id}/updateState/${id}`,
-        [],
-        appData.token
-      )
+      .put<ProjectType>(`/projects/${project.id}/updateState/${id}`, [])
       .then((project) => setProject(project));
   };
 
-  console.log(project);
-  console.log(app?.projectStates);
-
   return (
-    <StandardLayout title="Project overview" activePage="Projects">
+    <AppLayout title="Project overview" activePage="Projects">
       <Grid fluid={true} style={{ width: "100%" }}>
         <Row>
-          <Col style={{ width: "75%" }}>
+          <Col style={{ width: "100%" }}>
             <ButtonToolbar style={{ marginBottom: "20px" }}>
               <Backlink link="/projects" />
               <SimpleCreateModal<TaskType>
@@ -107,9 +101,37 @@ export default function Project() {
                   });
                 }}
               />
+              <Button
+                appearance="ghost"
+                color="red"
+                startIcon={<FontAwesomeIcon icon={faFilePdf} />}
+                style={{ marginLeft: "auto" }}
+                onClick={() => {
+                  let token = Cookies.get("token");
+                  if (!token) return;
+                  fetch(`/api/projects/${params.id}/toPDF`, {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  })
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                      var url = window.URL.createObjectURL(blob);
+                      var a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${project.name}`;
+                      document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+                      a.click();
+                      a.remove();
+                    });
+                }}
+              >
+                Generate PDF
+              </Button>
             </ButtonToolbar>
             <MainTitle>{project && project.name}</MainTitle>
             <Steps
+              // TODO make steps horizontal on smaller screens
               // vertical={stepsWidth < 700}
               style={{
                 cursor: "pointer",
@@ -117,7 +139,8 @@ export default function Project() {
                 padding: "20px 0",
                 // border: "1px solid grey",
                 minWidth: `700px`,
-                // width: "100%",
+
+                width: "90%",
               }}
               current={project?.projectState?.position ?? 0}
             >
@@ -136,7 +159,7 @@ export default function Project() {
           </Col>
         </Row>
         <Row gutter={30}>
-          <Col>
+          <Col style={{ width: "70%" }}>
             <Subtitle>Tasks</Subtitle>
             {tasks && (
               <CommonList<TaskType>
@@ -160,13 +183,31 @@ export default function Project() {
           </Col>
           <Col>
             <Subtitle>{project ? "Project informations" : ""}</Subtitle>
+            <FluidText>
+              {project?.startDate
+                ? `Start date: ${new Date(
+                    project?.startDate.date
+                  ).toLocaleDateString("pl")}`
+                : ""}
+            </FluidText>
+            <FluidText>
+              {project?.endDate
+                ? `Deadline: ${new Date(
+                    project?.endDate.date
+                  ).toLocaleDateString("pl")}`
+                : ""}
+            </FluidText>
             {project && (
-              <div style={{ marginBottom: "10px" }}>
+              <div style={{ marginBlock: "10px" }}>
                 <SelectPicker
                   label={"Client: "}
                   data={clientsSelect}
                   value={project?.client?.id}
                   onChange={updateProjectClient}
+                  readOnly={
+                    !appData?.currentUser?.currentAppRole?.permissions?.projects
+                      .hasOptions
+                  }
                 />
                 {project?.client?.id && (
                   <Button
@@ -174,7 +215,7 @@ export default function Project() {
                     as={Link}
                     appearance="ghost"
                     color="cyan"
-                    to={`/clients/${project.client.id}/options`}
+                    to={`/clients/${project.client.id}`}
                   >
                     To client
                   </Button>
@@ -188,6 +229,10 @@ export default function Project() {
                   data={websitesSelect}
                   value={project?.website?.id}
                   onChange={updateProjectWebsite}
+                  readOnly={
+                    !appData?.currentUser?.currentAppRole?.permissions?.projects
+                      .hasOptions
+                  }
                 />
                 {project?.website?.id && (
                   <Button
@@ -195,7 +240,7 @@ export default function Project() {
                     as={Link}
                     appearance="ghost"
                     color="cyan"
-                    to={`/websites/${project.website.id}/options`}
+                    to={`/websites/${project.website.id}`}
                   >
                     To website
                   </Button>
@@ -203,8 +248,14 @@ export default function Project() {
               </div>
             )}
           </Col>
+          {project?.notes && (
+            <Notes
+              notes={project?.notes}
+              postUrl={`/projects/${project?.id}/addNote`}
+            />
+          )}
         </Row>
       </Grid>
-    </StandardLayout>
+    </AppLayout>
   );
 }

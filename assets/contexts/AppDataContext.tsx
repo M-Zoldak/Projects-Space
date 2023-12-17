@@ -2,19 +2,20 @@ import { PropsWithChildren, createContext, useContext } from "react";
 import { useState } from "react";
 import { AppType } from "../interfaces/EntityTypes/AppType";
 import { CurrentUserType } from "../interfaces/EntityTypes/UserType";
-import { http_methods } from "../Functions/Fetch";
+import { http_methods } from "../Functions/HTTPMethods";
 import { redirect } from "react-router-dom";
+import Cookies from "js-cookie";
 
 interface AppDataType {
   currentUser?: CurrentUserType;
   apps?: Array<AppType>;
-  token?: string;
 }
 
 type AppDataContextType = {
   appData: AppDataType;
-  initializeAppData: (token: string) => Promise<boolean | Response>;
-  refreshAppData: () => Promise<boolean | Response>;
+  initializeAppData: (apps: Array<AppType>, user: CurrentUserType) => void;
+  updateApps: (apps: Array<AppType>) => void;
+  updateCurrentUser: (user: CurrentUserType) => void;
   clear: () => void;
 };
 
@@ -35,59 +36,33 @@ export const useAppDataContext = () =>
 
 export default function AppDataProvider({ children }: PropsWithChildren) {
   const [appData, setAppData] = useState<AppDataType>(
-    getLocalItem("appData") ?? ({} as AppDataType)
+    getLocalItem("appData") ??
+      ({ apps: null, currentUser: null } as AppDataType)
   );
 
-  const initializeAppData = async (token?: string) => {
-    if (token || appData.token) {
-      return await http_methods
-        .fetch<any>(token ?? appData.token, "/initial_data")
-        .then(async (data: { user: CurrentUserType; apps: AppType[] }) => {
-          appData.currentUser = setCurrentUserData(data.user);
-          appData.token = token ?? appData.token;
-          appData.apps = data.apps ?? [];
-          setLocalItem("appData", { ...appData });
-          setAppData({ ...appData });
-        })
-        .then(() => true)
-        .catch((err: Error) => {
-          err.message == "Invalid token";
-          console.log("Token expired");
-          clear();
-          return redirect("/login");
-        });
-    } else {
-      return redirect("/login");
-    }
+  const initializeAppData = (apps: Array<AppType>, user: CurrentUserType) => {
+    appData.apps = apps ?? [];
+    appData.currentUser = user ?? null;
+    setLocalItem("appData", { ...appData });
+    setAppData({ ...appData });
   };
 
-  const setCurrentUserData = (userData: CurrentUserType): CurrentUserType => {
-    if (userData.currentAppRole == null) {
-      userData.currentAppRole = {
-        id: null,
-        name: null,
-        isOwnerRole: true,
-        ownerApp: null,
-        permissions: {
-          apps: {
-            name: "apps",
-            deleteable: true,
-            hasOptions: true,
-            hasView: true,
-          },
-        },
-      };
-    }
-    return userData;
+  const updateApps = (apps: AppType[]) => {
+    appData.apps = apps ?? [];
+    setLocalItem("appData", { ...appData });
+    setAppData({ ...appData });
   };
 
-  const refreshAppData = async () => {
-    return await initializeAppData();
+  const updateCurrentUser = (user: CurrentUserType) => {
+    appData.currentUser = user ?? null;
+    setLocalItem("appData", { ...appData });
+    setAppData({ ...appData });
   };
 
   const clear = () => {
     localStorage.clear();
     setAppData({} as AppDataType);
+    Cookies.remove("token");
   };
 
   return (
@@ -95,8 +70,9 @@ export default function AppDataProvider({ children }: PropsWithChildren) {
       value={{
         appData,
         initializeAppData,
+        updateCurrentUser,
+        updateApps,
         clear,
-        refreshAppData,
       }}
     >
       {children}

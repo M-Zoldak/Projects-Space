@@ -3,7 +3,7 @@
     "outDir": "./dist/",
     "noImplicitAny": true,
     "module": "es6",
-    "target": "es5",
+    "target": "ES2015",
     "jsx": "react-jsx",
     "allowJs": true,
     "moduleResolution": "node",
@@ -13,6 +13,6 @@
     }
   },
   // "exclude": ["/node_modules/**/*"],
-  "include": ["assets"],
+  "include": ["assets", "assets/extensions"],
   "moduleResolution": ["node_modules", "node"]
 }

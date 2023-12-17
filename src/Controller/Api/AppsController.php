@@ -206,7 +206,7 @@ class AppsController extends AbstractController {
         else return new JsonResponse(["message" => "Something went wrong. E-mail could not be sent. Please try again later"], 503);
     }
 
-    #[Route('/apps/{id}/updateUserRole', name: 'app_update_default_role', methods: ["PUT"])]
+    #[Route('/apps/{id}/updateUserRole', name: 'app_update_user_role', methods: ["PUT"])]
     public function updateUserRole(string $id, Request $request): JsonResponse {
         $data = (object) json_decode($request->getContent());
         $app = $this->appRepository->findOneById($id);

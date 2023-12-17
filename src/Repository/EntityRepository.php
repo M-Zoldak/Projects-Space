@@ -45,6 +45,8 @@ abstract class EntityRepository extends ServiceEntityRepository {
 
         $this->entityManager->persist($object);
         $this->entityManager->flush();
+
+        return $object;
     }
 
     public function delete(Entity $object) {

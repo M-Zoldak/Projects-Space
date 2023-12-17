@@ -4,9 +4,11 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBookAtlas,
+  faCalendar,
   faGaugeHigh,
   faGear,
   faGlobe,
+  faHouseFlag,
   faPeopleGroup,
   faProjectDiagram,
   faUserGear,
@@ -14,8 +16,9 @@ import {
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { useEffect } from "react";
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
+import { useAccessControlContext } from "../../contexts/PlaceContext";
 
 export interface PageLinkInterface {
   name: string;
@@ -52,20 +55,19 @@ class PageLink implements PageLinkInterface {
 }
 
 function AppChooser(index: number) {
-  const { appData, refreshAppData } = useAppDataContext();
+  const { appData, updateCurrentUser } = useAppDataContext();
 
-  useEffect(() => {}, [appData.currentUser.userOptions.selectedAppId]);
+  useEffect(() => {}, [appData?.currentUser?.userOptions?.selectedAppId]);
 
   const handleChange = (appId: string) => {
     http_methods
-      .post<CurrentUserType>(
-        "/user/updateSelectedApp",
-        {
-          appId: appId,
-        },
-        appData.token
-      )
-      .then((res) => refreshAppData())
+      .post<CurrentUserType>("/user/updateSelectedApp", {
+        appId: appId,
+      })
+      .then((res) => {
+        console.log(res);
+        updateCurrentUser(res);
+      })
       .catch((err) => err);
   };
 
@@ -80,7 +82,7 @@ function AppChooser(index: number) {
       key={index}
       data={provideSelectData(appData.apps)}
       searchable={false}
-      defaultValue={appData.currentUser.userOptions?.selectedAppId?.toString()}
+      defaultValue={appData?.currentUser?.userOptions?.selectedAppId?.toString()}
       onChange={handleChange}
       style={{
         width: "calc(100% - 40px)",
@@ -104,9 +106,10 @@ function AppChooser(index: number) {
 }
 
 export default function SideNav({ activePage }: { activePage: string }) {
+  const { accessControl } = useAccessControlContext();
   const { appData } = useAppDataContext();
 
-  useEffect(() => {}, [appData]);
+  useEffect(() => {}, [accessControl, appData]);
 
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(
@@ -114,20 +117,31 @@ export default function SideNav({ activePage }: { activePage: string }) {
       "/dashboard",
       <FontAwesomeIcon icon={faGaugeHigh} />
     ),
+    new PageLink(
+      "Calendar",
+      "/calendar",
+      <FontAwesomeIcon icon={faCalendar} />
+    ),
     appData?.currentUser?.userOptions?.selectedAppId &&
-      appData.currentUser?.currentAppRole?.permissions.projects?.hasView &&
+      appData?.currentUser?.currentAppRole?.permissions.projects?.hasView &&
       new PageLink(
         "Projects",
         "/projects",
         <FontAwesomeIcon icon={faProjectDiagram} />
       ),
     new MenuDivider(),
-    new PageLink("Websites", "/websites", <FontAwesomeIcon icon={faGlobe} />),
-    new PageLink(
-      "Clients",
-      "/clients",
-      <FontAwesomeIcon icon={faPeopleGroup} />
-    ),
+
+    appData?.currentUser?.userOptions?.selectedAppId &&
+      appData?.currentUser?.currentAppRole?.permissions.websites?.hasView &&
+      new PageLink("Websites", "/websites", <FontAwesomeIcon icon={faGlobe} />),
+
+    appData?.currentUser?.userOptions?.selectedAppId &&
+      appData?.currentUser?.currentAppRole?.permissions.clients?.hasView &&
+      new PageLink(
+        "Clients",
+        "/clients",
+        <FontAwesomeIcon icon={faPeopleGroup} />
+      ),
     // new PageLink('About', '/about'),
     // new PageLink('Contact', '/contact'),
     new MenuDivider(),
@@ -141,6 +155,7 @@ export default function SideNav({ activePage }: { activePage: string }) {
     new MenuDivider(),
     new PageLink("Profile", "/profile", <FontAwesomeIcon icon={faUserGear} />),
     new PageLink("Settings", "/settings", <FontAwesomeIcon icon={faGear} />),
+    new PageLink("Back to portal", "/", <FontAwesomeIcon icon={faHouseFlag} />),
   ];
 
   const renderMenu = () => {

@@ -28,12 +28,14 @@ class UsersController extends AbstractController {
     #[Route('/user/updateSelectedApp', name: 'app_update_user_selected_app', methods: ["POST"])]
     public function updateApp(Request $request, #[CurrentUser] ?User $user): JsonResponse {
         $data = json_decode($request->getContent());
+
         $app = $user->getApps()->findFirst(function ($key, $app) use ($data) {
             return $app->getId() == $data->appId;
         });
         $user->getUserOptions()->setSelectedApp($app);
-        $this->userRepository->save($user);
+        /** @var User $user */
+        $user = $this->userRepository->save($user);
 
-        return new JsonResponse($user->getCurrentUserData());
+        return new JsonResponse($user->getCurrentUserData($app));
     }
 }

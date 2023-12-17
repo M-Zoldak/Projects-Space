@@ -7,37 +7,29 @@ import {
   Nav,
   Message,
 } from "rsuite";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import TopNav from "./components/TopNav";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import SideNav from "./components/SideNav";
 import { useNotificationsContext } from "../contexts/NotificationsContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRocket } from "@fortawesome/free-solid-svg-icons";
 import { useAppDataContext } from "../contexts/AppDataContext";
 
-type StandardLayout = PropsWithChildren<{
+type AppLayout = PropsWithChildren<{
   title: string;
   activePage: string;
+  className?: string;
 }>;
 
-const StandardLayout = ({
-  children,
-  title,
-  activePage, // notifications,
-}: StandardLayout) => {
-  const [expand, setExpand] = useState(true);
+const AppLayout = ({ children, title, activePage, className }: AppLayout) => {
   const { notifications, removeNotification } = useNotificationsContext();
   const { appData } = useAppDataContext();
 
   return (
-    <div className="sidebar-page">
+    <div className={"sidebar-page" + " " + className}>
       <Container>
-        <Sidebar
-          style={{ display: "flex", flexDirection: "column" }}
-          width={expand ? 260 : 56}
-          collapsible
-        >
+        <Sidebar style={{ display: "flex", flexDirection: "column" }}>
           <Sidenav.Header>
             <Link to="/" className="navbar-brand">
               <FontAwesomeIcon
@@ -50,21 +42,14 @@ const StandardLayout = ({
                   borderRadius: "50%",
                 }}
               />
-              {/* <FontAwesomeIcon icon={} */}
               <span>Projects Space</span>
             </Link>
           </Sidenav.Header>
-          <Sidenav
-            expanded={expand}
-            defaultOpenKeys={["3"]}
-            appearance="default"
-          >
+          <Sidenav defaultOpenKeys={["3"]} appearance="default">
             <Sidenav.Body>
-              {
-                <Nav>
-                  <SideNav activePage={activePage} />
-                </Nav>
-              }
+              <Nav>
+                <SideNav activePage={activePage} />
+              </Nav>
             </Sidenav.Body>
           </Sidenav>
         </Sidebar>
@@ -72,9 +57,9 @@ const StandardLayout = ({
         <Container>
           <Header className="site_header">
             <h2>{title}</h2>
-            <h5>Logged in as: {appData.currentUser.name}</h5>
+            <h5>Logged in as: {appData?.currentUser?.name}</h5>
             <div style={{ display: "flex", alignItems: "stretch" }}>
-              <TopNav expand={expand} onChange={() => setExpand(!expand)} />
+              <TopNav />
             </div>
           </Header>
           <Container>
@@ -100,4 +85,4 @@ const StandardLayout = ({
   );
 };
 
-export default StandardLayout;
+export default AppLayout;

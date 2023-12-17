@@ -35,24 +35,36 @@ class Project extends Entity {
     #[ORM\ManyToOne(inversedBy: 'projects')]
     private ?ProjectState $projectState = null;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $startDate = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $endDate = null;
+
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Note::class)]
+    private Collection $note;
+
     public function __construct(App $app, string $name) {
         parent::__construct();
         $this->tasks = new ArrayCollection();
         $this->setApp($app);
         $this->setName($name);
+        $this->note = new ArrayCollection();
     }
 
     public function getData(): array {
         return [
             "id" => $this->getId(),
-            "appId" => $this->getApp()->getId(),
+            "appId" => $this->getApp()?->getId(),
             "name" => $this->getName(),
             "tasks" => EntityCollectionUtil::createCollectionData($this->getTasks()),
             "participants" => $this->getParticipants(),
             "client" => $this->getClient()?->getData(),
             "website" => $this->getWebsite()?->getData(),
             "projectState" => $this->getProjectState()?->getData(),
-            "participants" => $this->getParticipants()
+            "startDate" => $this->getStartDate(),
+            "endDate" => $this->getEndDate(),
+            "notes" => EntityCollectionUtil::createCollectionData($this->getNotes())
         ];
     }
 
@@ -139,6 +151,53 @@ class Project extends Entity {
 
     public function setProjectState(?ProjectState $projectState): static {
         $this->projectState = $projectState;
+
+        return $this;
+    }
+
+    public function getStartDate(): ?\DateTimeInterface {
+        return $this->startDate;
+    }
+
+    public function setStartDate(?\DateTimeInterface $startDate): static {
+        $this->startDate = $startDate;
+
+        return $this;
+    }
+
+    public function getEndDate(): ?\DateTimeInterface {
+        return $this->endDate;
+    }
+
+    public function setEndDate(?\DateTimeInterface $endDate): static {
+        $this->endDate = $endDate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Note>
+     */
+    public function getNotes(): Collection {
+        return $this->note;
+    }
+
+    public function addNote(Note $note): static {
+        if (!$this->note->contains($note)) {
+            $this->note->add($note);
+            $note->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNote(Note $note): static {
+        if ($this->note->removeElement($note)) {
+            // set the owning side to null (unless already changed)
+            if ($note->getProject() === $this) {
+                $note->setProject(null);
+            }
+        }
 
         return $this;
     }

@@ -1,8 +1,8 @@
-import StandardLayout from "../../layouts/StandardLayout";
+import AppLayout from "../../layouts/AppLayout";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
-import { http_methods } from "../../Functions/Fetch";
+import { http_methods } from "../../Functions/HTTPMethods";
 import ContentLoader from "../../components/Loader";
 
 import PermissionsTable from "../../components/Data/PermissionsTable";
@@ -30,7 +30,7 @@ export default function AppRoleOptions() {
 
   useEffect(() => {
     http_methods
-      .fetch<AppRoleType>(appData.token, `/app-roles/${params.id}/options`)
+      .fetch<AppRoleType>(`/app-roles/${params.id}/options`)
       .then((data) => {
         setApp(data.ownerApp);
         setAppRole(data);
@@ -58,7 +58,7 @@ export default function AppRoleOptions() {
   const saveChanges = () => {
     setTableLoading(true);
     http_methods
-      .put<AppRoleType>(`/app-roles/${appRole.id}`, appRole, appData.token)
+      .put<AppRoleType>(`/app-roles/${appRole.id}`, appRole)
       .then((data) => {
         setAppRole(data);
         addNotification({
@@ -71,11 +71,9 @@ export default function AppRoleOptions() {
 
   const updateName = (roleName: string) => {
     http_methods
-      .put<AppRoleType>(
-        `/app-roles/${appRole.id}/updateName`,
-        { name: roleName },
-        appData.token
-      )
+      .put<AppRoleType>(`/app-roles/${appRole.id}/updateName`, {
+        name: roleName,
+      })
       .then((data) => {
         setAppRole(data);
         addNotification({
@@ -84,13 +82,9 @@ export default function AppRoleOptions() {
         });
       });
   };
-  // TODO Check user role
-  // const userRole = () => {
-  //   return findAppUserRole(appRole.ownerApp, appData.currentUser);
-  // };
 
   return (
-    <StandardLayout title="Role options" activePage="My Apps">
+    <AppLayout title="Role options" activePage="My Apps">
       <Backlink link={state?.backlink} />
 
       <ContentLoader loaded={loaded}>
@@ -147,6 +141,6 @@ export default function AppRoleOptions() {
           </>
         )}
       </ContentLoader>
-    </StandardLayout>
+    </AppLayout>
   );
 }

@@ -1,19 +1,7 @@
-import {
-  FlexboxGrid,
-  Panel,
-  ButtonToolbar,
-  Button,
-  Form,
-  DatePicker,
-  Divider,
-} from "rsuite";
-import LoginLayout from "../../layouts/LoginLayout";
-import { useEffect, useState } from "react";
+import { FlexboxGrid, Panel } from "rsuite";
 import { useNavigate } from "react-router-dom";
 import FormComponent from "../../components/Forms/FormComponent";
-import { http_methods } from "../../Functions/Fetch";
-import { FormDataType } from "../../interfaces/FormDataType";
-import ContentLoader from "../../components/Loader";
+import PortalLayout from "../../layouts/PortalLayout";
 
 function Registration() {
   const navigate = useNavigate();
@@ -23,17 +11,15 @@ function Registration() {
   };
 
   return (
-    <LoginLayout>
-      <FlexboxGrid justify="center">
+    <PortalLayout activePage="register" title="Register" withContainer={false}>
+      <FlexboxGrid justify="center" style={{ paddingBlock: "2rem" }}>
         <FlexboxGrid.Item>
           <Panel header={<h3>Registration</h3>} bordered>
-            {/* <ContentLoader loaded={loaded}> */}
             <FormComponent<any> entity="register" onSuccess={handleSuccess} />
-            {/* </ContentLoader> */}
           </Panel>
         </FlexboxGrid.Item>
       </FlexboxGrid>
-    </LoginLayout>
+    </PortalLayout>
   );
 }
 

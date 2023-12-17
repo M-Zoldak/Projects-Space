@@ -1,24 +1,14 @@
-import StandardLayout from "../layouts/StandardLayout";
-import { useState } from "react";
-import { Button } from "rsuite";
+import { useEffect } from "react";
+import AppLayout from "../layouts/AppLayout";
 import { useAppDataContext } from "../contexts/AppDataContext";
 
 const Dashboard = () => {
-  const [data, setData] = useState("");
-  const { appData } = useAppDataContext();
+  const { appData, initializeAppData } = useAppDataContext();
 
-  const loadData = async () => {
-    await fetch("api/some/info")
-      .then((res) => res.json())
-      .then((data) => setData(data.dataFromResponse.toString()));
-  };
-
-  return (
-    <StandardLayout title="Dashboard" activePage="Dashboard">
-      <div className="data_container">{data}</div>
-      <Button onClick={() => loadData()}>Load Data</Button>
-    </StandardLayout>
-  );
+  useEffect(() => {
+    if (!appData) initializeAppData;
+  }, []);
+  return <AppLayout title="Dashboard" activePage="Dashboard"></AppLayout>;
 };
 
 export default Dashboard;

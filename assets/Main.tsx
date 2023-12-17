@@ -1,10 +1,10 @@
-import React, { StrictMode } from "react";
+import React, { StrictMode, useEffect } from "react";
+import "react-quill/dist/quill.snow.css";
 import { createRoot } from "react-dom/client";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Home from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
+import About from "./pages/Regular/About";
+import Contact from "./pages/Regular/Contact";
+import NotFound from "./pages/Regular/NotFound";
 import { CustomProvider } from "rsuite";
 import Login from "./pages/Login/Login";
 import Registration from "./pages/Login/Registration";
@@ -26,6 +26,13 @@ import ContactOptions from "./pages/Client/Contact/Options";
 import AddressOptions from "./pages/Client/Address/Options";
 import WebsitesList from "./pages/Website/List";
 import WebsiteOptions from "./pages/Website/Options";
+import Website from "./pages/Website/Website";
+import Client from "./pages/Client/Client";
+import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Regular/Home";
+import Calendar from "./pages/calendar/Calendar";
+import AccessControlProvider from "./contexts/PlaceContext";
+import ProjectOptions from "./pages/Project/Options";
 
 function Main() {
   return (
@@ -33,6 +40,8 @@ function Main() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route
           path="/login"
           element={
@@ -61,7 +70,7 @@ function Main() {
           path="/dashboard"
           element={
             <Protected>
-              <Home />
+              <Dashboard />
             </Protected>
           }
         />
@@ -78,6 +87,14 @@ function Main() {
           element={
             <Protected>
               <WebsiteOptions />
+            </Protected>
+          }
+        />
+        <Route
+          path="/websites/:id"
+          element={
+            <Protected>
+              <Website />
             </Protected>
           }
         />
@@ -135,6 +152,15 @@ function Main() {
         />
 
         <Route
+          path="/projects/:id/options"
+          element={
+            <Protected>
+              <ProjectOptions />
+            </Protected>
+          }
+        />
+
+        <Route
           path="/clients"
           element={
             <Protected>
@@ -148,6 +174,24 @@ function Main() {
           element={
             <Protected>
               <ClientOptions />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/clients/:id"
+          element={
+            <Protected>
+              <Client />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/calendar"
+          element={
+            <Protected>
+              <Calendar />
             </Protected>
           }
         />
@@ -179,23 +223,7 @@ function Main() {
           }
         />
 
-        <Route
-          path="/about"
-          element={
-            <Protected>
-              <About />
-            </Protected>
-          }
-        />
-        <Route
-          path="/contact"
-          element={
-            <Protected>
-              <Contact />
-            </Protected>
-          }
-        />
-        <Route element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
@@ -210,11 +238,13 @@ if (document.getElementById("app")) {
   root.render(
     <StrictMode>
       <AppDataProvider>
-        <CustomProvider theme="dark">
-          <NotificationsProvider>
-            <Main />
-          </NotificationsProvider>
-        </CustomProvider>
+        <AccessControlProvider>
+          <CustomProvider theme="dark">
+            <NotificationsProvider>
+              <Main />
+            </NotificationsProvider>
+          </CustomProvider>
+        </AccessControlProvider>
       </AppDataProvider>
     </StrictMode>
   );
