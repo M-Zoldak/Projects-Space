@@ -130,32 +130,34 @@ export default function Project() {
               </Button>
             </ButtonToolbar>
             <MainTitle>{project && project.name}</MainTitle>
-            <Steps
-              // TODO make steps horizontal on smaller screens
-              // vertical={stepsWidth < 700}
-              style={{
-                cursor: "pointer",
-                // marginTop: "20px",
-                padding: "20px 0",
-                // border: "1px solid grey",
-                minWidth: `700px`,
+            {app?.projectStates.length > 0 && (
+              <Steps
+                // TODO make steps horizontal on smaller screens
+                // vertical={stepsWidth < 700}
+                style={{
+                  cursor: "pointer",
+                  // marginTop: "20px",
+                  padding: "20px 0",
+                  // border: "1px solid grey",
+                  minWidth: `700px`,
 
-                width: "90%",
-              }}
-              current={project?.projectState?.position ?? 0}
-            >
-              {app?.projectStates
-                ?.sort((i, i2) => (i.position > i2.position ? 1 : 0))
-                .map((state, index) => {
-                  return (
-                    <Steps.Item
-                      key={index}
-                      title={state.name}
-                      onClick={() => setProjectState(state.id)}
-                    />
-                  );
-                })}
-            </Steps>
+                  width: "90%",
+                }}
+                current={project?.projectState?.position ?? 0}
+              >
+                {app?.projectStates
+                  ?.sort((i, i2) => (i.position > i2.position ? 1 : 0))
+                  .map((state, index) => {
+                    return (
+                      <Steps.Item
+                        key={index}
+                        title={state.name}
+                        onClick={() => setProjectState(state.id)}
+                      />
+                    );
+                  })}
+              </Steps>
+            )}
           </Col>
         </Row>
         <Row gutter={30}>

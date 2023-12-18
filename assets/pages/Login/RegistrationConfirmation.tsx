@@ -1,10 +1,11 @@
 import { FlexboxGrid, Panel } from "rsuite";
 import FluidText from "../../components/Text/FluidText";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigation } from "react-router-dom";
 import PortalLayout from "../../layouts/PortalLayout";
 
 function RegistrationConfirmation() {
-  const username = localStorage.getItem("spa_app_username");
+  const location = useLocation();
+  const username = location.state.name;
 
   return (
     <PortalLayout activePage="register" title="Register">

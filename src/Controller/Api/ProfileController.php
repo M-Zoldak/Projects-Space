@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\User;
 use App\Enums\FormField;
+use App\Helpers\DateHelper;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
 use App\Helpers\ValidatorHelper;
@@ -11,7 +12,6 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Helpers\DateHelper as HelpersDateHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -35,7 +35,7 @@ class ProfileController extends AbstractController {
         $formBuilder = new FormBuilder();
         $formBuilder->add("firstName", "First name", FormField::TEXT, ["required" => true, "value" => $user->getFirstName()]);
         $formBuilder->add("lastName", "Last name", FormField::TEXT, ["required" => true, "value" => $user->getLastName()]);
-        $formBuilder->add("birthDate", "Date of birth", FormField::DATE, ["required" => true, "value" => $user->getBirthDate()->format("d-M-y")]);
+        $formBuilder->add("birthDate", "Date of birth", FormField::DATE, ["required" => true, "value" => DateHelper::exposeDate($user->getBirthDate())]);
         // $formBuilder->add("email", "E-mail", FormField::TEXT, ["required" => true, $user->getEmail(), "readonly" => true]);
 
         return new JsonResponse($formBuilder->getFormData());
@@ -51,7 +51,7 @@ class ProfileController extends AbstractController {
         $user->setFirstName($data->firstName);
         $user->setLastName($data->lastName);
 
-        $user->setBirthDate(HelpersDateHelper::convertToDate($data->birthDate));
+        $user->setBirthDate(DateHelper::convertToDate($data->birthDate));
 
         $errors = ValidatorHelper::validateObject($user, $validator);
 

@@ -10,7 +10,13 @@ import { ProjectType } from "../../interfaces/EntityTypes/ProjectType";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBarsProgress, faPerson } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBarsProgress,
+  faForwardStep,
+  faPause,
+  faPerson,
+} from "@fortawesome/free-solid-svg-icons";
+import { HoverTooltip } from "../../components/Text/Tooltip";
 
 export default function ProjectsList() {
   const { appData } = useAppDataContext();
@@ -38,6 +44,22 @@ export default function ProjectsList() {
           <FontAwesomeIcon icon={faBarsProgress} /> State:{" "}
           {project?.projectState?.name ?? "Unset"}
         </FlexboxGridItem>
+        {project?.startDate.date && (
+          <FlexboxGridItem>
+            <HoverTooltip text="Project begin">
+              <FontAwesomeIcon icon={faForwardStep} />{" "}
+              {project.startDate.date.slice(0, 8)}
+            </HoverTooltip>
+          </FlexboxGridItem>
+        )}
+        {project?.endDate.date && (
+          <FlexboxGridItem>
+            <HoverTooltip text="Project deadline">
+              <FontAwesomeIcon icon={faPause} />{" "}
+              {project.endDate.date.slice(0, 8)}
+            </HoverTooltip>
+          </FlexboxGridItem>
+        )}
         {project?.client?.name && (
           <FlexboxGridItem>
             <FontAwesomeIcon icon={faPerson} /> Client: {project?.client?.name}

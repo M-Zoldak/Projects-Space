@@ -6,6 +6,6 @@ export type FormDataType = {
   name: string;
   label: string;
   error: string;
-  value?: string;
+  value?: string | any;
   options: Array<{ value: number; label: string }>;
 } & DynamicallyFilledObject<string>;

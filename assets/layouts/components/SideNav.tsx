@@ -18,6 +18,7 @@ import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { useEffect } from "react";
 import { http_methods } from "../../Functions/HTTPMethods";
 import { CurrentUserType } from "../../interfaces/EntityTypes/UserType";
+import { useCookies } from "react-cookie";
 
 export interface PageLinkInterface {
   name: string;
@@ -105,8 +106,6 @@ function AppChooser(index: number) {
 
 export default function SideNav({ activePage }: { activePage: string }) {
   const { appData } = useAppDataContext();
-
-  useEffect(() => {}, [appData]);
 
   const defaultPageLinks: PageLinksListInterface = [
     new PageLink(

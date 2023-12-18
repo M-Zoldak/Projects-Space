@@ -4,8 +4,12 @@ import Cookies from "js-cookie";
 import { useCookies } from "react-cookie";
 
 export default function GuestsOnly({ children }: PropsWithChildren) {
-  // let token = Cookies.get("token");
-  const [cookies] = useCookies();
+  let cookie;
 
-  return cookies.token ? <Navigate to="/" /> : children;
+  if (!cookie) {
+    const [cookies] = useCookies();
+    cookie = cookies.token;
+  }
+
+  return cookie ? <Navigate to="/" /> : children;
 }

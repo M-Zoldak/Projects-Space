@@ -3,6 +3,7 @@ import FluidText from "../../components/Text/FluidText";
 import PortalLayout from "../../layouts/PortalLayout";
 import { PropsWithChildren } from "react";
 import { Link } from "react-router-dom";
+import FluidTextWrapper from "../../components/Text/FluidTextWrapper";
 
 type CardType = PropsWithChildren<{
   header: string;
@@ -21,7 +22,7 @@ export default function Home() {
         O projeckcie można przeczytać w zakładce About
       </h1>
 
-      <FluidText
+      <FluidTextWrapper
         className="startpage"
         styles={{ maxWidth: 800, margin: "auto" }}
       >
@@ -62,7 +63,7 @@ export default function Home() {
           <br /> <Link to="/register">Join Projects Space</Link> today and let
           your ideas take flight!
         </p>
-      </FluidText>
+      </FluidTextWrapper>
     </PortalLayout>
   );
 }

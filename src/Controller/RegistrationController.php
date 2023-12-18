@@ -7,6 +7,7 @@ use DateTime;
 use App\Entity\User;
 use DateTimeImmutable;
 use App\Enums\FormField;
+use App\Helpers\DateHelper;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
 use App\Helpers\ValidatorHelper;
@@ -48,7 +49,7 @@ class RegistrationController extends AbstractController {
         $user->setFirstName($data->firstName);
         $user->setLastName($data->lastName);
 
-        $birthDate = new DateTimeImmutable(strtotime($data->birthDate));
+        $birthDate = new DateTimeImmutable(DateHelper::convertToDate($data->birthDate)->format(DATE_RFC822));
         $birthDate->setTime(00, 00, 00);
         $user->setBirthDate($birthDate);
 

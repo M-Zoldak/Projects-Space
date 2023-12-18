@@ -17,7 +17,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { UserNotificationType } from "../../interfaces/EntityTypes/UserNotificationType";
 import { http_methods } from "../../Functions/HTTPMethods";
-import Cookies from "js-cookie";
 import { useCookies } from "react-cookie";
 
 const TopNav = () => {

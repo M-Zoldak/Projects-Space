@@ -39,7 +39,9 @@ function Login() {
         setCookie("token", data.token, { maxAge: 300, secure: true });
         initializeAppData(data.appData.apps, data.appData.user);
       })
-      .then(() => navigate("/dashboard", { unstable_flushSync: true }))
+      .then(() => {
+        navigate("/dashboard");
+      })
       .catch((err: Error) => setErrorMsg("Invalid email or password."));
   };
 

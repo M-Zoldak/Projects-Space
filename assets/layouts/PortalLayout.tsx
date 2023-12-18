@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRocket } from "@fortawesome/free-solid-svg-icons";
 import PortalSideNav from "./components/PortalSideNav";
-import { useAppDataContext } from "../contexts/AppDataContext";
 
 type PortalLayoutProps = PropsWithChildren<{
   title: string;

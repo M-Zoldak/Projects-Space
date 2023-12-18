@@ -31,9 +31,8 @@ import Client from "./pages/Client/Client";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Regular/Home";
 import Calendar from "./pages/calendar/Calendar";
-import AccessControlProvider from "./contexts/PlaceContext";
 import ProjectOptions from "./pages/Project/Options";
-import { CookiesProvider } from "react-cookie";
+import { CookiesProvider, useCookies } from "react-cookie";
 
 function Main() {
   return (
@@ -238,17 +237,17 @@ if (document.getElementById("app")) {
 
   root.render(
     <StrictMode>
-      <CookiesProvider>
+      <CustomProvider theme="dark">
         <AppDataProvider>
-          {/* <AccessControlProvider> */}
-          <CustomProvider theme="dark">
+          <CookiesProvider>
+            {/* <AccessControlProvider> */}
             <NotificationsProvider>
               <Main />
             </NotificationsProvider>
-          </CustomProvider>
-          {/* </AccessControlProvider> */}
+            {/* </AccessControlProvider> */}
+          </CookiesProvider>
         </AppDataProvider>
-      </CookiesProvider>
+      </CustomProvider>
     </StrictMode>
   );
 }

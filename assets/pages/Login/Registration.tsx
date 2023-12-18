@@ -7,7 +7,9 @@ function Registration() {
   const navigate = useNavigate();
 
   const handleSuccess = (successData: any) => {
-    navigate("/register/confirm");
+    navigate("/register/confirm", {
+      state: { name: successData.firstName + " " + successData.lastName },
+    });
   };
 
   return (

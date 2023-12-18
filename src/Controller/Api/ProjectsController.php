@@ -128,6 +128,7 @@ class ProjectsController extends AbstractController {
         $website = $this->websiteRepository->findOneById($data->website);
         if ($website) $project->setWebsite($website);
 
+        $project->setName($data->name);
         $project->setStartDate(DateHelper::convertToDate($data->startDate));
         $project->setEndDate(DateHelper::convertToDate($data->endDate));
 

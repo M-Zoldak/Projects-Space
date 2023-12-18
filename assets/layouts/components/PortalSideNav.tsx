@@ -55,10 +55,7 @@ class PageLink implements PageLinkInterface {
 }
 
 export default function PortalSideNav({ activePage }: { activePage: string }) {
-  const { appData } = useAppDataContext();
   const [cookies] = useCookies();
-
-  useEffect(() => {}, [appData]);
 
   let token = cookies.token;
   const defaultPageLinks: PageLinksListInterface = [

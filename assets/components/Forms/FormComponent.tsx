@@ -51,6 +51,14 @@ export default function FormComponent<T>({
           }
           if (field.type == "date") {
             console.log(field.value);
+            // try {
+            field.value = field.value
+              ? new Date(field.value)
+              : new Date("2000.01.01");
+            // } catch (e) {
+            //   field.value = new Date();
+            // }
+            console.log(field.value);
             // field.value =
           }
           return field;
@@ -63,7 +71,14 @@ export default function FormComponent<T>({
     setLoaded(false);
     let formValues = formFields.reduce(
       (data: DynamicallyFilledObject<string>, field: FormDataType) => {
-        data[field.name] = field.value;
+        if (field.type == "date") {
+          let date = new Date(field.value);
+          console.log(field.value);
+          console.log(date.getTime());
+          data[field.name] = date.getTime().toString();
+        } else {
+          data[field.name] = field.value;
+        }
         return data;
       },
       {}
@@ -142,6 +157,7 @@ export default function FormComponent<T>({
         );
       }
       case "date": {
+        console.log(field.value);
         return (
           <Form.Group controlId={field.name} key={key}>
             <Form.ControlLabel>{field.label}</Form.ControlLabel>
