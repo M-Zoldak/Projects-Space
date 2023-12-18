@@ -25,7 +25,6 @@ const TopNav = () => {
   const navigate = useNavigate();
 
   async function handleLogout() {
-    // let token = Cookies.get("token");
     if (!cookies.token) return;
     await fetch("/api/logout", {
       method: "POST",

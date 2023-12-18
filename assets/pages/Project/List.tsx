@@ -41,14 +41,16 @@ export default function ProjectsList() {
     return (
       <FlexboxGrid style={{ gap: "1rem" }}>
         <FlexboxGridItem>
-          <FontAwesomeIcon icon={faBarsProgress} /> State:{" "}
-          {project?.projectState?.name ?? "Unset"}
+          <HoverTooltip text="Project state">
+            <FontAwesomeIcon icon={faBarsProgress} />
+            {project?.projectState?.name ?? "Unset"}
+          </HoverTooltip>
         </FlexboxGridItem>
         {project?.startDate.date && (
           <FlexboxGridItem>
             <HoverTooltip text="Project begin">
               <FontAwesomeIcon icon={faForwardStep} />{" "}
-              {project.startDate.date.slice(0, 8)}
+              {project.startDate.date.slice(0, 10)}
             </HoverTooltip>
           </FlexboxGridItem>
         )}
@@ -56,7 +58,7 @@ export default function ProjectsList() {
           <FlexboxGridItem>
             <HoverTooltip text="Project deadline">
               <FontAwesomeIcon icon={faPause} />{" "}
-              {project.endDate.date.slice(0, 8)}
+              {project.endDate.date.slice(0, 10)}
             </HoverTooltip>
           </FlexboxGridItem>
         )}
@@ -102,6 +104,8 @@ export default function ProjectsList() {
               { label: "Project name", value: "name" },
               { label: "Project state", value: ["projectState", "position"] },
               { label: "Client", value: ["client", "name"] },
+              { label: "Start date", value: ["startDate", "date"] },
+              { label: "End date", value: ["endDate", "date"] },
             ]}
             sortingDefaults={{
               direction: "asc",

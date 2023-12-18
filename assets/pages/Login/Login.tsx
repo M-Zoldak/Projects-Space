@@ -36,7 +36,7 @@ function Login() {
     await http_methods
       .notTokenizedpost<any>("/login", formValue)
       .then((data) => {
-        setCookie("token", data.token, { maxAge: 300, secure: true });
+        setCookie("token", data.token, { maxAge: 1800, secure: true });
         initializeAppData(data.appData.apps, data.appData.user);
       })
       .then(() => {
