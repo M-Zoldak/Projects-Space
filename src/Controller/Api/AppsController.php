@@ -3,29 +3,23 @@
 namespace App\Controller\Api;
 
 use App\Entity\App;
-use App\Entity\Note;
 use App\Entity\User;
 use App\Entity\AppRole;
-use App\Entity\Project;
 use App\Enums\FormField;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
-use App\Entity\UserNotification;
 use App\Helpers\ValidatorHelper;
 use App\Repository\AppRepository;
 use App\Repository\NoteRepository;
 use App\Repository\UserRepository;
 use App\Utils\EntityCollectionUtil;
 use App\Repository\AppRoleRepository;
-use App\Classes\Notifications\AppInvitation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\SectionPermissionsRepository;
-use App\Classes\Notifications\NewAppNotification;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Doctrine\ORM\Internal\TopologicalSort\CycleDetectedException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[OA\Tag(name: 'Apps')]
@@ -125,28 +119,19 @@ class AppsController extends AbstractController {
         $app = $this->appRepository->findOneById($id);
         if (!$app) return new JsonResponse([], 404);
 
-        // $users = $app->getUsers()->toArray();
-        // array_walk($users, fn (User $user) => $user->getUserOptions()->setSelectedApp());
         $deletedAppData = $app->getData();
-        try {
-            $app->setDefaultRole(null);
-            $app->setOwner(null);
-            // $users = $app->getUsers();
-
-            // $users->forAll(function (int $uIndex, User $user) use ($app) {
-            // });
-            $app->getRoles()->forAll(fn ($roleKey, $role) => $this->appRoleRepository->delete($role));
-            $this->appRepository->delete($app);
-        } catch (CycleDetectedException $exc) {
-            dump($exc->getCycle());
-            // dd($exc->getCycle());
-        }
+        $app->setDefaultRole(null);
+        // try {
+        $this->appRepository->delete($app);
+        // } catch (CycleDetectedException $e) {
+        // dd($e->getCycle());
+        // }
 
         return new JsonResponse($deletedAppData);
     }
 
     #[Route('/apps/{id}', name: 'app_update', methods: ["PUT"])]
-    public function updateApp(string $id, Request $request, ValidatorInterface $validator): JsonResponse {
+    public function updateApp(string $id, #[CurrentUser] $user, Request $request, ValidatorInterface $validator): JsonResponse {
 
         $data = (object) json_decode($request->getContent());
         $app = $this->appRepository->findOneById($id);
@@ -161,7 +146,7 @@ class AppsController extends AbstractController {
 
         $this->appRepository->save($app);
 
-        return new JsonResponse($app->getData());
+        return new JsonResponse($app->getData($user));
     }
 
     #[Route('/apps/{id}/updateDefaultRole', name: 'app_update_default_role', methods: ["PUT"])]

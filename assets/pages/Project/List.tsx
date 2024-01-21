@@ -15,11 +15,12 @@ import {
   faForwardStep,
   faPause,
   faPerson,
+  faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
 import { HoverTooltip } from "../../components/Text/Tooltip";
 
 export default function ProjectsList() {
-  const { appData } = useAppDataContext();
+  const { appData, refreshAppData } = useAppDataContext();
   const [loaded, setLoaded] = useState(false);
   const { addNotification } = useNotificationsContext();
   const [projects, setProjects] = useState<Array<ProjectType>>([]);
@@ -35,7 +36,9 @@ export default function ProjectsList() {
       .catch((err: Error) => {
         addNotification({ text: err.message });
       });
-  }, [appData]);
+
+    refreshAppData();
+  }, [appData.currentUser.userOptions.selectedAppId]);
 
   const projectAdditionalInfo = (project: ProjectType) => {
     return (
@@ -46,6 +49,13 @@ export default function ProjectsList() {
             {project?.projectState?.name ?? "Unset"}
           </HoverTooltip>
         </FlexboxGridItem>
+        {project?.manager && (
+          <FlexboxGridItem>
+            <HoverTooltip text="Project manager">
+              <FontAwesomeIcon icon={faUserTie} /> {project?.manager?.name}
+            </HoverTooltip>
+          </FlexboxGridItem>
+        )}
         {project?.startDate.date && (
           <FlexboxGridItem>
             <HoverTooltip text="Project begin">
@@ -103,6 +113,7 @@ export default function ProjectsList() {
             sortingItems={[
               { label: "Project name", value: "name" },
               { label: "Project state", value: ["projectState", "position"] },
+              { label: "Project manager", value: ["manager", "firstName"] },
               { label: "Client", value: ["client", "name"] },
               { label: "Start date", value: ["startDate", "date"] },
               { label: "End date", value: ["endDate", "date"] },
@@ -135,6 +146,7 @@ export default function ProjectsList() {
             filters={[
               { label: "Project state", value: "projectState" },
               { label: "Client", value: "client" },
+              { label: "Project manager", value: "manager" },
             ]}
             additionalInfo={projectAdditionalInfo}
           />

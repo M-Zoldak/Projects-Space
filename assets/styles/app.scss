@@ -1,5 +1,9 @@
 $main-color: #116588;
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   min-height: 100vh;
   display: flex;

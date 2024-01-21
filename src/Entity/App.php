@@ -16,33 +16,33 @@ class App extends Entity {
     #[ORM\Column(length: 255, nullable: false)]
     private ?string $name = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps', cascade: ["persist"])]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'apps', cascade: ["persist", "remove"])]
     private Collection $users;
 
-    #[ORM\OneToMany(mappedBy: 'app', cascade: ["persist", "remove"], targetEntity: Website::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', cascade: ["persist"], targetEntity: Website::class, orphanRemoval: true)]
     private Collection $websites;
 
-    #[ORM\OneToOne(mappedBy: 'app', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToOne(mappedBy: 'app', cascade: ['persist'], orphanRemoval: true)]
     private ?WebsiteOptions $websiteOptions = null;
 
-    #[ORM\OneToMany(mappedBy: 'app', cascade: ['persist', 'remove'], targetEntity: AppRole::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'app', targetEntity: AppRole::class, cascade: ['persist', "remove"], orphanRemoval: true)]
     private Collection $roles;
 
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: Project::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     private Collection $projects;
 
-    #[ORM\OneToMany(mappedBy: 'selectedApp', targetEntity: UserOptions::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'selectedApp', targetEntity: UserOptions::class, cascade: ["remove"])]
     private Collection $userOptions;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\ManyToOne(targetEntity: AppRole::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?AppRole $defaultRole = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'appInvitations')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'appInvitations', cascade: ["remove"])]
     #[ORM\JoinTable(name: "app_users_invitation")]
     private Collection $invitedUsers;
 
-    #[ORM\ManyToOne(inversedBy: 'ownedApps', cascade: ['persist'])]
+    #[ORM\ManyToOne(inversedBy: 'ownedApps', cascade: ['persist', "remove"])]
     #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $owner = null;
 

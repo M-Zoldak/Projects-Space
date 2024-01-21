@@ -23,6 +23,15 @@ class Task extends Entity {
     #[ORM\ManyToOne(inversedBy: 'tasks', cascade: ["persist"])]
     private ?Project $project = null;
 
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    private ?User $assignedTo = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $completed = null;
+
     public function __construct() {
         parent::__construct();
     }
@@ -34,7 +43,8 @@ class Task extends Entity {
             "name" => $this->getName(),
             "startDate" => $this->getStartDate(),
             "endDate" => $this->getEndDate(),
-            "taskCategory" => $this->getCategory()
+            "taskCategory" => $this?->getCategory(),
+            "completed" => $this->isCompleted()
         ];
     }
 
@@ -84,6 +94,36 @@ class Task extends Entity {
 
     public function setProject(?Project $project): static {
         $this->project = $project;
+
+        return $this;
+    }
+
+    public function getAssignedTo(): ?User {
+        return $this->assignedTo;
+    }
+
+    public function setAssignedTo(?User $assignedTo): static {
+        $this->assignedTo = $assignedTo;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function isCompleted(): ?bool {
+        return $this->completed;
+    }
+
+    public function setCompleted(?bool $completed): static {
+        $this->completed = $completed;
 
         return $this;
     }

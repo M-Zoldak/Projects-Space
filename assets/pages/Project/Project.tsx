@@ -9,6 +9,7 @@ import {
   Button,
   ButtonToolbar,
   Col,
+  FlexboxGrid,
   Grid,
   Row,
   SelectPicker,
@@ -24,13 +25,15 @@ import Subtitle from "../../components/Text/Subtitle";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { isButtonElement } from "react-router-dom/dist/dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { faFilePdf, faUserGear } from "@fortawesome/free-solid-svg-icons";
 import Cookies from "js-cookie";
 import FluidText from "../../components/Text/FluidText";
 import { Editor } from "@tinymce/tinymce-react";
 import ReactQuill, { Quill } from "react-quill";
 import Notes from "../../components/Data/Notes";
 import { useCookies } from "react-cookie";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+import { HoverTooltip } from "../../components/Text/Tooltip";
 
 export default function Project() {
   const params = useParams();
@@ -42,22 +45,34 @@ export default function Project() {
   const [project, setProject] = useState<ProjectType>(null);
   const [tasks, setTasks] = useState<TaskType[]>(null);
   const [clientsSelect, setClientsSelect] = useState<SelectDataType[]>([]);
+  const [managerSelect, setManagerSelect] = useState<SelectDataType[]>([]);
   const [websitesSelect, setWebsitesSelect] = useState<SelectDataType[]>([]);
 
   useEffect(() => {
     http_methods
       .fetch<ProjectType>(`/projects/${params.id}`)
-      .then(({ project, clientsSelect, websitesSelect }) => {
-        setProject(project);
-        setTasks(project.tasks);
-        setClientsSelect(clientsSelect);
-        setWebsitesSelect(websitesSelect);
-        let app = appData.apps.find(
-          (app) => app.id == appData.currentUser.userOptions.selectedAppId
-        );
-        setApp(app);
-      });
+      .then(
+        ({ project, clientsSelect, websitesSelect, projectManagerSelect }) => {
+          setProject(project);
+          setTasks(project.tasks);
+          setClientsSelect(clientsSelect);
+          setWebsitesSelect(websitesSelect);
+          setManagerSelect(projectManagerSelect);
+          let app = appData.apps.find(
+            (app) => app.id == appData.currentUser.userOptions.selectedAppId
+          );
+          setApp(app);
+        }
+      );
   }, []);
+
+  const updateProjectManager = (projectManagerId: string) => {
+    http_methods
+      .put<ProjectType>(`/projects/${project.id}/updateProjectManager`, {
+        projectManagerId,
+      })
+      .then((proj) => setProject({ ...proj }));
+  };
 
   const updateProjectClient = (clientId: string) => {
     http_methods
@@ -168,23 +183,109 @@ export default function Project() {
                 onEmpty="This project don't have any tasks yet. Create one!"
                 label={(task) => task.name}
                 entity="tasks"
-                items={tasks}
+                items={tasks.filter((t) => !t.completed)}
                 linkPrepend={`/projects/${params.id}`}
                 sortingItems={[{ label: "Name", value: "name" }]}
                 sortingDefaults={{ field: "name" }}
+                checkable={true}
+                onCheck={(task) => {
+                  let nTasks = tasks.map((t) => {
+                    if (task.id == t.id) {
+                      t.completed = task.completed;
+                    }
+                    return t;
+                  });
+                  setTasks(nTasks);
+                }}
+                additionalInfo={(t) => (
+                  <FlexboxGrid style={{ gap: "1rem" }}>
+                    {t.assignedTo && (
+                      <FlexboxGridItem>
+                        <HoverTooltip text="Laborer">
+                          <FontAwesomeIcon icon={faUserGear} />{" "}
+                          {t?.assignedTo?.name}
+                        </HoverTooltip>
+                      </FlexboxGridItem>
+                    )}
+                  </FlexboxGrid>
+                )}
                 onDelete={(task) => {
                   addNotification({
                     text: `Task ${task.name} was deleted`,
                     notificationProps: { type: "success" },
                   });
-                  let newTasks = tasks.filter((t) => t.id != task.id);
-                  setTasks(newTasks);
+                  let nTasks = tasks.filter((t) => t.id != task.id);
+                  setTasks(nTasks);
+                }}
+                buttons={{
+                  hasView: false,
+                  hasOptions:
+                    appData.currentUser.currentAppRole.permissions.projects
+                      .hasOptions,
+                  deleteable:
+                    appData.currentUser.currentAppRole.permissions.projects
+                      .deleteable,
                 }}
               />
+            )}
+            {tasks?.filter((t) => t.completed).length > 0 && (
+              <>
+                <Subtitle>Finished Tasks</Subtitle>
+                <CommonList<TaskType>
+                  onEmpty="This project don't have any tasks yet. Create one!"
+                  label={(task) => task.name}
+                  entity="tasks"
+                  items={tasks.filter((t) => t.completed)}
+                  linkPrepend={`/projects/${params.id}`}
+                  sortingItems={[{ label: "Name", value: "name" }]}
+                  sortingDefaults={{ field: "name" }}
+                  checkable={true}
+                  onCheck={(task) => {
+                    let nTasks = tasks.map((t) => {
+                      if (task.id == t.id) {
+                        t.completed = task.completed;
+                      }
+                      return t;
+                    });
+                    setTasks(nTasks);
+                    console.log("after set Tasks");
+                  }}
+                  onDelete={(task) => {
+                    addNotification({
+                      text: `Task ${task.name} was deleted`,
+                      notificationProps: { type: "success" },
+                    });
+                    let nTasks = tasks.filter((t) => t.id != task.id);
+                    setTasks(nTasks);
+                  }}
+                  buttons={{
+                    hasView: false,
+                    hasOptions: false,
+                    deleteable:
+                      appData.currentUser.currentAppRole.permissions.projects
+                        .deleteable,
+                  }}
+                />
+              </>
             )}
           </Col>
           <Col>
             <Subtitle>{project ? "Project informations" : ""}</Subtitle>
+
+            {project && (
+              <div style={{ marginBlock: "10px" }}>
+                <SelectPicker
+                  label={"Project manager: "}
+                  data={managerSelect}
+                  value={project?.manager?.id}
+                  onChange={updateProjectManager}
+                  disabled={
+                    !appData?.currentUser?.currentAppRole?.permissions?.projects
+                      .hasOptions
+                  }
+                />
+              </div>
+            )}
             <FluidText>
               {project?.startDate
                 ? `Start date: ${new Date(
@@ -206,7 +307,7 @@ export default function Project() {
                   data={clientsSelect}
                   value={project?.client?.id}
                   onChange={updateProjectClient}
-                  readOnly={
+                  disabled={
                     !appData?.currentUser?.currentAppRole?.permissions?.projects
                       .hasOptions
                   }
@@ -231,7 +332,7 @@ export default function Project() {
                   data={websitesSelect}
                   value={project?.website?.id}
                   onChange={updateProjectWebsite}
-                  readOnly={
+                  disabled={
                     !appData?.currentUser?.currentAppRole?.permissions?.projects
                       .hasOptions
                   }

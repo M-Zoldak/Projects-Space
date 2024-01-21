@@ -50,7 +50,7 @@ export default function FormComponent<T>({
             field.value = appData.currentUser.userOptions.selectedAppId;
           }
           if (field.type == "date") {
-            console.log(field.value);
+            // console.log(field.value);
             // try {
             field.value = field.value
               ? new Date(field.value)
@@ -58,7 +58,7 @@ export default function FormComponent<T>({
             // } catch (e) {
             //   field.value = new Date();
             // }
-            console.log(field.value);
+            // console.log(field.value);
             // field.value =
           }
           return field;
@@ -73,8 +73,8 @@ export default function FormComponent<T>({
       (data: DynamicallyFilledObject<string>, field: FormDataType) => {
         if (field.type == "date") {
           let date = new Date(field.value);
-          console.log(field.value);
-          console.log(date.getTime());
+          // console.log(field.value);
+          // console.log(date.getTime());
           data[field.name] = date.getTime().toString();
         } else {
           data[field.name] = field.value;
@@ -157,7 +157,7 @@ export default function FormComponent<T>({
         );
       }
       case "date": {
-        console.log(field.value);
+        // console.log(field.value);
         return (
           <Form.Group controlId={field.name} key={key}>
             <Form.ControlLabel>{field.label}</Form.ControlLabel>

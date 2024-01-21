@@ -81,7 +81,7 @@ class ContactPersonsController extends AbstractController {
     }
 
 
-    #[Route('/clients/{id}/contacts/{personId}', name: 'contact_person_update', methods: ["POST"])]
+    #[Route('/clients/{id}/contacts/{personId}', name: 'contact_person_update', methods: ["PUT"])]
     public function updateContactPerson(int $id, int $personId, Request $request): JsonResponse {
         $data = json_decode($request->getContent());
 

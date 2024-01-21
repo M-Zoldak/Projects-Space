@@ -2,14 +2,17 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\App;
 use App\Entity\Task;
 use App\Entity\User;
+use App\Entity\Project;
 use App\Enums\FormField;
 use App\Helpers\DateHelper;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
 use App\Repository\AppRepository;
 use App\Repository\TaskRepository;
+use App\Repository\UserRepository;
 use App\Utils\EntityCollectionUtil;
 use App\Repository\AppRoleRepository;
 use App\Repository\ProjectRepository;
@@ -26,27 +29,28 @@ class TasksController extends AbstractController {
         private TaskRepository $taskRepository,
         private ProjectRepository $projectRepository,
         private AppRepository $appRepository,
-        private AppRoleRepository $appRoleRepository
+        private AppRoleRepository $appRoleRepository,
+        private UserRepository $userRepository
     ) {
     }
 
     #[Route('/projects/{id}/tasks/create', name: 'tasks_create_form', methods: ["GET"])]
-    public function addForm(Request $request): JsonResponse {
-        $formBuilder = $this->addAndEditForm();
+    public function addForm(Request $request, #[CurrentUser] ?User $user): JsonResponse {
+        $app = $user->getUserOptions()->getSelectedApp();
+        $formBuilder = $this->addAndEditForm($app);
         return new JsonResponse($formBuilder->getFormData());
     }
 
     #[Route('/projects/{id}/tasks', name: 'tasks_create', methods: ["POST"])]
-    public function create(int $id, Request $request): JsonResponse {
+    public function create(Project $project, Request $request): JsonResponse {
         $data = json_decode($request->getContent());
-        // $app = $this->appRepository->findOneById($data->appId);
-        $project = $this->projectRepository->findOneById($id);
 
         $task = new Task();
         $task->setName($data->name);
         $task->setStartDate(DateHelper::convertToDate($data->startDate));
         $task->setEndDate(DateHelper::convertToDate($data->endDate));
         $task->setCategory("task");
+        $task->setAssignedTo($this->userRepository->findOneById($data->assignedTo));
         $project->addTask($task);
         $this->projectRepository->save($project);
 
@@ -54,7 +58,7 @@ class TasksController extends AbstractController {
     }
 
     #[Route('/projects/{id}/tasks', name: 'tasks_overview', methods: ["GET"])]
-    public function list(Request $request, #[CurrentUser] ?User $user): JsonResponse {
+    public function list(Project $project, Request $request, #[CurrentUser] ?User $user): JsonResponse {
         $app = $user->getUserOptions()->getSelectedApp();
         $tasks = $app->getProjects();
         $tasksData = EntityCollectionUtil::createCollectionData($tasks);
@@ -77,11 +81,38 @@ class TasksController extends AbstractController {
         return new JsonResponse($taskData);
     }
 
-    private function addAndEditForm(?Task $task = null): FormBuilder {
+    #[Route('/projects/{id}/tasks/{taskId}/updateCheckbox', name: 'task_update_completed', methods: ["PUT"])]
+    public function updateCheckbox(string $taskId, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+        $task = $this->taskRepository->findOneById($taskId);
+        $task->setCompleted($data->completed);
+
+        $this->taskRepository->save($task);
+
+        return new JsonResponse($task->getData());
+    }
+
+    #[Route('/userTasks', name: 'user_active_tasks', methods: ["GET"])]
+    public function userActiveTasks(Request $request, #[CurrentUser] ?User $user): JsonResponse {
+
+        // $apps = $user->getApps();
+        // $projects = $apps->map(fn (App $app) => $app->getProjects());
+
+        // $tasks = 
+        // $taskData = $task->getData();
+
+        // $this->taskRepository->delete($task);
+        return new JsonResponse();
+    }
+
+    private function addAndEditForm(App $app, ?Task $task = null): FormBuilder {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "Task name", FormField::TEXT, ["value" => $task?->getName()]);
+        $formBuilder->add("assignedTo", "Assigned employee", FormField::SELECT, ["value" => $task?->getAssignedTo()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getUsers(), "fullName")]);
         $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $task?->getStartDate()?->format("Y-m-d")]);
         $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $task?->getEndDate()?->format("Y-m-d")]);
+        $formBuilder->add("description", "Task name", FormField::TEXT, ["value" => $task?->getDescription()]);
+
         $formBuilder->createAppIdField();
         return $formBuilder;
     }

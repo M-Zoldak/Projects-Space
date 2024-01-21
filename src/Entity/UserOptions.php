@@ -13,7 +13,7 @@ class UserOptions {
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'userOptions', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "SET NULL")]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'userOptions')]

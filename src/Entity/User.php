@@ -45,20 +45,20 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $birthDate = null;
 
-    #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'users', cascade: ["persist", "remove"])]
     private Collection $apps;
 
     #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
     private Collection $appRoles;
 
-    #[ORM\OneToOne(mappedBy: 'user', cascade: ["persist"])]
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ["persist"], orphanRemoval: true)]
     private ?UserOptions $userOptions = null;
 
     #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'invitedUsers')]
     #[ORM\JoinTable(name: "apps_users_invitation")]
     private Collection $appInvitations;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserNotification::class, cascade: ["persist"], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserNotification::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     private Collection $notifications;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: App::class)]
@@ -66,6 +66,12 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Note::class)]
     private Collection $notes;
+
+    #[ORM\OneToMany(mappedBy: 'assignedTo', targetEntity: Task::class)]
+    private Collection $tasks;
+
+    #[ORM\OneToMany(mappedBy: 'manager', targetEntity: Project::class)]
+    private Collection $projectsManagerFor;
 
     public function __construct() {
         parent::__construct();
@@ -76,6 +82,8 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         $this->notifications = new ArrayCollection();
         $this->ownedApps = new ArrayCollection();
         $this->notes = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
+        $this->projectsManagerFor = new ArrayCollection();
     }
 
     public function getData(App $app = null): array {
@@ -365,13 +373,11 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     /**
      * @return Collection<int, Note>
      */
-    public function getNotes(): Collection
-    {
+    public function getNotes(): Collection {
         return $this->notes;
     }
 
-    public function addNote(Note $note): static
-    {
+    public function addNote(Note $note): static {
         if (!$this->notes->contains($note)) {
             $this->notes->add($note);
             $note->setUser($this);
@@ -380,12 +386,71 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this;
     }
 
-    public function removeNote(Note $note): static
-    {
+    public function removeNote(Note $note): static {
         if ($this->notes->removeElement($note)) {
             // set the owning side to null (unless already changed)
             if ($note->getUser() === $this) {
                 $note->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getTasks(): Collection
+    {
+        return $this->tasks;
+    }
+
+    public function addTask(Task $task): static
+    {
+        if (!$this->tasks->contains($task)) {
+            $this->tasks->add($task);
+            $task->setAssignedTo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTask(Task $task): static
+    {
+        if ($this->tasks->removeElement($task)) {
+            // set the owning side to null (unless already changed)
+            if ($task->getAssignedTo() === $this) {
+                $task->setAssignedTo(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function getProjectsManagerFor(): Collection
+    {
+        return $this->projectsManagerFor;
+    }
+
+    public function addProjectsManagerFor(Project $projectsManagerFor): static
+    {
+        if (!$this->projectsManagerFor->contains($projectsManagerFor)) {
+            $this->projectsManagerFor->add($projectsManagerFor);
+            $projectsManagerFor->setManager($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectsManagerFor(Project $projectsManagerFor): static
+    {
+        if ($this->projectsManagerFor->removeElement($projectsManagerFor)) {
+            // set the owning side to null (unless already changed)
+            if ($projectsManagerFor->getManager() === $this) {
+                $projectsManagerFor->setManager(null);
             }
         }
 

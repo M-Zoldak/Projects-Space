@@ -34,9 +34,9 @@ function Login() {
 
   const login = async () => {
     await http_methods
-      .notTokenizedpost<any>("/login", formValue)
+      .post<any>("/login", formValue)
       .then((data) => {
-        setCookie("token", data.token, { maxAge: 1800, secure: true });
+        setCookie("token", data.token, { maxAge: 1800 });
         initializeAppData(data.appData.apps, data.appData.user);
       })
       .then(() => {

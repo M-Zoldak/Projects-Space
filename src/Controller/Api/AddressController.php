@@ -79,7 +79,7 @@ class AddressController extends AbstractController {
     }
 
 
-    #[Route('/clients/{id}/addresses/{addressId}/update', name: 'address_update', methods: ["POST"])]
+    #[Route('/clients/{id}/addresses/{addressId}/update', name: 'address_update', methods: ["PUT"])]
     public function updateAddress(int $id, int $addressId, Request $request): JsonResponse {
         $data = json_decode($request->getContent());
 

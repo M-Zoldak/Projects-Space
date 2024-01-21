@@ -6,15 +6,19 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ContactPersonRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ContactPersonRepository::class)]
 class ContactPerson  extends Entity {
+    #[Assert\NotBlank()]
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
 
+    #[Assert\NotBlank()]
     #[ORM\Column(length: 255)]
     private ?string $lastName = null;
 
+    #[Assert\NotBlank()]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 

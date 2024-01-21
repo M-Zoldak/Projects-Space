@@ -18,14 +18,7 @@ export default function ProjectOptions() {
   const [project, setProject] = useState(null);
 
   useEffect(() => {
-    // http_methods
-    //   .fetch<ProjectType>(`/projects/${params.id}`)
-    //   .then((data) => {
-    //     setProject(data);
-    //   })
-    //   .catch((err: Error) => {
-    //     addNotification({ text: JSON.parse(err.message).message });
-    //   });
+    http_methods.fetch(`/projects/${params.id}`).then(setProject);
     setLoaded(true);
   }, []);
 

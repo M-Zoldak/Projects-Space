@@ -2,10 +2,10 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProjectStateRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: ProjectStateRepository::class)]
 class ProjectState extends Entity {
@@ -26,7 +26,7 @@ class ProjectState extends Entity {
         parent::__construct();
         $this->setName($name);
         $this->setApp($app);
-        $this->setPosition($this->app->getProjectStates()->count() + 1);
+        $this->setPosition($this->app->getProjectStates()->count());
         $this->projects = new ArrayCollection();
     }
 
@@ -72,13 +72,11 @@ class ProjectState extends Entity {
     /**
      * @return Collection<int, Project>
      */
-    public function getProjects(): Collection
-    {
+    public function getProjects(): Collection {
         return $this->projects;
     }
 
-    public function addProject(Project $project): static
-    {
+    public function addProject(Project $project): static {
         if (!$this->projects->contains($project)) {
             $this->projects->add($project);
             $project->setProjectState($this);
@@ -87,8 +85,7 @@ class ProjectState extends Entity {
         return $this;
     }
 
-    public function removeProject(Project $project): static
-    {
+    public function removeProject(Project $project): static {
         if ($this->projects->removeElement($project)) {
             // set the owning side to null (unless already changed)
             if ($project->getProjectState() === $this) {

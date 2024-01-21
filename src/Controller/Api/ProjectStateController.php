@@ -80,18 +80,16 @@ class ProjectStateController extends AbstractController {
         $data = json_decode($request->getContent());
         $app = $this->appRepository->findOneById($id);
         $projectStates = $app->getProjectStates();
-        // dd($data);
+
         foreach ($data as $projectStateObj) {
-            $projectState = $projectStates->findFirst(fn ($i, ProjectState &$ps) => $ps->getId() == $projectStateObj->id);
-            // dd($projectState);
+            $projectState = $projectStates->findFirst(fn ($i, ProjectState $ps) => $ps->getId() == $projectStateObj->id);
 
             $projectState->setPosition($projectStateObj->position);
             $this->projectStateRepository->save($projectState);
         };
 
-        // $app->addProjectState($projectState);
+        $app = $this->appRepository->findOneById($id);
 
-        // $this->appRepository->save($app);
-        return new JsonResponse("success");
+        return new JsonResponse(EntityCollectionUtil::createCollectionData($app->getProjectStates()));
     }
 }

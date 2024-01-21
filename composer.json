@@ -103,7 +103,7 @@
       "@auto-scripts"
     ],
     "start": [
-      "symfony server:start 192.168.0.232:8005"
+      "symfony server:start 192.168.0.232"
     ]
   },
   "conflict": {

@@ -12,6 +12,7 @@ export default function Notes({ notes, postUrl }: NotesType) {
   const [notesInside, setNotes] = useState(notes);
 
   const addNote = () => {
+    setNewNote("");
     http_methods.post<NoteType>(postUrl, { text: newNote }).then((note) => {
       setNotes([note, ...notesInside]);
     });
@@ -45,24 +46,28 @@ export default function Notes({ notes, postUrl }: NotesType) {
       </Col>
       <Col style={{ width: "100%", paddingLeft: "15px", paddingRight: "15px" }}>
         <List bordered>
-          {notesInside.map((note) => {
-            let date = new Date(note.createdAt.date);
-            return (
-              <List.Item>
-                <h6 style={{ display: "inline" }}>{`${note.user.name}`} </h6>
-                <p
-                  style={{
-                    display: "inline",
-                    color: "#777",
-                    marginLeft: ".2rem",
-                  }}
-                >{`${date.toLocaleDateString("pl")} ${date.toLocaleTimeString(
-                  "pl"
-                )}`}</p>
-                <FluidText dangerouslySetInnerHTML={{ __html: note.text }} />
-              </List.Item>
-            );
-          })}
+          {notesInside
+            .sort((e1, e2) =>
+              new Date(e1.createdAt.date) < new Date(e2.createdAt.date) ? 1 : 0
+            )
+            .map((note, index) => {
+              let date = new Date(note.createdAt.date);
+              return (
+                <List.Item key={index}>
+                  <h6 style={{ display: "inline" }}>{`${note.user.name}`} </h6>
+                  <p
+                    style={{
+                      display: "inline",
+                      color: "#777",
+                      marginLeft: ".2rem",
+                    }}
+                  >{`${date.toLocaleDateString("pl")} ${date.toLocaleTimeString(
+                    "pl"
+                  )}`}</p>
+                  <FluidText dangerouslySetInnerHTML={{ __html: note.text }} />
+                </List.Item>
+              );
+            })}
         </List>
       </Col>
     </>

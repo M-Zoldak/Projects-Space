@@ -19,4 +19,5 @@ export type ProjectType = DefaultType & {
   startDate: { date: string };
   endDate: { date: string };
   notes: Array<NoteType>;
+  manager: UserType;
 } & PermissionsType;

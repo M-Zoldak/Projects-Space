@@ -41,8 +41,11 @@ class Project extends Entity {
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $endDate = null;
 
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Note::class, cascade: ["persist", "remove"])]
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Note::class, cascade: ["persist", "remove"], orphanRemoval: true)]
     private Collection $note;
+
+    #[ORM\ManyToOne(inversedBy: 'projectsManagerFor')]
+    private ?User $manager = null;
 
     public function __construct(App $app, string $name) {
         parent::__construct();
@@ -64,7 +67,8 @@ class Project extends Entity {
             "projectState" => $this->getProjectState()?->getData(),
             "startDate" => $this->getStartDate(),
             "endDate" => $this->getEndDate(),
-            "notes" => EntityCollectionUtil::createCollectionData($this->getNotes())
+            "notes" => EntityCollectionUtil::createCollectionData($this->getNotes()),
+            "manager" => $this->getManager()?->getData()
         ];
     }
 
@@ -198,6 +202,16 @@ class Project extends Entity {
                 $note->setProject(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getManager(): ?User {
+        return $this->manager;
+    }
+
+    public function setManager(?User $manager): static {
+        $this->manager = $manager;
 
         return $this;
     }

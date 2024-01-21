@@ -53,4 +53,8 @@ abstract class EntityRepository extends ServiceEntityRepository {
         $this->entityManager->remove($object);
         $this->entityManager->flush();
     }
+
+    public function getConnection() {
+        return parent::getEntityManager()->getConnection();
+    }
 }

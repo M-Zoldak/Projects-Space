@@ -9,6 +9,7 @@ use App\Enums\FormField;
 use App\Classes\FormBuilder;
 use OpenApi\Attributes as OA;
 use App\Entity\WebsiteHosting;
+use App\Helpers\ValidatorHelper;
 use App\Repository\AppRepository;
 use App\Utils\EntityCollectionUtil;
 use App\Repository\ClientRepository;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[OA\Tag(name: 'Websites')]
@@ -39,16 +41,23 @@ class WebsitesController extends AbstractController {
     }
 
     #[Route('/websites', name: 'websites_create', methods: ["POST"])]
-    public function create(Request $request): JsonResponse {
+    public function create(Request $request, ValidatorInterface $validator): JsonResponse {
         $data = json_decode($request->getContent());
+
+        $website = new Website();
+        $website->setDomain($data->domain);
+        $errors = ValidatorHelper::validateObject($website, $validator);
+
+        if ($errors) {
+            return new JsonResponse($errors, 422);
+        }
+
 
         $app = $this->appRepository->findOneById($data->appId);
         $client = $this->clientRepository->findOneById($data->client);
         $websiteHosting = $app->getWebsiteOptions()->getHostings()->findFirst(fn (int $index, WebsiteHosting $h) => $h->getId() == $data->hosting);
 
-        $website = new Website();
         $website->setHosting($websiteHosting);
-        $website->setDomain($data->domain);
         $website->setClient($client);
 
         $app->addWebsite($website);

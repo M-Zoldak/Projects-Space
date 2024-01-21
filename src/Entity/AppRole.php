@@ -19,7 +19,7 @@ class AppRole extends Entity {
     #[ORM\ManyToOne(inversedBy: 'roles', cascade: ["persist"])]
     private ?App $app = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'appRoles')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'appRoles', cascade: ["persist", "remove"])]
     private Collection $users;
 
     #[ORM\Column(options: ["default" => true])]

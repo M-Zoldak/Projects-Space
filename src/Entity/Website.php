@@ -6,10 +6,13 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\WebsiteRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: WebsiteRepository::class)]
 class Website extends Entity {
 
+    #[Assert\NotBlank()]
+    #[Assert\Regex("/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/", message: "Domain should contain only letters and at least one dot. No spaces allowed.")]
     #[ORM\Column(length: 255)]
     private ?string $domain = null;
 

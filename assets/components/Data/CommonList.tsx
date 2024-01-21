@@ -2,8 +2,11 @@ import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Button,
+  Checkbox,
   Col,
   FlexboxGrid,
+  Input,
+  InputGroup,
   List,
   ListItemProps,
   Modal,
@@ -16,17 +19,20 @@ import { http_methods } from "../../Functions/HTTPMethods";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
+import { ValueType } from "rsuite/esm/Checkbox";
 
 export type CommonListItemProps = {
   id: string;
   name: string;
   props?: ListItemProps;
+  completed?: boolean;
 };
 
 type CommonListProps<T> = {
   items: Array<CommonListItemProps>;
   entity: string;
   onDelete: (item: T) => void;
+  onCheck?: (item: T, value: boolean) => void;
   buttons?: ActionButtonsType;
   inViewBacklink?: string;
   additionalInfo?: (item: T) => ReactElement;
@@ -44,6 +50,8 @@ type CommonListProps<T> = {
   editableLabel?: boolean;
   onEditLabel?: (name: string, item: T) => void;
   filters?: Array<{ value: string; label: string }>;
+  search?: { label: string; value: string };
+  checkable?: boolean;
 };
 
 export default function CommonList<T>({
@@ -71,6 +79,9 @@ export default function CommonList<T>({
   editableLabel,
   onEditLabel,
   filters,
+  search,
+  checkable = false,
+  onCheck,
 }: CommonListProps<T>) {
   const { appData } = useAppDataContext();
   const { addNotification } = useNotificationsContext();
@@ -83,6 +94,7 @@ export default function CommonList<T>({
   const [sortDirection, setSortDirection] = useState(sortingDefaults.direction);
   const [currentFilter, setCurrentFilter] = useState("none");
   const [filteredValue, setFilteredValue] = useState("none");
+  const [searchValue, setSearchValue] = useState("");
 
   const destroyObject = () => {
     http_methods
@@ -251,7 +263,7 @@ export default function CommonList<T>({
           searchable={false}
           size="sm"
           label="Filter"
-          data={[{ label: "None", value: "none" }, ...filters]}
+          data={[{ label: "Off", value: "none" }, ...filters]}
           onChange={setCurrentFilter}
           value={currentFilter}
           defaultValue={"none"}
@@ -268,7 +280,7 @@ export default function CommonList<T>({
             defaultValue={"none"}
             onClean={() => setFilteredValue("none")}
             data={[
-              { label: "None", value: "none" },
+              { label: "Off", value: "none" },
               ...items
                 .map((i: any) => {
                   if (
@@ -310,10 +322,28 @@ export default function CommonList<T>({
     );
   };
 
+  const searchFilter = (item: CommonListItemProps) => {
+    return item.name.toLowerCase().includes(searchValue.toLowerCase());
+  };
+
+  const renderSearch = () => {
+    if (!search?.value) return;
+
+    return (
+      <FlexboxGrid align="middle" style={{ padding: "14px 20px", gap: "1rem" }}>
+        <InputGroup>
+          <InputGroup.Addon>Search: </InputGroup.Addon>
+          <Input value={searchValue} onChange={setSearchValue} />
+        </InputGroup>
+      </FlexboxGrid>
+    );
+  };
+
   return (
     <List hover bordered sortable={sortable} onSort={onSort}>
-      {sortingItems && renderSorting()}
+      {sortingItems && items.length > 0 && renderSorting()}
       {filters && renderFilter()}
+      {search && items.length > 0 && renderSearch()}
       {items?.length > 0 ? (
         items
           .filter((i: any) => {
@@ -335,7 +365,30 @@ export default function CommonList<T>({
           .map((item: CommonListItemProps, index: number) => (
             <List.Item key={item.id.toString()} index={index}>
               <FlexboxGrid align="middle" justify="space-between">
-                <FlexboxGridItem as={Col} colspan={24} md={9}>
+                {checkable && (
+                  <FlexboxGridItem as={Col}>
+                    <Checkbox
+                      value={item.completed ? 1 : 0}
+                      checked={item.completed}
+                      onChange={async (val, checked) => {
+                        await http_methods.put(
+                          `${linkPrepend}/${entity}/${item.id}/updateCheckbox`,
+                          {
+                            completed: checked,
+                          }
+                        );
+                        item.completed = checked;
+                        onCheck(item as T, checked);
+                      }}
+                    />
+                  </FlexboxGridItem>
+                )}
+                <FlexboxGridItem
+                  as={Col}
+                  colspan={24}
+                  md={9}
+                  style={{ marginRight: checkable ? "auto" : "" }}
+                >
                   <h5>
                     {label(item as T)}
                     {editableLabel ? (

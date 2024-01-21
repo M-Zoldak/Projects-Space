@@ -66,8 +66,8 @@ export default function Options() {
         setHostingsList(data.app.websiteOptions.hostings);
         setDefaultRoleId(data.app.defaultRoleId);
         setProjectStatesList(
-          data.app.projectStates.sort((i1, i2) =>
-            i1.position > i2.position ? 1 : 0
+          data.app.projectStates.sort((el1, el2) =>
+            el1.position > el2.position ? 1 : 0
           )
         );
         setAppName(data.app.name);
@@ -276,15 +276,28 @@ export default function Options() {
         name,
       })
       .then((projectState) => {
-        setProjectStatesList([...projectStatesList, projectState]);
+        setProjectStatesList(
+          [...projectStatesList, projectState].sort((el1, el2) =>
+            el1.position > el2.position ? 1 : 0
+          )
+        );
+      })
+      .then(() => {
+        updateProjectStatePositions();
       });
   };
 
   const updateProjectStatePositions = () => {
-    http_methods.put(
-      `/apps/${app.id}/updateProjectStatesPosition`,
-      projectStatesList.map((el, index) => ({ ...el, position: index }))
-    );
+    http_methods
+      .put<ProjectStateType[]>(
+        `/apps/${app.id}/updateProjectStatesPosition`,
+        projectStatesList.map((el, index) => ({ ...el, position: index }))
+      )
+      .then((res) =>
+        setProjectStatesList(
+          res.sort((el1, el2) => (el1.position > el2.position ? 1 : 0))
+        )
+      );
   };
 
   const handleSortEnd = ({
