@@ -38,7 +38,6 @@ class PDF {
         // $this->injectPhotos();
         // $this->addStylesheet();
         $this->createHeader();
-        $this->createFooter();
         $this->setContent();
     }
 
@@ -68,13 +67,32 @@ class PDF {
     }
 
     private function generateProjectInfos() {
-        $text = "";
-        $text .= "Tasks count: " . $this->project->getTasks()->count();
-        $text .= $this->generateTaskInfos($this->project->getTasks());
+        $text = "<h3>Project manager: " . $this->project->getManager()->getFullName() . '</h3>';
+        $text .= '<p>Project state: ' . $this->project->getProjectState()->getName() .  '</p><br/>';
+        $text .= $this->generateTaskInfos();
         return $text;
     }
 
-    private function generateTaskInfos() {
+    private function generateTaskInfos(): string {
+
+        $text = "Tasks count: " . $this->project->getTasks()->count();
+        $tasks = $this->project->getTasks()->toArray();
+        $tasksTexts = array_map([__CLASS__, "generateTaskInfo"], $tasks, array_keys($tasks));
+        $text .= implode($tasksTexts);
+        // $text .= $this->project->getTasks();
+        return $text;
+    }
+
+    private function generateTaskInfo(Task $task, int $index): string {
+        $index++;
+        $text = "<span><h4 " . self::inlineStyle('display: inline; float:left;') . ">$index.{$task->getName()}</h4></span>";
+        $assignedToTask = $task->getAssignedTo();
+        $text .=
+            $task->isCompleted() ?
+            "  <span " . self::inlineStyle('display: inline; float:left; padding: 4px 4px; background-color: #808080; color: white;') . ">At work</span>" :
+            "  <span " . self::inlineStyle('display: inline; float:left; padding: 4px 4px; background-color: lime-green; color: 3BB143') . ">Done</span>";
+        $text .= "<span><h5>Laborer: </h5>" . ($assignedToTask ? $task->getAssignedTo()?->getFullName() . "({$task->getAssignedTo()->getEmail()})" : "No one assigned to task") . "</span>";
+        return $text;
     }
 
     private function createHeader() {
@@ -84,81 +102,29 @@ class PDF {
         $header =
             '<table width="100%">
                 <tr>
-                    <td ' . self::inlineStyle('width: 50%; vertical-align: top;') . '>
-                        <h1 ' . self::inlineStyle('font-size: 44px; line-height: 44px;') . '>Project report</h1>
+                    <td ' . self::inlineStyle('width: 100%; vertical-align: top;') . '>
+                        <h1 ' . self::inlineStyle('font-size: 34px; line-height: 34px;') . '>' . $this->project->getName() . '</h1>
                         ' . self::tableGap() . '
-                        <h3>' . $this->project->getName() . '</h3>
                         </td>
-                    <td ' . self::inlineStyle('width: 50%; vertical-align: top;') . '>
-                        <img height="45px" src="var:">
-                    </td>
                 </tr>
                     <tr><td></td></tr>
                     <tr><td></td></tr>
                 <tr>
-                    
                     <td ' . self::inlineStyle('text-align: right; width: 50%; font-size: 18px; vertical-align: bottom;') . '>
                     <table width="100%">
                         <tr>
-                            <td ' . self::inlineStyle('text-align: left; width: 50%;') . '>Export date:' . $currentDate . '</td>
-                            <td ' . self::inlineStyle('text-align: right; width: 50%;') . '>{PAGENO}</td>
+                            <td ' . self::inlineStyle('text-align: left; width: 50%;') . '><p>Date: ' . $currentDate . '</p></td>
+                            <td ' . self::inlineStyle('text-align: right; width: 50%;') . '><p>{PAGENO}</p></td>
                         </tr>
                     </table>
                     </td>
                 </tr>
                 <tr>
                     <td ' . self::inlineStyle('border-bottom: 1px solid lightgrey; width: 85%;') . '></td>
-                    <td ' . self::inlineStyle('border-bottom: 2px solid black; width: 15%;') . '></td>
                 </tr>
             </table>';
 
         $this->pdf->setHtmlHeader($header);
-    }
-
-    private function createFooter() {
-        $this->pdf->setAutoBottomMargin = 'pad';
-
-        $textAlign = 'left';
-        $fontSize = 10;
-
-        $styles = self::inlineStyle("text-align: {$textAlign}; font-size: {$fontSize}; font-weight: 300; line-height: 16px");
-        $imgStyles = self::inlineStyle('height: 95px');
-        $footer = "<table width='100%'>
-                    <tr>
-                        <td width='28%' {$styles}>
-                            <b> Digital- & Filmagentur</b><br>
-                            Inhabergeführt von Christoph Voigt<br>
-                            Bachelor of Engineering<br>
-                            Freiberuflicher Designer<br><br><br><br>
-                        </td>
-                        <td width='22%' {$styles}>
-                            Eibenberger Straße 25a,<br>
-                            09235 Burkhardtsdorf<br>
-                            Telefon 03721 33 99 20<br>
-                            E-Mail kontakt@.de<br><br><br><br>
-                        </td>
-                        <td width='16%' {$styles}>
-                            UST-IDNR<br>
-                            DE815394632<br>
-                            Steuernummer<br>
-                            224/284/01372<br><br><br><br>
-                        </td>
-                        <td width='34%' align='right'>
-                            <table>
-                                <tr " . self::inlineStyle('text-align:right') . ">
-                                    <td>
-                                        <img src='var:contao' {$imgStyles}>
-                                    </td>
-                                    <td>
-                                        <img src='var:expert' {$imgStyles}>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>";
-
-        $this->pdf->setHTMLFooter($footer);
     }
 
     private function addFonts(): array {

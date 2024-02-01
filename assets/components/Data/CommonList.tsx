@@ -405,7 +405,7 @@ export default function CommonList<T>({
                     {additionalInfo(item as T)}
                   </FlexboxGridItem>
                 )}
-                <FlexboxGridItem as={Col} style={{ alignSelf: "end" }}>
+                <FlexboxGridItem as={Col}>
                   {ownButtons ? (
                     <FlexboxGrid className="buttons_container">
                       {ownButtons(item as T)}
