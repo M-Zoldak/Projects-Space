@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use DateTime;
 use Mpdf\Mpdf;
 use App\Entity\App;
 use App\Classes\PDF;
@@ -62,6 +63,10 @@ class ProjectsController extends AbstractController {
     public function create(Request $request): JsonResponse {
         $data = json_decode($request->getContent());
         $app = $this->appRepository->findOneById($data->appId);
+
+        if (empty($data->name)) {
+            return new JsonResponse((object)["name" => "Name field may not be empty"], 422);
+        }
 
         $project = new Project($app, $data->name);
 
@@ -128,6 +133,10 @@ class ProjectsController extends AbstractController {
         $data = json_decode($request->getContent());
         // dd($data);
         $app = $this->appRepository->findOneById($data->appId);
+
+        if (empty($data->name)) {
+            return new JsonResponse((object)["name" => "Name field may not be empty"], 422);
+        }
 
         $client = $this->clientRepository->findOneById($data->client);
         if ($client) $project->setClient($client);
@@ -269,8 +278,8 @@ class ProjectsController extends AbstractController {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "Project name", FormField::TEXT, ["value" => $project?->getName() ?? ""]);
         $formBuilder->add("manager", "Project manager", FormField::SELECT, ["value" => $project?->getManager()->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getUsers(), "fullName")]);
-        $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $project?->getStartDate()?->format("Y-m-d")  ?? ""]);
-        $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $project?->getEndDate()?->format("Y-m-d") ?? ""]);
+        $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $project?->getStartDate()?->format("Y-m-d")  ?? (new DateTime())->format("Y-m-d")]);
+        $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $project?->getEndDate()?->format("Y-m-d") ?? (new DateTime())->modify("+1 month")->format("Y-m-d")]);
         $formBuilder->add("client", "Client", FormField::SELECT, ["value" => $project?->getClient()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getClients(), "name")]);
         $formBuilder->add("website", "Website", FormField::SELECT, ["value" => $project?->getWebsite()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getWebsites(), "domain")]);
 

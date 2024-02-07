@@ -90,7 +90,7 @@ class PDF {
         $text .=
             $task->isCompleted() ?
             "  <span " . self::inlineStyle('display: inline; float:left; padding: 4px 4px; background-color: #808080; color: white;') . ">At work</span>" :
-            "  <span " . self::inlineStyle('display: inline; float:left; padding: 4px 4px; background-color: lime-green; color: 3BB143') . ">Done</span>";
+            "  <span " . self::inlineStyle('display: inline; float:left; padding: 4px 4px; background-color: #7DCD85; color: black') . ">Done</span>";
         $text .= "<span><h5>Laborer: </h5>" . ($assignedToTask ? $task->getAssignedTo()?->getFullName() . "({$task->getAssignedTo()->getEmail()})" : "No one assigned to task") . "</span>";
         return $text;
     }

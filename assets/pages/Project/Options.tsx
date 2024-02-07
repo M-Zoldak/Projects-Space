@@ -18,29 +18,28 @@ export default function ProjectOptions() {
   const [project, setProject] = useState(null);
 
   useEffect(() => {
+    setLoaded(false);
     http_methods.fetch(`/projects/${params.id}`).then(setProject);
     setLoaded(true);
   }, []);
 
   return (
     <AppLayout
-      title={project ? `${project.name} options` : "Loading..."}
-      activePage="projects"
+      title={project ? `${project?.project.name} options` : "Loading..."}
+      activePage="Projects"
     >
       <Backlink link={`/projects`} />
 
       <ContentLoader loaded={loaded}>
         <FormComponent<ProjectType>
           entity="projects"
-          // updatePath={}
-          // prependQuery={`/clients/${params.id}`}
           updatePath={{ id: params.id }}
           onSuccess={(project) => {
             // setAddress(address);
-            // addNotification({
-            //   text: `Address was succesfully updated.`,
-            //   notificationProps: { type: "success" },
-            // });
+            addNotification({
+              text: `Project was succesfully updated.`,
+              notificationProps: { type: "success" },
+            });
           }}
         />
       </ContentLoader>

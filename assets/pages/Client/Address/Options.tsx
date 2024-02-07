@@ -23,9 +23,7 @@ export default function AddressOptions() {
   useEffect(() => {
     http_methods
       .fetch<AddressType>(`/clients/${params.id}/addresses/${params.addressId}`)
-      .then((data) => {
-        setAddress(data);
-      })
+      .then(setAddress)
       .catch((err: Error) => {
         addNotification({ text: "test" });
       });

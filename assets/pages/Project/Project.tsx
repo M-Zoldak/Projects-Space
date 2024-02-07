@@ -180,7 +180,11 @@ export default function Project() {
             <Subtitle>Tasks</Subtitle>
             {tasks && (
               <CommonList<TaskType>
-                onEmpty="This project don't have any tasks yet. Create one!"
+                onEmpty={
+                  tasks.length > 0
+                    ? "All tasks are done! Great Job!"
+                    : "This project don't have any tasks yet. Create one!"
+                }
                 label={(task) => task.name}
                 entity="tasks"
                 items={tasks.filter((t) => !t.completed)}

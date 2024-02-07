@@ -113,7 +113,7 @@ export default function ProjectsList() {
             sortingItems={[
               { label: "Project name", value: "name" },
               { label: "Project state", value: ["projectState", "position"] },
-              { label: "Project manager", value: ["manager", "firstName"] },
+              { label: "Project manager", value: ["manager", "name"] },
               { label: "Client", value: ["client", "name"] },
               { label: "Start date", value: ["startDate", "date"] },
               { label: "End date", value: ["endDate", "date"] },

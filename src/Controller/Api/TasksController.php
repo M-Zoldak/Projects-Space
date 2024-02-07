@@ -46,6 +46,11 @@ class TasksController extends AbstractController {
         $data = json_decode($request->getContent());
 
         $task = new Task();
+
+        if (empty($data->name)) {
+            return new JsonResponse((object)["name" => "Name field may not be empty"], 422);
+        }
+
         $task->setName($data->name);
         $task->setStartDate(DateHelper::convertToDate($data->startDate));
         $task->setEndDate(DateHelper::convertToDate($data->endDate));
@@ -57,6 +62,15 @@ class TasksController extends AbstractController {
         return new JsonResponse($task->getData());
     }
 
+
+    #[Route('/projects/{id}/tasks/{taskId}/options', name: 'task_options', methods: ["GET"])]
+    public function options(Project $project, int $taskId, Request $request, #[CurrentUser] ?User $user): JsonResponse {
+        $app = $user->getUserOptions()->getSelectedApp();
+        $task = $this->taskRepository->findOneById($taskId);
+        $formBuilder = $this->addAndEditForm($app, $task);
+        return new JsonResponse($formBuilder->getFormData());
+    }
+
     #[Route('/projects/{id}/tasks', name: 'tasks_overview', methods: ["GET"])]
     public function list(Project $project, Request $request, #[CurrentUser] ?User $user): JsonResponse {
         $app = $user->getUserOptions()->getSelectedApp();
@@ -64,6 +78,27 @@ class TasksController extends AbstractController {
         $tasksData = EntityCollectionUtil::createCollectionData($tasks);
 
         return new JsonResponse($tasksData);
+    }
+
+    #[Route('/projects/{id}/tasks/{taskId}', name: 'task_update', methods: ["PUT"])]
+    public function update(int $id, int $taskId, Request $request): JsonResponse {
+        $data = json_decode($request->getContent());
+        // dd($taskId);
+        $task = $this->taskRepository->findOneById($taskId);
+
+        if (empty($data->name)) {
+            return new JsonResponse((object)["name" => "Name field may not be empty"], 422);
+        }
+
+        $task->setName($data->name);
+        $task->setStartDate(DateHelper::convertToDate($data->startDate));
+        $task->setEndDate(DateHelper::convertToDate($data->endDate));
+        $task->setCategory("task");
+        $task->setAssignedTo($this->userRepository->findOneById($data->assignedTo));
+        // $project->addTask($task);
+        $this->taskRepository->save($task);
+
+        return new JsonResponse($task->getData());
     }
 
     #[Route('/projects/{id}/tasks/{taskId}', name: 'tasks', methods: ["GET"])]
@@ -108,10 +143,10 @@ class TasksController extends AbstractController {
     private function addAndEditForm(App $app, ?Task $task = null): FormBuilder {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "Task name", FormField::TEXT, ["value" => $task?->getName()]);
-        $formBuilder->add("assignedTo", "Assigned employee", FormField::SELECT, ["value" => $task?->getAssignedTo()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getUsers(), "fullName")]);
+        $formBuilder->add("description", "Description", FormField::TEXT, ["value" => $task?->getDescription()]);
+        $formBuilder->add("assignedTo", "Laborer", FormField::SELECT, ["value" => $task?->getAssignedTo()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getUsers(), "fullName")]);
         $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $task?->getStartDate()?->format("Y-m-d")]);
         $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $task?->getEndDate()?->format("Y-m-d")]);
-        $formBuilder->add("description", "Task name", FormField::TEXT, ["value" => $task?->getDescription()]);
 
         $formBuilder->createAppIdField();
         return $formBuilder;

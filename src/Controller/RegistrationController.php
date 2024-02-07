@@ -34,7 +34,7 @@ class RegistrationController extends AbstractController {
         $formBuilder = new FormBuilder();
         $formBuilder->add("firstName", "First name", FormField::TEXT, ["required" => true]);
         $formBuilder->add("lastName", "Last name", FormField::TEXT, ["required" => true]);
-        $formBuilder->add("birthDate", "Date of birth", FormField::DATE, ["required" => true]);
+        $formBuilder->add("birthDate", "Date of birth", FormField::DATE, ["required" => true, "value" => (new DateTime())->modify("-18 years")->format("Y-m-d")]);
         $formBuilder->add("email", "E-mail", FormField::TEXT, ["required" => true]);
         $formBuilder->add("password", "Password", FormField::TEXT, ["type" => "password", "required" => true]);
         $formBuilder->add("verifyPassword", "Verify Password", FormField::TEXT, ["type" => "password", "required" => true]);

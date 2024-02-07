@@ -33,6 +33,7 @@ import Home from "./pages/Regular/Home";
 import Calendar from "./pages/calendar/Calendar";
 import ProjectOptions from "./pages/Project/Options";
 import { CookiesProvider, useCookies } from "react-cookie";
+import TaskOptions from "./pages/Task/Options";
 
 function Main() {
   return (
@@ -156,6 +157,15 @@ function Main() {
           element={
             <Protected>
               <ProjectOptions />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/projects/:id/tasks/:taskId/options"
+          element={
+            <Protected>
+              <TaskOptions />
             </Protected>
           }
         />
