@@ -19,6 +19,7 @@ class Note extends Entity {
     private ?string $title = null;
 
     #[ORM\ManyToOne(inversedBy: 'notes', cascade: ["persist"])]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $user = null;
 
     public function __construct() {

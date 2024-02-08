@@ -3,6 +3,7 @@
 namespace App\Classes;
 
 use Mpdf\Mpdf;
+use App\Entity\Note;
 use App\Entity\Task;
 use App\Entity\Project;
 use Contao\ArticleModel;
@@ -35,31 +36,14 @@ class PDF {
 
     private function buildPDF() {
         $this->createPageNumbers();
-        // $this->injectPhotos();
-        // $this->addStylesheet();
         $this->createHeader();
         $this->setContent();
     }
 
     private function createPageNumbers() {
-        $this->pdf->pagenumPrefix = 'Seite ';
+        $this->pdf->pagenumPrefix = 'Page ';
         $this->pdf->pagenumSuffix = '/{nb}';
     }
-
-    // private function injectPhotos() {
-    // $this->pdf->showImageErrors = true;
-    // $this->pdf->imageVars[''] = file_get_contents(SystemUtils::getUrl() . '/bundles/projectmanagement/styles/assets/img/_logo.svg');
-    // $this->pdf->imageVars['expert'] = file_get_contents(SystemUtils::getUrl() . '/bundles/projectmanagement/styles/assets/img/pdf/proven-expert-siegel.svg');
-    // $this->pdf->imageVars['contao'] = file_get_contents(SystemUtils::getUrl() . '/bundles/projectmanagement/styles/assets/img/pdf/shopware-und-contao-partner-sw.svg');
-    // $this->pdf->imageVars['circle_red'] = file_get_contents(SystemUtils::getUrl() . '/bundles/projectmanagement/styles/assets/img/pdf/circle_red.png');
-    // $this->pdf->imageVars['circle_blue'] = file_get_contents(SystemUtils::getUrl() . '/bundles/projectmanagement/styles/assets/img/pdf/circle_blue.png');
-    // $this->pdf->imageVars['circle_yellow'] = file_get_contents(SystemUtils::getUrl() . '/bundles/projectmanagement/styles/assets/img/pdf/circle_yellow.png');
-    // }
-
-    // private function addStylesheet() {
-    //     $stylesheet = file_get_contents(SystemUtils::getUrl() . '/bundles/projectmanagement/styles/dist/pdf.css');
-    //     $this->pdf->WriteHTML($stylesheet, \Mpdf\HTMLParserMode::HEADER_CSS);
-    // }
 
     private function setContent() {
         $content = $this->generateProjectInfos();
@@ -68,14 +52,47 @@ class PDF {
 
     private function generateProjectInfos() {
         $text = "<h3>Project manager: " . $this->project->getManager()->getFullName() . '</h3>';
-        $text .= '<p>Project state: ' . $this->project->getProjectState()->getName() .  '</p><br/>';
+
+        $tableInfo = new TableBuilder(2, [50, 50], "margin:0");
+        if ($this->project->getWebsite()) {
+            $tableInfo->insertColumn("Website: ");
+            $tableInfo->insertColumn($this->project->getWebsite()->getDomain());
+        }
+        $tableInfo->insertColumn("Start date: ");
+        $tableInfo->insertColumn("{$this->project->getStartDate()->format("Y-m-d")}");
+        $tableInfo->insertColumn("End date: ");
+        $tableInfo->insertColumn("{$this->project->getEndDate()->format("Y-m-d")}");
+        $tableInfo->insertColumn("Project state:");
+        $tableInfo->insertColumn($this->project->getProjectState()?->getName() ?? "None");
+        $tableInfo->insertColumn("Tasks count:");
+        $tableInfo->insertColumn($this->project->getTasks()->count());
+
+        $text .= $tableInfo->print();
         $text .= $this->generateTaskInfos();
+
+        if ($this->project->getNotes()->count()) {
+            $text .= "<h4>Notes</h4>";
+            $text .= $this->generateNotes();
+        }
         return $text;
+    }
+
+    private function generateNotes() {
+        $notes = $this->project->getNotes();
+        $notesTable = new TableBuilder(3, [20, 20, 60]);
+        $notesTable->insertHead(["Person", "Date", "Message"]);
+
+        foreach ($notes as $note) {
+            $notesTable->insertColumn($note->getUser()->getFullName());
+            $notesTable->insertColumn($note->getCreatedAt()->format("Y-m-d"));
+            $notesTable->insertColumn($note->getText());
+        }
+        return $notesTable->print();
     }
 
     private function generateTaskInfos(): string {
 
-        $text = "Tasks count: " . $this->project->getTasks()->count();
+        $text = "<h3 style='margin-top: 40px'>Tasks:</h3> ";
         $tasks = $this->project->getTasks()->toArray();
         $tasksTexts = array_map([__CLASS__, "generateTaskInfo"], $tasks, array_keys($tasks));
         $text .= implode($tasksTexts);
@@ -85,13 +102,37 @@ class PDF {
 
     private function generateTaskInfo(Task $task, int $index): string {
         $index++;
-        $text = "<span><h4 " . self::inlineStyle('display: inline; float:left;') . ">$index.{$task->getName()}</h4></span>";
+
+        $tableHeader = new TableBuilder(3, [70, 10, 20]);
+
+        $tableTaskName = new TableBuilder(3, ["*", "*", "30"], "");
+
+        $tableTaskName->insertColumn("<h4>$index. {$task->getName()}</h4>");
+        $tableTaskName->insertColumn($task->isCompleted() ?
+            "  <div style='padding: 4px; background-color: #7DCD85; color: black'> Done </div>" :
+            "  <div style='padding: 4px; background-color: #808080; color: white;'> At work </div>");
+        $tableTaskName->insertColumn("");
+
+
+        $tableDate = new TableBuilder(2, [50, 50]);
+        $tableDate->insertColumn("<span style='max-width:min-content;text-align:right;font-size: 10'>Start date: </span>");
+        $tableDate->insertColumn("<span style='max-width:min-content;text-align:right;font-size: 10'>{$task->getStartDate()->format("Y-m-d")}</span>");
+        $tableDate->insertColumn("<span style='max-width:min-content;text-align:right;font-size: 10'>End date: </span>");
+        $tableDate->insertColumn("<span style='max-width:min-content;text-align:right;font-size: 10'>{$task->getEndDate()->format("Y-m-d")}</span>");
+
+        $tableHeader->insertColumn($tableTaskName->print());
+        $tableHeader->insertColumn("");
+        $tableHeader->insertColumn($tableDate->print());
+
+        $tableLaborer = new TableBuilder(3, [8, 43, 49]);
+
         $assignedToTask = $task->getAssignedTo();
-        $text .=
-            $task->isCompleted() ?
-            "  <span " . self::inlineStyle('display: inline; float:left; padding: 4px 4px; background-color: #808080; color: white;') . ">At work</span>" :
-            "  <span " . self::inlineStyle('display: inline; float:left; padding: 4px 4px; background-color: #7DCD85; color: black') . ">Done</span>";
-        $text .= "<span><h5>Laborer: </h5>" . ($assignedToTask ? $task->getAssignedTo()?->getFullName() . "({$task->getAssignedTo()->getEmail()})" : "No one assigned to task") . "</span>";
+        $tableLaborer->insertColumn("<h5>Laborer: </h5>");
+        $tableLaborer->insertColumn(($assignedToTask ? $task->getAssignedTo()?->getFullName() . " - {$task->getAssignedTo()?->getEmail()}" : "No one assigned to task") . "");
+        $tableLaborer->insertColumn("");
+
+        $text = $tableHeader->print() . $tableLaborer->print();
+
         return $text;
     }
 
@@ -135,9 +176,6 @@ class PDF {
         $fontData = $defaultFontConfig['fontdata'];
 
         return [
-            // 'fontDir' => array_merge($fontDirs, [
-            //     // SystemUtils::getUrl() . '/bundles/projectmanagement/styles/poppins',
-            // ]),
             'fontdata' => $fontData + [
                 'Open Sans' => [
                     'R' => 'open-sans-v35-latin-regular.ttf',

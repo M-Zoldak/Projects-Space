@@ -51,7 +51,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     #[ORM\ManyToMany(targetEntity: AppRole::class, mappedBy: 'users', cascade: ["persist"])]
     private Collection $appRoles;
 
-    #[ORM\OneToOne(mappedBy: 'user', cascade: ["persist"], orphanRemoval: true)]
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ["persist", "remove"])]
     private ?UserOptions $userOptions = null;
 
     #[ORM\ManyToMany(targetEntity: App::class, mappedBy: 'invitedUsers')]
@@ -71,6 +71,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     private Collection $tasks;
 
     #[ORM\OneToMany(mappedBy: 'manager', targetEntity: Project::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private Collection $projectsManagerFor;
 
     public function __construct() {
@@ -400,13 +401,11 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     /**
      * @return Collection<int, Task>
      */
-    public function getTasks(): Collection
-    {
+    public function getTasks(): Collection {
         return $this->tasks;
     }
 
-    public function addTask(Task $task): static
-    {
+    public function addTask(Task $task): static {
         if (!$this->tasks->contains($task)) {
             $this->tasks->add($task);
             $task->setAssignedTo($this);
@@ -415,8 +414,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this;
     }
 
-    public function removeTask(Task $task): static
-    {
+    public function removeTask(Task $task): static {
         if ($this->tasks->removeElement($task)) {
             // set the owning side to null (unless already changed)
             if ($task->getAssignedTo() === $this) {
@@ -430,13 +428,11 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
     /**
      * @return Collection<int, Project>
      */
-    public function getProjectsManagerFor(): Collection
-    {
+    public function getProjectsManagerFor(): Collection {
         return $this->projectsManagerFor;
     }
 
-    public function addProjectsManagerFor(Project $projectsManagerFor): static
-    {
+    public function addProjectsManagerFor(Project $projectsManagerFor): static {
         if (!$this->projectsManagerFor->contains($projectsManagerFor)) {
             $this->projectsManagerFor->add($projectsManagerFor);
             $projectsManagerFor->setManager($this);
@@ -445,8 +441,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         return $this;
     }
 
-    public function removeProjectsManagerFor(Project $projectsManagerFor): static
-    {
+    public function removeProjectsManagerFor(Project $projectsManagerFor): static {
         if ($this->projectsManagerFor->removeElement($projectsManagerFor)) {
             // set the owning side to null (unless already changed)
             if ($projectsManagerFor->getManager() === $this) {

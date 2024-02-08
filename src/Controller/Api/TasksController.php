@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use DateTime;
 use App\Entity\App;
 use App\Entity\Task;
 use App\Entity\User;
@@ -145,8 +146,8 @@ class TasksController extends AbstractController {
         $formBuilder->add("name", "Task name", FormField::TEXT, ["value" => $task?->getName()]);
         $formBuilder->add("description", "Description", FormField::TEXT, ["value" => $task?->getDescription()]);
         $formBuilder->add("assignedTo", "Laborer", FormField::SELECT, ["value" => $task?->getAssignedTo()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getUsers(), "fullName")]);
-        $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $task?->getStartDate()?->format("Y-m-d")]);
-        $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $task?->getEndDate()?->format("Y-m-d")]);
+        $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $task?->getStartDate()?->format("Y-m-d") ?? (new DateTime())->format("Y-m-d")]);
+        $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $task?->getEndDate()?->format("Y-m-d") ?? (new DateTime())->modify("+1 month")->format("Y-m-d")]);
 
         $formBuilder->createAppIdField();
         return $formBuilder;

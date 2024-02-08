@@ -42,7 +42,7 @@ class App extends Entity {
     #[ORM\JoinTable(name: "app_users_invitation")]
     private Collection $invitedUsers;
 
-    #[ORM\ManyToOne(inversedBy: 'ownedApps', cascade: ['persist', "remove"])]
+    #[ORM\ManyToOne(inversedBy: 'ownedApps', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $owner = null;
 

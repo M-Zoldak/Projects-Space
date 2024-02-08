@@ -48,7 +48,7 @@ class WebsitesController extends AbstractController {
         $website->setDomain($data->domain);
         $errors = ValidatorHelper::validateObject($website, $validator);
 
-        if ($errors) {
+        if (!empty((array) $errors)) {
             return new JsonResponse($errors, 422);
         }
 

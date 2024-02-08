@@ -428,7 +428,7 @@ export default function Options() {
             setProjectStatesList(newPS);
           }}
           entity="hostings"
-          editableLabel
+          // editableLabel
           linkPrepend={`/apps/${app?.id}/`}
           items={hostingsList}
           label={(item) => item.name}
@@ -454,7 +454,7 @@ export default function Options() {
           sortable={!!app?.currentUserRole?.permissions?.apps?.hasOptions}
           onSort={handleSortEnd}
           onEmpty="There are no project states yet. Create one."
-          editableLabel
+          // editableLabel
           onDelete={(projectState) => {
             let newPS = projectStatesList.filter(
               (ps) => ps.id != projectState.id

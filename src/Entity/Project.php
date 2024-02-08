@@ -45,6 +45,7 @@ class Project extends Entity {
     private Collection $note;
 
     #[ORM\ManyToOne(inversedBy: 'projectsManagerFor')]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $manager = null;
 
     public function __construct(App $app, string $name) {

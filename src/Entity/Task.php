@@ -24,6 +24,7 @@ class Task extends Entity {
     private ?Project $project = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $assignedTo = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
