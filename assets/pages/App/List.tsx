@@ -9,7 +9,7 @@ import { useNotificationsContext } from "../../contexts/NotificationsContext";
 import { useAppDataContext } from "../../contexts/AppDataContext";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faGear, faUser } from "@fortawesome/free-solid-svg-icons";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { HoverTooltip } from "../../components/Text/Tooltip";
 
@@ -60,6 +60,15 @@ export default function AppsList() {
             <FontAwesomeIcon icon={faUser} /> {item.statistics.usersCount}
           </HoverTooltip>
         </FlexboxGridItem>
+        {/* <FlexboxGridItem>
+          <HoverTooltip text="Your role">
+            <FontAwesomeIcon icon={faGear} />{" "}
+            {
+              item.users.filter((u) => u.id == appData.currentUser.id).at(0)
+                ?.appRole?.name
+            }
+          </HoverTooltip>
+        </FlexboxGridItem> */}
       </FlexboxGrid>
     );
   };

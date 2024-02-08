@@ -14,6 +14,7 @@ export type AppType = DefaultType & {
   websiteOptions: WebsiteOptionsType;
   currentUserRole: AppRoleType;
   projectStates: ProjectStateType[];
+  users: UserType[];
 };
 
 export type AppOptionsType = {

@@ -91,7 +91,9 @@ export default function CommonList<T>({
   //   sortingDefaults.type ?? "alphabetically"
   // );
   const [sortBy, setSortBy] = useState(sortingDefaults.field);
-  const [sortDirection, setSortDirection] = useState(sortingDefaults.direction);
+  const [sortDirection, setSortDirection] = useState(
+    sortingDefaults.direction ?? "asc"
+  );
   const [currentFilter, setCurrentFilter] = useState("none");
   const [filteredValue, setFilteredValue] = useState("none");
   const [searchValue, setSearchValue] = useState("");
@@ -248,6 +250,7 @@ export default function CommonList<T>({
           ]}
           onChange={setSortDirection}
           value={sortDirection}
+          // defaultValue={"asc"}
         />
         {/* <Button size="sm">Sort</Button> */}
       </FlexboxGrid>
@@ -267,6 +270,7 @@ export default function CommonList<T>({
           onChange={setCurrentFilter}
           value={currentFilter}
           defaultValue={"none"}
+          cleanable={false}
           // value={sortDirection}
           onClean={() => setCurrentFilter("none")}
         />

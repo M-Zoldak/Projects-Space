@@ -24,7 +24,12 @@ import { SelectDataType } from "../../interfaces/DefaultTypes";
 import Subtitle from "../../components/Text/Subtitle";
 import { AppType } from "../../interfaces/EntityTypes/AppType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilePdf, faUserGear } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFilePdf,
+  faForwardStep,
+  faPause,
+  faUserGear,
+} from "@fortawesome/free-solid-svg-icons";
 import FluidText from "../../components/Text/FluidText";
 import Notes from "../../components/Data/Notes";
 import { useCookies } from "react-cookie";
@@ -90,6 +95,42 @@ export default function Project() {
     http_methods
       .put<ProjectType>(`/projects/${project.id}/updateState/${id}`, [])
       .then((project) => setProject(project));
+  };
+
+  const taskAdditionalInfo = (task: TaskType) => {
+    return (
+      <FlexboxGrid style={{ gap: "1rem" }}>
+        {/* <FlexboxGridItem>
+          <HoverTooltip text="task state">
+            <FontAwesomeIcon icon={faBarsProgress} />
+            {task?.taskState?.name ?? "Unset"}
+          </HoverTooltip>
+        </FlexboxGridItem> */}
+        {task?.assignedTo?.name && (
+          <FlexboxGridItem>
+            <HoverTooltip text="task manager">
+              <FontAwesomeIcon icon={faUserGear} /> {task.assignedTo.name}
+            </HoverTooltip>
+          </FlexboxGridItem>
+        )}
+        {task?.startDate?.date && (
+          <FlexboxGridItem>
+            <HoverTooltip text="task begin">
+              <FontAwesomeIcon icon={faForwardStep} />{" "}
+              {task.startDate.date.slice(0, 10)}
+            </HoverTooltip>
+          </FlexboxGridItem>
+        )}
+        {task?.endDate?.date && (
+          <FlexboxGridItem>
+            <HoverTooltip text="Task deadline">
+              <FontAwesomeIcon icon={faPause} />{" "}
+              {task.endDate.date.slice(0, 10)}
+            </HoverTooltip>
+          </FlexboxGridItem>
+        )}
+      </FlexboxGrid>
+    );
   };
 
   return (
@@ -197,18 +238,21 @@ export default function Project() {
                   });
                   setTasks(nTasks);
                 }}
-                additionalInfo={(t) => (
-                  <FlexboxGrid style={{ gap: "1rem" }}>
-                    {t.assignedTo && (
-                      <FlexboxGridItem>
-                        <HoverTooltip text="Laborer">
-                          <FontAwesomeIcon icon={faUserGear} />{" "}
-                          {t?.assignedTo?.name}
-                        </HoverTooltip>
-                      </FlexboxGridItem>
-                    )}
-                  </FlexboxGrid>
-                )}
+                additionalInfo={
+                  taskAdditionalInfo
+                  // (t) => (
+                  // <FlexboxGrid style={{ gap: "1rem" }}>
+                  //   {t.assignedTo && (
+                  //     <FlexboxGridItem>
+                  //       <HoverTooltip text="Laborer">
+                  //         <FontAwesomeIcon icon={faUserGear} />{" "}
+                  //         {t?.assignedTo?.name}
+                  //       </HoverTooltip>
+                  //     </FlexboxGridItem>
+                  //   )}
+                  // </FlexboxGrid>
+                  // )
+                }
                 onDelete={(task) => {
                   addNotification({
                     text: `Task ${task.name} was deleted`,
