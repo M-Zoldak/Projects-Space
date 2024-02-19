@@ -45,7 +45,8 @@ class Task extends Entity {
             "startDate" => $this->getStartDate(),
             "endDate" => $this->getEndDate(),
             "taskCategory" => $this?->getCategory(),
-            "completed" => $this->isCompleted()
+            "completed" => $this->isCompleted(),
+            "assignedTo" => $this->getAssignedTo()?->getData()
         ];
     }
 

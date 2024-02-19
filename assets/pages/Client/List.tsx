@@ -66,6 +66,14 @@ export default function ClientsList() {
                 notificationProps: { type: "success" },
               });
             }}
+            search={{ label: "name", value: "name" }}
+            // filters={[
+            //   { label: "Project state", value: "projectState" },
+            //   { label: "Client", value: "client" },
+            //   { label: "Project manager", value: "manager" },
+            // ]}
+            sortingDefaults={{ field: "name" }}
+            sortingItems={[{ value: "name", label: "Name" }]}
             buttons={{
               deleteable:
                 appData?.currentUser?.currentAppRole?.permissions?.clients

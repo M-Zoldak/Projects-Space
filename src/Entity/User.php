@@ -292,7 +292,7 @@ class User extends Entity implements UserInterface, PasswordAuthenticatedUserInt
         if (!$this->appInvitations->contains($app)) {
             $this->appInvitations->add($app);
             $app->addInvitedUser($this);
-            $notification = new UserNotification(new AppInvitation($this, $app), $this);
+            $notification = new UserNotification(new AppInvitation($app), $this);
             $this->addNotification($notification);
         }
 

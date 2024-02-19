@@ -7,7 +7,7 @@ import Backlink from "./Buttons/Backlink";
 type StandardViewProps = {
   mainTitle: string;
   items: StandardViewBlockProps[];
-  backlink: string;
+  backlink?: string;
 };
 
 type StandardViewBlockProps = {
@@ -37,9 +37,13 @@ function StandardViewBlock({
           !Array.isArray(items)) && <Subtitle>{subtitle}</Subtitle>}
       <Row>
         {Array.isArray(items) ? (
-          items.map((item, index) => (
-            <TextBlock key={index} textBlocks={textBlocks} item={item} />
-          ))
+          items.length > 0 ? (
+            items.map((item, index) => (
+              <TextBlock key={index} textBlocks={textBlocks} item={item} />
+            ))
+          ) : (
+            "No results found..."
+          )
         ) : (
           <TextBlock textBlocks={textBlocks} />
         )}
@@ -91,10 +95,6 @@ export default function StandardView({
 }: StandardViewProps) {
   return (
     <div className="standardView">
-      <Backlink link={backlink} />
-      <br />
-      <MainTitle>{mainTitle}</MainTitle>
-      <Divider />
       {items &&
         items.map((i, index) => <StandardViewBlock {...i} key={index} />)}
     </div>

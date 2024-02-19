@@ -6,4 +6,5 @@ export type TaskType = DefaultType & {
   assignedTo: UserType;
   startDate: { date: string };
   endDate: { date: string };
+  projectId: number;
 };

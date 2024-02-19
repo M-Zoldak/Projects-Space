@@ -51,7 +51,7 @@ class PDF {
     }
 
     private function generateProjectInfos() {
-        $text = "<h3>Project manager: " . $this->project->getManager()->getFullName() . '</h3>';
+        $text = "<h3>Project manager: " . $this->project->getManager()?->getFullName() ?? "No one assigned as manager" . '</h3>';
 
         $tableInfo = new TableBuilder(2, [50, 50], "margin:0");
         if ($this->project->getWebsite()) {

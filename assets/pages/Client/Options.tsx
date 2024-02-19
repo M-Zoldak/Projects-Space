@@ -15,6 +15,7 @@ import CommonList from "../../components/Data/CommonList";
 import SimpleCreateModal from "../../components/Modals/SimpleCreateModal";
 import { ButtonToolbar } from "rsuite";
 import { add } from "@hotwired/stimulus";
+import TabsNavbar from "../../components/Tabs";
 
 export default function ClientOptions() {
   const { appData } = useAppDataContext();
@@ -49,16 +50,9 @@ export default function ClientOptions() {
       });
   };
 
-  return (
-    <AppLayout
-      title={client?.name ? `Client options` : "Loading..."}
-      activePage="Clients"
-    >
-      <Backlink link="/clients" />
-
-      <ContentLoader loaded={loaded}>
-        <h2>{client?.name} options</h2>
-
+  const MainOptionsView = () => {
+    return (
+      <>
         <InputButtonGroup
           buttonText="Update client name"
           label="Client name: "
@@ -74,9 +68,13 @@ export default function ClientOptions() {
             `Client profile updates succesfully.`;
           }}
         />
+      </>
+    );
+  };
 
-        <h3>Contacts</h3>
-
+  const ContactsView = () => {
+    return (
+      <>
         {appData?.currentUser?.currentAppRole.permissions?.clients.hasOptions &&
           contacts && (
             <ButtonToolbar>
@@ -122,9 +120,13 @@ export default function ClientOptions() {
             });
           }}
         />
+      </>
+    );
+  };
 
-        <h3>Addresses</h3>
-
+  const AddressesView = () => {
+    return (
+      <>
         {appData?.currentUser?.currentAppRole.permissions?.clients.hasOptions &&
           addresses && (
             <ButtonToolbar>
@@ -171,6 +173,25 @@ export default function ClientOptions() {
               notificationProps: { type: "success" },
             });
           }}
+        />
+      </>
+    );
+  };
+
+  return (
+    <AppLayout
+      title={client?.name ? `Client options` : "Loading..."}
+      activePage="Clients"
+    >
+      <Backlink link="/clients" />
+      <ContentLoader loaded={loaded}>
+        {client?.name && <h2>{client?.name} options</h2>}
+        <TabsNavbar
+          items={[
+            { label: "Main options", view: <MainOptionsView /> },
+            { label: "Contacts", view: <ContactsView /> },
+            { label: "Addresses", view: <AddressesView /> },
+          ]}
         />
       </ContentLoader>
     </AppLayout>

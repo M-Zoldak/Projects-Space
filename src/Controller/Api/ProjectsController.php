@@ -228,56 +228,15 @@ class ProjectsController extends AbstractController {
     #[Route('/projects/{id}/toPDF', name: 'projects_create_pdf', methods: ["GET"])]
     public function downloadPDF(int $id, Request $request) {
         $project = $this->projectRepository->findOneById($id);
-        $client = $project->getClient();
-        $website = $project->getWebsite();
-        $tasks = $project->getTasks();
 
         $pdf = new PDF($project);
         return $pdf->createPdf();
-        // try {
-        //     $mpdf = new Mpdf([
-        //         "mode" => 'utf-8',
-        //         'format' => 'A4'
-        //     ]);
-
-        //     $mpdf->SetFont("FreeSans");
-        //     $mpdf->SetStyles("font-family: FreeSans");
-
-        //     $mpdf->SetHTMLHeader('
-        //     <div style="text-align: right; font-weight: bold;">
-        //         Projects space
-        //     </div>');
-        //     $mpdf->SetHTMLFooter('
-        //     <table width="100%">
-        //         <tr>
-        //             <td width="33%">{DATE j-m-Y}</td>
-        //             <td width="33%" align="center">{PAGENO}/{nbpg}</td>
-        //             <td width="33%" style="text-align: right;">My document</td>
-        //         </tr>
-        //     </table>');
-
-        //     $mpdf->AddPage();
-        //     $mpdf->setFooter('{PAGENO}');
-
-        //     foreach ($project->getTasks() as $task) {
-        //         $mpdf->WriteHTML($task->getName());
-        //         $mpdf->WriteHTML($task->getStartDate());
-        //         $mpdf->WriteHTML($task->getEndDate());
-        //     }
-
-
-        //     return $mpdf->Output("t", "D");
-        // } catch (MpdfException $e) {
-        //     dump($e->getMessage());
-        // }
-
-        return new JsonResponse($project->getData());
     }
 
     private function addAndEditForm(App $app, ?Project $project = null): FormBuilder {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "Project name", FormField::TEXT, ["value" => $project?->getName() ?? ""]);
-        $formBuilder->add("manager", "Project manager", FormField::SELECT, ["value" => $project?->getManager()->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getUsers(), "fullName")]);
+        $formBuilder->add("manager", "Project manager", FormField::SELECT, ["value" => $project?->getManager()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getUsers(), "fullName")]);
         $formBuilder->add("startDate", "Start date", FormField::DATE, ["value" => $project?->getStartDate()?->format("Y-m-d")  ?? (new DateTime())->format("Y-m-d")]);
         $formBuilder->add("endDate", "End date", FormField::DATE, ["value" => $project?->getEndDate()?->format("Y-m-d") ?? (new DateTime())->modify("+1 month")->format("Y-m-d")]);
         $formBuilder->add("client", "Client", FormField::SELECT, ["value" => $project?->getClient()?->getId() ?? "", "options" => EntityCollectionUtil::convertToSelectable($app->getClients(), "name")]);

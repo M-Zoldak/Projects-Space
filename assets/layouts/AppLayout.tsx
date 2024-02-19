@@ -15,14 +15,22 @@ import { useNotificationsContext } from "../contexts/NotificationsContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRocket } from "@fortawesome/free-solid-svg-icons";
 import { useAppDataContext } from "../contexts/AppDataContext";
+import TabsNavbar from "../components/Tabs";
 
 type AppLayout = PropsWithChildren<{
   title: string;
   activePage: string;
   className?: string;
+  Tabs?: typeof TabsNavbar;
 }>;
 
-const AppLayout = ({ children, title, activePage, className }: AppLayout) => {
+const AppLayout = ({
+  children,
+  title,
+  activePage,
+  className,
+  Tabs,
+}: AppLayout) => {
   const { notifications, removeNotification } = useNotificationsContext();
   const { appData } = useAppDataContext();
 

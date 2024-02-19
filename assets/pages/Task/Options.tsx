@@ -19,7 +19,7 @@ export default function TaskOptions() {
 
   useEffect(() => {
     http_methods
-      .fetch<TaskType>(`/projects/${params.id}/tasks/${params.taskId}/options`)
+      .fetch<TaskType>(`/projects/${params.id}/tasks/${params.taskId}`)
       .then(setTask);
   }, []);
 

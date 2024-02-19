@@ -108,14 +108,14 @@ export default function Project() {
         </FlexboxGridItem> */}
         {task?.assignedTo?.name && (
           <FlexboxGridItem>
-            <HoverTooltip text="task manager">
+            <HoverTooltip text="Laborer">
               <FontAwesomeIcon icon={faUserGear} /> {task.assignedTo.name}
             </HoverTooltip>
           </FlexboxGridItem>
         )}
         {task?.startDate?.date && (
           <FlexboxGridItem>
-            <HoverTooltip text="task begin">
+            <HoverTooltip text="Task start date">
               <FontAwesomeIcon icon={faForwardStep} />{" "}
               {task.startDate.date.slice(0, 10)}
             </HoverTooltip>
@@ -292,7 +292,6 @@ export default function Project() {
                       return t;
                     });
                     setTasks(nTasks);
-                    console.log("after set Tasks");
                   }}
                   onDelete={(task) => {
                     addNotification({

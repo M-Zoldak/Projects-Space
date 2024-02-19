@@ -128,19 +128,6 @@ class TasksController extends AbstractController {
         return new JsonResponse($task->getData());
     }
 
-    #[Route('/userTasks', name: 'user_active_tasks', methods: ["GET"])]
-    public function userActiveTasks(Request $request, #[CurrentUser] ?User $user): JsonResponse {
-
-        // $apps = $user->getApps();
-        // $projects = $apps->map(fn (App $app) => $app->getProjects());
-
-        // $tasks = 
-        // $taskData = $task->getData();
-
-        // $this->taskRepository->delete($task);
-        return new JsonResponse();
-    }
-
     private function addAndEditForm(App $app, ?Task $task = null): FormBuilder {
         $formBuilder = new FormBuilder();
         $formBuilder->add("name", "Task name", FormField::TEXT, ["value" => $task?->getName()]);

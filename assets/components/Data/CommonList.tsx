@@ -212,6 +212,18 @@ export default function CommonList<T>({
         }
       }
     } else {
+      if (
+        item1 &&
+        item1[sortBy] &&
+        item1[sortBy].hasOwnProperty("date") &&
+        item2 &&
+        item2[sortBy] &&
+        item2[sortBy].hasOwnProperty("date")
+      ) {
+        let time1 = new Date(item1[sortBy].date).getTime();
+        let time2 = new Date(item2[sortBy].date).getTime();
+        return time1 > time2 ? 1 : -1;
+      }
       if (sortDirection == "asc") {
         return item1[sortBy] > item2[sortBy] ? 1 : -1;
       } else {
@@ -327,7 +339,11 @@ export default function CommonList<T>({
   };
 
   const searchFilter = (item: CommonListItemProps) => {
-    return item.name.toLowerCase().includes(searchValue.toLowerCase());
+    if (!search) return true;
+    return item?.name
+      ? item.name.toLowerCase().includes(searchValue?.toLowerCase())
+      : /** @ts-ignore */
+        item?.firstName?.toLowerCase().includes(searchValue?.toLowerCase());
   };
 
   const renderSearch = () => {
@@ -366,6 +382,7 @@ export default function CommonList<T>({
             else return false;
           })
           .sort(officialSort)
+          .filter(searchFilter)
           .map((item: CommonListItemProps, index: number) => (
             <List.Item key={item.id.toString()} index={index}>
               <FlexboxGrid align="middle" justify="space-between">
