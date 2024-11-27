@@ -2,11 +2,12 @@
 
 Projects-Space is a SPA written in Symfony Framework on backend, and React(TypeScript) in Front-End.
 
-Example Sites and possibilities:
+It's possible to use one of fake logins. You can try it <a href='https://projects-space.zoldak.pl/login' target='_blank'>here</a>.
 
-1. Apps/spaces - separated workspaces for cooperation between testers, stakeholders, programmers, project-managers, designers, and so on...
+Example possibilities:
+
+1. Apps/spaces overview - separated workspaces for cooperation between testers, stakeholders, programmers, project-managers, designers, and so on...
 ![Projects-Space-Spaces-Overview](https://github.com/user-attachments/assets/2955ab85-6204-4fcd-aeb9-b38b9917fb73)
-
 View with invitation
 ![Projects-Space-Spaces-Overview-Invitiation](https://github.com/user-attachments/assets/3cfc551c-163f-420f-a91b-fe67d15635c0)
 
