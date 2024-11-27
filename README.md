@@ -4,6 +4,17 @@ Projects-Space is a SPA written in Symfony Framework on backend, and React(TypeS
 
 You can try it yourself <a href='https://projects-space.zoldak.pl/login' target='_blank'>here</a>. Just use one of fake logins.
 
+Project also has it's own version in react-native for mobile phones(pretty much copied from here). It might be found <a href='https://github.com/M-Zoldak/PS-React-Native' target='_blank'>here</a>.
+
+Key things:
+- implementation over Rest API
+- login implemented through JWT Token.
+- App state controlled over `contexts`
+- Typescript included
+- Front-End library - R-Suite
+- Not much, but still 1 unit test included :) 
+
+
 Example possibilities:
 
 1. Apps/spaces overview - separated workspaces for cooperation between testers, stakeholders, programmers, project-managers, designers, and so on...
